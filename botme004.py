@@ -11,7 +11,6 @@ FUTURES_API_KEY = 'fvcNgcglEHAoouBoMn1s4NhlyK90CXs5wcjyi2HJm2fSIQpgCnpZHII6c295i
 FUTURES_SECRET_KEY = 'nsjeRYY6nPxy1cfF07JNU8mhHnxwRB5FO8DHGtfZy9927u26ajnodnaSOLPvK5nV'
 
 ADDRESS_ONE = '0x9D95d4751fCc02157d55527Ca4D50588bCC80590'
-ADDRESS_TWO = 'YOUR_ADDRESS_TWO'
 
 # Initialize the Binance Spot exchange
 binance_spot = ccxt.binance({
@@ -31,21 +30,12 @@ binance_futures = ccxt.binance({
     }
 })
 
-def initial_withdraw_and_transfer():
-    balance = binance_spot.fetch_balance()
-    usdt_balance = balance['total']['USDT']
-    
-    # Withdraw 300 USDT to ADDRESS_ONE using BEP20
-    if usdt_balance >= 300:
-        binance_spot.withdraw('USDT', 300, ADDRESS_ONE, tag=None, params={'network': 'BEP20'})
-        time.sleep(10)  # Sleep to ensure the withdrawal is processed
-
-    # Transfer the remaining balance to the futures account
-    remaining_balance = binance_spot.fetch_balance()['total']['USDT']
-    if remaining_balance > 0:
+def initial_transfer():
+    usdt_balance = binance_spot.fetch_balance()['total']['USDT']
+    if usdt_balance > 0:
         binance_spot.sapi_post_futures_transfer({
             'asset': 'USDT',
-            'amount': remaining_balance,
+            'amount': usdt_balance,
             'type': 1  # Type 1 means transfer from spot to futures
         })
 
@@ -54,9 +44,7 @@ def check_and_withdraw_spot_balance():
     usdt_balance = balance['total']['USDT']
     
     if usdt_balance > 10:
-        half_balance = usdt_balance / 2
-        binance_spot.withdraw('USDT', half_balance, ADDRESS_ONE, tag=None, params={'network': 'BEP20'})
-        binance_spot.withdraw('USDT', half_balance, ADDRESS_TWO, tag=None, params={'network': 'BEP20'})
+        binance_spot.withdraw('USDT', usdt_balance, ADDRESS_ONE, tag=None, params={'network': 'BEP20'})
         time.sleep(10)  # Sleep to ensure the withdrawals are processed
 
 def set_leverage(symbol, leverage):
@@ -72,7 +60,7 @@ def check_and_manage_futures_balance():
     balance = binance_futures.fetch_balance()
     usdt_balance = balance['total']['USDT']
     
-    if usdt_balance >= 50000:
+    if usdt_balance >= 5000:
         # Close all positions
         positions = binance_futures.private_get_positionrisk()
         for position in positions:
@@ -186,7 +174,7 @@ def manage_positions():
         time.sleep(60)  # Check every minute
 
 def main():
-    initial_withdraw_and_transfer()
+    initial_transfer()
     while True:
         check_and_withdraw_spot_balance()
         if check_and_manage_futures_balance():
