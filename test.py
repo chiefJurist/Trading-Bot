@@ -26,5 +26,9 @@ binance_futures = ccxt.binanceusdm({
     'secret': FUTURES_SECRET_KEY,
 })
 
-balance = binance_spot.fetch_balance()['total']['USDT']
-binance_spot.withdraw('USDT', balance, ADDRESS_TWO, tag=None, params={'network': 'BEP20'})
+# balance = binance_spot.fetch_balance()['total']['USDT']
+# binance_spot.withdraw('USDT', balance, ADDRESS_TWO, tag=None, params={'network': 'BEP20'})
+
+
+# Close all positions
+binance_futures.close_all_positions()
