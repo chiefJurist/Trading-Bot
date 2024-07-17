@@ -41,3 +41,17 @@ binance_futures = ccxt.binanceusdm({
 #                     side=side,
 #                     amount=abs(float(position['positionAmt']))
 #                 )
+
+
+#Checking sotchrsi
+symbol = 'ETH/USDT'
+timeframe = '5m'
+
+def calculate_stoch_rsi(df):
+    stoch_rsi_k, stoch_rsi_d = ta.STOCHRSI(df['close'], timeperiod=14)
+    return stoch_rsi_k, stoch_rsi_d
+
+df = binance_futures.fetch_ohlcv(symbol, timeframe)
+stoch_rsi_k, stoch_rsi_d = calculate_stoch_rsi(df)
+
+print(stoch_rsi_d, stoch_rsi_k)
