@@ -16,30 +16,21 @@ ADDRESS_ONE = '0x9D95d4751fCc02157d55527Ca4D50588bCC80590'
 binance_spot = ccxt.binance({
     'apiKey': SPOT_API_KEY,
     'secret': SPOT_SECRET_KEY,
-    'options': {
-        'defaultType': 'spot'
-    }
 })
 
 # Initialize the Binance Futures exchange
 binance_futures = ccxt.binanceusdm({
     'apiKey': FUTURES_API_KEY,
     'secret': FUTURES_SECRET_KEY,
-    'options': {
-        'defaultType': 'future'
-    }
 })
 
 def initial_transfer():
-    balance = binance_spot.fetch_balance()
-    usdt_balance = balance['total']['USDT']
-    
     # Transfer the balance to the futures account
-    remaining_balance = binance_spot.fetch_balance()['total']['USDT']
-    if remaining_balance > 0:
+    balance = binance_spot.fetch_balance()['total']['USDT']
+    if balance > 0:
         binance_spot.sapi_post_futures_transfer({
             'asset': 'USDT',
-            'amount': remaining_balance,
+            'amount': balance,
             'type': 1  # Type 1 means transfer from spot to futures
         })
 
