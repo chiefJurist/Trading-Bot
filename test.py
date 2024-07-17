@@ -31,4 +31,4 @@ binance_futures = ccxt.binanceusdm({
 
 
 # Close all positions
-binance_futures.close_all_positions()
+positions = binance_futures.fetch_positions_risk()
