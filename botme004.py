@@ -48,6 +48,7 @@ def check_and_withdraw_spot_balance():
         time.sleep(10)  # Sleep to ensure the withdrawals are processed
 
 def set_leverage(symbol, leverage):
+    # Fetch markets for Binance Futures
     markets = binance_futures.fetch_markets()
 
     for market in markets:
