@@ -4,7 +4,7 @@ import talib as ta
 import time
 import math
 
-# Replace these with your own API keys and addresses
+# The User's API keys and addresses
 SPOT_API_KEY = 'Io1hIHpNwK2PldQaV45ow3LlUbDW7CqzTnpiyWo3JSOQlm38RLKA0CfDQT0BuOhC'
 SPOT_SECRET_KEY = '6bKn0jotdod18Y7fto7gDBVmO0zMMdR5OrhUpIy2f57qm7o4YE0AWAiQFLSa3GbW'
 FUTURES_API_KEY = 'fvcNgcglEHAoouBoMn1s4NhlyK90CXs5wcjyi2HJm2fSIQpgCnpZHII6c295iUQM'
@@ -24,8 +24,8 @@ binance_futures = ccxt.binanceusdm({
     'secret': FUTURES_SECRET_KEY,
 })
 
+# Transfer the balance to the futures account
 def initial_transfer():
-    # Transfer the balance to the futures account
     balance = binance_spot.fetch_balance()['total']['USDT']
     if balance > 0:
         binance_spot.sapi_post_futures_transfer({
