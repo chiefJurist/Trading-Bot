@@ -22,7 +22,7 @@ binance_spot = ccxt.binance({
 })
 
 # Initialize the Binance Futures exchange
-binance_futures = ccxt.binance({
+binance_futures = ccxt.binanceusdm({
     'apiKey': FUTURES_API_KEY,
     'secret': FUTURES_SECRET_KEY,
     'options': {
@@ -31,29 +31,72 @@ binance_futures = ccxt.binance({
 })
 
 def initial_transfer():
-    usdt_balance = binance_spot.fetch_balance()['total']['USDT']
-    if usdt_balance > 0:
-        binance_spot.transfer('USDT', 'futures', usdt_balance)
+    balance = binance_spot.fetch_balance()
+    usdt_balance = balance['total']['USDT']
+    
+    # Transfer the balance to the futures account
+    remaining_balance = binance_spot.fetch_balance()['total']['USDT']
+    if remaining_balance > 0:
+        binance_spot.sapi_post_futures_transfer({
+            'asset': 'USDT',
+            'amount': remaining_balance,
+            'type': 1  # Type 1 means transfer from spot to futures
+        })
 
 def check_and_withdraw_spot_balance():
     balance = binance_spot.fetch_balance()
     usdt_balance = balance['total']['USDT']
     
-    if usdt_balance > 5000:
+    if usdt_balance > 500:
         binance_spot.withdraw('USDT', usdt_balance, ADDRESS_ONE, tag=None, params={'network': 'BEP20'})
         time.sleep(10)  # Sleep to ensure the withdrawals are processed
 
 def set_leverage(symbol, leverage):
-    binance_futures.load_markets()
-    market = binance_futures.market(symbol)
-    binance_futures.private_post_leverage({
-        'symbol': market['id'],
-        'leverage': leverage
-    })
+    markets = binance_futures.load_markets()
+    if symbol in markets:
+        market_id = markets[symbol]['id']
+        binance_futures.fapiPrivate_post_leverage({
+            'symbol': market_id,
+            'leverage': leverage
+        })
 
-def fetch_positions():
-    binance_futures.load_markets()
-    return binance_futures.fetch_positions()
+def check_and_manage_futures_balance():
+    balance = binance_futures.fetch_balance()
+    usdt_balance = balance['total']['USDT']
+    
+    if usdt_balance >= 600:
+        # Close all positions
+        positions = binance_futures.private_get_positionrisk()
+        for position in positions:
+            if float(position['positionAmt']) != 0:
+                side = 'sell' if float(position['positionAmt']) > 0 else 'buy'
+                binance_futures.create_order(
+                    symbol=position['symbol'],
+                    type='market',
+                    side=side,
+                    amount=abs(float(position['positionAmt']))
+                )
+        
+        # Calculate the amount to transfer back to spot
+        transfer_amount = usdt_balance - 100
+        if transfer_amount > 0:
+            binance_futures.sapi_post_futures_transfer({
+                'asset': 'USDT',
+                'amount': transfer_amount,
+                'type': 2  # Type 2 means transfer from futures to spot
+            })
+
+    return usdt_balance < 50000
+
+def fetch_ohlcv(symbol, timeframe, limit=500):
+    bars = binance_futures.fetch_ohlcv(symbol, timeframe, limit=limit)
+    df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+    df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+    return df
+
+def calculate_stoch_rsi(df):
+    stoch_rsi_k, stoch_rsi_d = ta.STOCHRSI(df['close'], timeperiod=14)
+    return stoch_rsi_k, stoch_rsi_d
 
 def manage_positions():
     symbol = 'ETH/USDT'
@@ -68,24 +111,27 @@ def manage_positions():
         stoch_rsi_k, stoch_rsi_d = calculate_stoch_rsi(df)
 
         # Check open positions
-        positions = fetch_positions()
-
-        open_long = any(float(position['positionAmt']) > 0 for position in positions)
-        open_short = any(float(position['positionAmt']) < 0 for position in positions)
+        positions = binance_futures.private_get_positionrisk()
+        open_long = False
+        open_short = False
+        for position in positions:
+            if position['symbol'] == 'ETHUSDT' and float(position['positionAmt']) != 0:
+                if float(position['positionAmt']) > 0:
+                    open_long = True
+                elif float(position['positionAmt']) < 0:
+                    open_short = True
 
         if open_long:
             while open_long:
                 df = fetch_ohlcv(symbol, timeframe)
                 stoch_rsi_k, stoch_rsi_d = calculate_stoch_rsi(df)
-                if stoch_rsi_k.iloc[-1] < stoch_rsi_d.iloc[-1]:  # Death cross
-                    for position in positions:
-                        if position['symbol'] == 'ETHUSDT' and float(position['positionAmt']) > 0:
-                            binance_futures.create_order(
-                                symbol='ETH/USDT',
-                                type='market',
-                                side='sell',
-                                amount=abs(float(position['positionAmt']))
-                            )
+                if stoch_rsi_k[-1] < stoch_rsi_d[-1]:  # Death cross
+                    binance_futures.create_order(
+                        symbol='ETH/USDT',
+                        type='market',
+                        side='sell',
+                        amount=abs(float(position['positionAmt']))
+                    )
                     open_long = False
                 time.sleep(60)  # Check every minute
 
@@ -93,33 +139,35 @@ def manage_positions():
             while open_short:
                 df = fetch_ohlcv(symbol, timeframe)
                 stoch_rsi_k, stoch_rsi_d = calculate_stoch_rsi(df)
-                if stoch_rsi_k.iloc[-1] > stoch_rsi_d.iloc[-1]:  # Golden cross
-                    for position in positions:
-                        if position['symbol'] == 'ETHUSDT' and float(position['positionAmt']) < 0:
-                            binance_futures.create_order(
-                                symbol='ETH/USDT',
-                                type='market',
-                                side='buy',
-                                amount=abs(float(position['positionAmt']))
-                            )
+                if stoch_rsi_k[-1] > stoch_rsi_d[-1]:  # Golden cross
+                    binance_futures.create_order(
+                        symbol='ETH/USDT',
+                        type='market',
+                        side='buy',
+                        amount=abs(float(position['positionAmt']))
+                    )
                     open_short = False
                 time.sleep(60)  # Check every minute
 
         else:
             if usdt_balance >= 50000:
                 transfer_amount = usdt_balance - 100
-                binance_futures.transfer('USDT', 'spot', transfer_amount)
+                binance_futures.sapi_post_futures_transfer({
+                    'asset': 'USDT',
+                    'amount': transfer_amount,
+                    'type': 2
+                })
             elif usdt_balance > 1:
                 df = fetch_ohlcv(symbol, timeframe)
                 stoch_rsi_k, stoch_rsi_d = calculate_stoch_rsi(df)
-                if stoch_rsi_k.iloc[-1] > stoch_rsi_d.iloc[-1]:  # Golden cross
+                if stoch_rsi_k[-1] > stoch_rsi_d[-1]:  # Golden cross
                     binance_futures.create_order(
                         symbol='ETH/USDT',
                         type='market',
                         side='buy',
                         amount=math.floor((usdt_balance * 10) / df['close'].iloc[-1])
                     )
-                elif stoch_rsi_k.iloc[-1] < stoch_rsi_d.iloc[-1]:  # Death cross
+                elif stoch_rsi_k[-1] < stoch_rsi_d[-1]:  # Death cross
                     binance_futures.create_order(
                         symbol='ETH/USDT',
                         type='market',
@@ -129,21 +177,12 @@ def manage_positions():
 
         time.sleep(60)  # Check every minute
 
-def fetch_ohlcv(symbol, timeframe, limit=500):
-    bars = binance_futures.fetch_ohlcv(symbol, timeframe, limit=limit)
-    df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
-    df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
-    return df
-
-def calculate_stoch_rsi(df):
-    stoch_rsi_k, stoch_rsi_d = ta.STOCHRSI(df['close'], timeperiod=14)
-    return stoch_rsi_k, stoch_rsi_d
-
 def main():
     initial_transfer()
     while True:
         check_and_withdraw_spot_balance()
-        manage_positions()
+        if check_and_manage_futures_balance():
+            manage_positions()
         time.sleep(60)  # Main loop delay
 
 if __name__ == "__main__":
