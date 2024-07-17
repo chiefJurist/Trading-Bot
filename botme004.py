@@ -109,12 +109,12 @@ def manage_positions():
         df = fetch_ohlcv(symbol, timeframe)
         stoch_rsi_k, stoch_rsi_d = calculate_stoch_rsi(df)
 
-        # Check open positions
-        positions = binance_futures.private_get_positionrisk()
+        # Fetch positions
+        positions = binance_futures.fetch_positions()  # Use the correct method here
         open_long = False
         open_short = False
         for position in positions:
-            if position['symbol'] == 'ETHUSDT' and float(position['positionAmt']) != 0:
+            if position['symbol'] == 'ETH/USDT' and float(position['positionAmt']) != 0:
                 if float(position['positionAmt']) > 0:
                     open_long = True
                 elif float(position['positionAmt']) < 0:
