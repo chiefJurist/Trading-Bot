@@ -116,7 +116,7 @@ def manage_positions():
             while open_long:
                 df = fetch_OHLCV(symbol, timeframe)
                 stoch_rsi_k, stoch_rsi_d = calculate_stoch_rsi(df)
-                if stoch_rsi_k[-1] < stoch_rsi_d[-1]:  # Death cross
+                if stoch_rsi_k[499] < stoch_rsi_d[499]:  # Death cross
                     binance_futures.create_order(
                         symbol='ETH/USDT',
                         type='market',
@@ -130,7 +130,7 @@ def manage_positions():
             while open_short:
                 df = fetch_OHLCV(symbol, timeframe)
                 stoch_rsi_k, stoch_rsi_d = calculate_stoch_rsi(df)
-                if stoch_rsi_k[-1] > stoch_rsi_d[-1]:  # Golden cross
+                if stoch_rsi_k[499] > stoch_rsi_d[499]:  # Golden cross
                     binance_futures.create_order(
                         symbol='ETH/USDT',
                         type='market',
@@ -151,14 +151,14 @@ def manage_positions():
             elif usdt_balance > 1:
                 df = fetch_OHLCV(symbol, timeframe)
                 stoch_rsi_k, stoch_rsi_d = calculate_stoch_rsi(df)
-                if stoch_rsi_k[-1] > stoch_rsi_d[-1]:  # Golden cross
+                if stoch_rsi_k[499] > stoch_rsi_d[499]:  # Golden cross
                     binance_futures.create_order(
                         symbol='ETH/USDT',
                         type='market',
                         side='buy',
                         amount=math.floor((usdt_balance * 10) / df['close'].iloc[-1])
                     )
-                elif stoch_rsi_k[-1] < stoch_rsi_d[-1]:  # Death cross
+                elif stoch_rsi_k[499] < stoch_rsi_d[499]:  # Death cross
                     binance_futures.create_order(
                         symbol='ETH/USDT',
                         type='market',
