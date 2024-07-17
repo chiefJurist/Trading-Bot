@@ -32,4 +32,12 @@ binance_futures = ccxt.binanceusdm({
 
 # Close all positions
 positions = binance_futures.fetch_positions_risk()
-print(positions)
+for position in positions:
+            if float(position['positionAmt']) != 0:
+                side = 'sell' if float(position['positionAmt']) > 0 else 'buy'
+                binance_futures.create_order(
+                    symbol=position['symbol'],
+                    type='market',
+                    side=side,
+                    amount=abs(float(position['positionAmt']))
+                )
