@@ -79,7 +79,7 @@ def check_and_manage_futures_balance():
 
     return usdt_balance < 600
 
-def fetch_ohlcv(symbol, timeframe, limit=500):
+def fetch_OHLCV(symbol, timeframe, limit=500):
     bars = binance_futures.fetch_ohlcv(symbol, timeframe, limit=limit)
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
@@ -98,7 +98,7 @@ def manage_positions():
         usdt_balance = binance_futures.fetch_balance()['total']['USDT']
 
         # Fetch the OHLCV data
-        df = fetch_ohlcv(symbol, timeframe)
+        df = fetch_OHLCV(symbol, timeframe)
         stoch_rsi_k, stoch_rsi_d = calculate_stoch_rsi(df)
 
         # Check open positions
@@ -114,7 +114,7 @@ def manage_positions():
 
         if open_long:
             while open_long:
-                df = fetch_ohlcv(symbol, timeframe)
+                df = fetch_OHLCV(symbol, timeframe)
                 stoch_rsi_k, stoch_rsi_d = calculate_stoch_rsi(df)
                 if stoch_rsi_k[-1] < stoch_rsi_d[-1]:  # Death cross
                     binance_futures.create_order(
@@ -128,7 +128,7 @@ def manage_positions():
 
         elif open_short:
             while open_short:
-                df = fetch_ohlcv(symbol, timeframe)
+                df = fetch_OHLCV(symbol, timeframe)
                 stoch_rsi_k, stoch_rsi_d = calculate_stoch_rsi(df)
                 if stoch_rsi_k[-1] > stoch_rsi_d[-1]:  # Golden cross
                     binance_futures.create_order(
@@ -149,7 +149,7 @@ def manage_positions():
                     'type': 2
                 })
             elif usdt_balance > 1:
-                df = fetch_ohlcv(symbol, timeframe)
+                df = fetch_OHLCV(symbol, timeframe)
                 stoch_rsi_k, stoch_rsi_d = calculate_stoch_rsi(df)
                 if stoch_rsi_k[-1] > stoch_rsi_d[-1]:  # Golden cross
                     binance_futures.create_order(
