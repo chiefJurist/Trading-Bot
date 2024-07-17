@@ -44,6 +44,7 @@ def check_and_withdraw_spot_balance():
         time.sleep(10)  # Sleep to ensure the withdrawals are processed
 
 def set_leverage(symbol, leverage):
+    binance_futures.load_markets()
     market = binance_futures.market(symbol)
     binance_futures.private_post_leverage({
         'symbol': market['id'],
@@ -51,6 +52,7 @@ def set_leverage(symbol, leverage):
     })
 
 def fetch_positions():
+    binance_futures.load_markets()
     return binance_futures.fetch_positions()
 
 def manage_positions():
