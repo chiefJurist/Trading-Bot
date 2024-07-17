@@ -48,20 +48,13 @@ def check_and_withdraw_spot_balance():
         time.sleep(10)  # Sleep to ensure the withdrawals are processed
 
 def set_leverage(symbol, leverage):
-    # Fetch markets for Binance Futures
-    markets = binance_futures.fetch_markets()
-
-    for market in markets:
-        if market['symbol'] == symbol:
-            market_id = market['id']
-            binance_futures.fapiPrivate_post_leverage({
-                'symbol': market_id,
-                'leverage': leverage
-            })
-            break
+    binance_futures.fapiPrivate_post_leverage({
+        'symbol': binance_futures.market_id(symbol),
+        'leverage': leverage
+    })
 
 def fetch_positions():
-    return binance_futures.fetch_positions()
+    return binance_futures.fapiPrivate_get_positionrisk()
 
 def manage_positions():
     symbol = 'ETH/USDT'
