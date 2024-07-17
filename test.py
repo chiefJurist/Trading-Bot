@@ -47,11 +47,17 @@ binance_futures = ccxt.binanceusdm({
 symbol = 'ETH/USDT'
 timeframe = '5m'
 
+def fetch_OHLCV(symbol, timeframe, limit=500):
+    bars = binance_futures.fetch_ohlcv(symbol, timeframe, limit=limit)
+    df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+    df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+    return df
+
 def calculate_stoch_rsi(df):
     stoch_rsi_k, stoch_rsi_d = ta.STOCHRSI(df['close'], timeperiod=14)
     return stoch_rsi_k, stoch_rsi_d
 
-df = binance_futures.fetch_ohlcv(symbol, timeframe)
+df = fetch_OHLCV(symbol, timeframe)
 stoch_rsi_k, stoch_rsi_d = calculate_stoch_rsi(df)
 
 print(stoch_rsi_d, stoch_rsi_k)
