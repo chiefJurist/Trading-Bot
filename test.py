@@ -30,14 +30,14 @@ binance_futures = ccxt.binanceusdm({
 # binance_spot.withdraw('USDT', balance, ADDRESS_TWO, tag=None, params={'network': 'BEP20'})
 
 
-# Close all positions
-positions = binance_futures.fetch_positions_risk()
-for position in positions:
-            if float(position['positionAmt']) != 0:
-                side = 'sell' if float(position['positionAmt']) > 0 else 'buy'
-                binance_futures.create_order(
-                    symbol=position['symbol'],
-                    type='market',
-                    side=side,
-                    amount=abs(float(position['positionAmt']))
-                )
+# # Close all positions
+# positions = binance_futures.fetch_positions_risk()
+# for position in positions:
+#             if float(position['positionAmt']) != 0:
+#                 side = 'sell' if float(position['positionAmt']) > 0 else 'buy'
+#                 binance_futures.create_order(
+#                     symbol=position['symbol'],
+#                     type='market',
+#                     side=side,
+#                     amount=abs(float(position['positionAmt']))
+#                 )

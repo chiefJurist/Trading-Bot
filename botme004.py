@@ -42,11 +42,11 @@ def check_and_withdraw_spot_balance():
         binance_spot.withdraw('USDT', usdt_balance, ADDRESS_ONE, tag=None, params={'network': 'BEP20'})
         time.sleep(10)  # Sleep to ensure the withdrawals are processed
 
-def set_leverage(symbol, leverage):
+def set_Leverage(symbol, leverage):
     markets = binance_futures.load_markets()
     if symbol in markets:
         market_id = markets[symbol]['id']
-        binance_futures.fapiPrivate_post_leverage({
+        binance_futures.set_leverage({
             'symbol': market_id,
             'leverage': leverage
         })
@@ -57,7 +57,7 @@ def check_and_manage_futures_balance():
     
     if usdt_balance >= 600:
         # Close all positions
-        positions = binance_futures.private_get_positionrisk()
+        positions = binance_futures.fetch_positions_risk()
         for position in positions:
             if float(position['positionAmt']) != 0:
                 side = 'sell' if float(position['positionAmt']) > 0 else 'buy'
@@ -77,7 +77,7 @@ def check_and_manage_futures_balance():
                 'type': 2  # Type 2 means transfer from futures to spot
             })
 
-    return usdt_balance < 50000
+    return usdt_balance < 600
 
 def fetch_ohlcv(symbol, timeframe, limit=500):
     bars = binance_futures.fetch_ohlcv(symbol, timeframe, limit=limit)
@@ -92,7 +92,7 @@ def calculate_stoch_rsi(df):
 def manage_positions():
     symbol = 'ETH/USDT'
     timeframe = '5m'
-    set_leverage(symbol, 10)
+    set_Leverage(symbol, 10)
 
     while True:
         usdt_balance = binance_futures.fetch_balance()['total']['USDT']
@@ -102,7 +102,7 @@ def manage_positions():
         stoch_rsi_k, stoch_rsi_d = calculate_stoch_rsi(df)
 
         # Check open positions
-        positions = binance_futures.private_get_positionrisk()
+        positions = binance_futures.fetch_positions_risk()
         open_long = False
         open_short = False
         for position in positions:
