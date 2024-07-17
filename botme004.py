@@ -193,15 +193,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-def main():
-    initial_transfer()
-    while True:
-        check_and_withdraw_spot_balance()
-        if check_and_manage_futures_balance():
-            manage_positions()
-        time.sleep(60)  # Main loop delay
-
-if __name__ == "__main__":
-    main()
