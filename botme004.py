@@ -152,12 +152,16 @@ def manage_positions():
                 df = fetch_OHLCV(symbol, timeframe)
                 stoch_rsi_k, stoch_rsi_d = calculate_stoch_rsi(df)
                 if stoch_rsi_k[499] > stoch_rsi_d[499]:  # Golden cross
-                    binance_futures.create_order(
+                    binance_futures.create_market_buy_order(
                         symbol='ETH/USDT:USDT',
-                        type='market',
-                        side='buy',
-                        amount=math.floor((usdt_balance * 10) / df['close'].iloc[-1])
+                        amount=math.floor((usdt_balance * 10))
                     )
+                    # binance_futures.create_order(
+                    #     symbol='ETH/USDT:USDT',
+                    #     type='market',
+                    #     side='buy',
+                    #     amount=math.floor((usdt_balance * 10) / df['close'].iloc[-1])
+                    # )
                 elif stoch_rsi_k[499] < stoch_rsi_d[499]:  # Death cross
                     binance_futures.create_order(
                         symbol='ETH/USDT:USDT',
