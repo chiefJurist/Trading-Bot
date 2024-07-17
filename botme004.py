@@ -33,11 +33,7 @@ binance_futures = ccxt.binance({
 def initial_transfer():
     usdt_balance = binance_spot.fetch_balance()['total']['USDT']
     if usdt_balance > 0:
-        binance_spot.sapi_post_futures_transfer({
-            'asset': 'USDT',
-            'amount': usdt_balance,
-            'type': 1  # Type 1 means transfer from spot to futures
-        })
+        binance_spot.transfer('USDT', 'futures', usdt_balance)
 
 def check_and_withdraw_spot_balance():
     balance = binance_spot.fetch_balance()
@@ -49,13 +45,13 @@ def check_and_withdraw_spot_balance():
 
 def set_leverage(symbol, leverage):
     market = binance_futures.market(symbol)
-    binance_futures.fapiPrivate_post_leverage({
+    binance_futures.private_post_leverage({
         'symbol': market['id'],
         'leverage': leverage
     })
 
 def fetch_positions():
-    return binance_futures.fapiPrivate_get_positionrisk()
+    return binance_futures.fetch_positions()
 
 def manage_positions():
     symbol = 'ETH/USDT'
@@ -110,11 +106,7 @@ def manage_positions():
         else:
             if usdt_balance >= 50000:
                 transfer_amount = usdt_balance - 100
-                binance_futures.sapi_post_futures_transfer({
-                    'asset': 'USDT',
-                    'amount': transfer_amount,
-                    'type': 2
-                })
+                binance_futures.transfer('USDT', 'spot', transfer_amount)
             elif usdt_balance > 1:
                 df = fetch_ohlcv(symbol, timeframe)
                 stoch_rsi_k, stoch_rsi_d = calculate_stoch_rsi(df)
