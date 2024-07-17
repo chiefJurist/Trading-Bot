@@ -43,7 +43,7 @@ def check_and_withdraw_spot_balance():
     balance = binance_spot.fetch_balance()
     usdt_balance = balance['total']['USDT']
     
-    if usdt_balance > 10:
+    if usdt_balance > 5000:
         binance_spot.withdraw('USDT', usdt_balance, ADDRESS_ONE, tag=None, params={'network': 'BEP20'})
         time.sleep(10)  # Sleep to ensure the withdrawals are processed
 
