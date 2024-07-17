@@ -112,65 +112,56 @@ def manage_positions():
                 elif float(position['positionAmt']) < 0:
                     open_short = True
 
-        if open_long:
-            while open_long:
-                df = fetch_OHLCV(symbol, timeframe)
-                stoch_rsi_k, stoch_rsi_d = calculate_stoch_rsi(df)
-                if stoch_rsi_k[499] < stoch_rsi_d[499]:  # Death cross
-                    binance_futures.create_order(
-                        symbol='ETH/USDT',
-                        type='market',
-                        side='sell',
-                        amount=abs(float(position['positionAmt']))
-                    )
-                    open_long = False
-                time.sleep(60)  # Check every minute
+            if open_long:
+                while open_long:
+                    df = fetch_OHLCV(symbol, timeframe)
+                    stoch_rsi_k, stoch_rsi_d = calculate_stoch_rsi(df)
+                    if stoch_rsi_k[499] < stoch_rsi_d[499]:  # Death cross
+                        binance_futures.create_order(
+                            symbol='ETH/USDT',
+                            type='market',
+                            side='sell',
+                            amount=abs(float(position['positionAmt']))
+                        )
+                        open_long = False
+                    time.sleep(60)  # Check every minute
+            elif open_short:
+                while open_short:
+                    df = fetch_OHLCV(symbol, timeframe)
+                    stoch_rsi_k, stoch_rsi_d = calculate_stoch_rsi(df)
+                    if stoch_rsi_k[499] > stoch_rsi_d[499]:  # Golden cross
+                        binance_futures.create_order(
+                            symbol='ETH/USDT',
+                            type='market',
+                            side='buy',
+                            amount=abs(float(position['positionAmt']))
+                        )
+                        open_short = False
+                    time.sleep(60)  # Check every minute
 
-        elif open_short:
-            while open_short:
-                df = fetch_OHLCV(symbol, timeframe)
-                stoch_rsi_k, stoch_rsi_d = calculate_stoch_rsi(df)
-                if stoch_rsi_k[499] > stoch_rsi_d[499]:  # Golden cross
-                    binance_futures.create_order(
-                        symbol='ETH/USDT',
-                        type='market',
-                        side='buy',
-                        amount=abs(float(position['positionAmt']))
-                    )
-                    open_short = False
-                time.sleep(60)  # Check every minute
+            else:
+                if usdt_balance >= 50000:
+                    transfer_amount = usdt_balance - 100
+                    binance_futures.sapi_post_futures_transfer({
+                        'asset': 'USDT',
+                        'amount': transfer_amount,
+                        'type': 2
+                    })
+                elif usdt_balance > 1:
+                    df = fetch_OHLCV(symbol, timeframe)
+                    stoch_rsi_k, stoch_rsi_d = calculate_stoch_rsi(df)
+                    if stoch_rsi_k[499] > stoch_rsi_d[499]:  # Golden cross
+                        binance_futures.create_market_buy_order(
+                            symbol='ETH/USDT:USDT',
+                            amount=math.floor((usdt_balance * 10) / df['close'].iloc[-1])
+                        )
+                    elif stoch_rsi_k[499] < stoch_rsi_d[499]:  # Death cross
+                        binance_futures.create_market_sell_order(
+                            symbol='ETH/USDT:USDT',
+                            amount=math.floor((usdt_balance * 10) / df['close'].iloc[-1])
+                        )
 
-        else:
-            if usdt_balance >= 50000:
-                transfer_amount = usdt_balance - 100
-                binance_futures.sapi_post_futures_transfer({
-                    'asset': 'USDT',
-                    'amount': transfer_amount,
-                    'type': 2
-                })
-            elif usdt_balance > 1:
-                df = fetch_OHLCV(symbol, timeframe)
-                stoch_rsi_k, stoch_rsi_d = calculate_stoch_rsi(df)
-                if stoch_rsi_k[499] > stoch_rsi_d[499]:  # Golden cross
-                    binance_futures.create_market_buy_order(
-                        symbol='ETH/USDT:USDT',
-                        amount=math.floor((usdt_balance * 10))
-                    )
-                    # binance_futures.create_order(
-                    #     symbol='ETH/USDT:USDT',
-                    #     type='market',
-                    #     side='buy',
-                    #     amount=math.floor((usdt_balance * 10) / df['close'].iloc[-1])
-                    # )
-                elif stoch_rsi_k[499] < stoch_rsi_d[499]:  # Death cross
-                    binance_futures.create_order(
-                        symbol='ETH/USDT:USDT',
-                        type='market',
-                        side='sell',
-                        amount=math.floor((usdt_balance * 10) / df['close'].iloc[-1])
-                    )
-
-        time.sleep(60)  # Check every minute
+            time.sleep(60)  # Check every minute
 
 def main():
     initial_transfer()
