@@ -60,4 +60,4 @@ def calculate_stoch_rsi(df):
 df = fetch_OHLCV(symbol, timeframe)
 stoch_rsi_k, stoch_rsi_d = calculate_stoch_rsi(df)
 
-print(stoch_rsi_d, stoch_rsi_k)
+print(stoch_rsi_d[-1], 'Break', stoch_rsi_k[-1])
