@@ -160,7 +160,7 @@ def manage_positions():
                     )
                 elif stoch_rsi_k[499] < stoch_rsi_d[499]:  # Death cross
                     binance_futures.create_order(
-                        symbol='ETH/USDT',
+                        symbol='ETH/USDT:USDT',
                         type='market',
                         side='sell',
                         amount=math.floor((usdt_balance * 10) / df['close'].iloc[-1])
