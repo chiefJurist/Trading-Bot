@@ -75,6 +75,8 @@ print(leverage)
 current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
 print(current_price)
 
+amount = balance / current_price
+print(amount)
 # createOrder = binance_futures.create_market_buy_order("ETH/USDT:USDT", balance)
 
 # print("leverage:", leverage, "current_price:", current_price,  "Order:", createOrder)
