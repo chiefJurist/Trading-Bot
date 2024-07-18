@@ -66,7 +66,7 @@ binance_futures = ccxt.binanceusdm({
 
 
 #Setting Leverage and entering trade
-balance = binance_spot.fetch_balance()['total']['USDT']
+balance = binance_futures.fetch_balance()['total']['USDT']
 print(balance)
 
 leverage = binance_futures.set_leverage(2, 'ETH/USDT:USDT')
