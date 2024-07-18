@@ -71,6 +71,6 @@ balance = binance_spot.fetch_balance()['total']['USDT']
 leverage = binance_futures.set_leverage(2, 'ETH/USDT:USDT')
 current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
 
-createOrder = binance_futures.create_market_buy_order("ETH/USDT:USDT", (balance * 2 / current_price ))
+createOrder = binance_futures.create_market_buy_order("ETH/USDT:USDT", balance)
 
 print("leverage:", leverage, "current_price:", current_price,  "Order:", createOrder)
