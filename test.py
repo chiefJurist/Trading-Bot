@@ -69,7 +69,7 @@ binance_futures = ccxt.binanceusdm({
 balance = binance_futures.fetch_balance()['total']['USDT']
 print(balance)
 
-leverage = binance_futures.set_leverage(2, 'ETH/USDT:USDT')
+leverage = binance_futures.set_leverage(3, 'ETH/USDT:USDT')
 print(leverage)
 
 current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
