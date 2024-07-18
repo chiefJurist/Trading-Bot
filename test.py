@@ -67,10 +67,12 @@ binance_futures = ccxt.binanceusdm({
 
 #Setting Leverage and entering trade
 balance = binance_spot.fetch_balance()['total']['USDT']
+print(balance)
 
 leverage = binance_futures.set_leverage(2, 'ETH/USDT:USDT')
-current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
+print(leverage)
+# current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
 
-createOrder = binance_futures.create_market_buy_order("ETH/USDT:USDT", balance)
+# createOrder = binance_futures.create_market_buy_order("ETH/USDT:USDT", balance)
 
-print("leverage:", leverage, "current_price:", current_price,  "Order:", createOrder)
+# print("leverage:", leverage, "current_price:", current_price,  "Order:", createOrder)
