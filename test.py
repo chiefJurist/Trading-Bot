@@ -103,8 +103,8 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
 def calculate_stochastic_oscillator(df):
     rsi = ta.RSI(df['close'].values, timeperiod=14)
     k, d = ta.STOCH(df['high'].values, df['low'].values, df['close'].values, 
-                    fastk_period=14, slowk_period=3, slowk_matype=0, 
-                    slowd_period=3, slowd_matype=0)
+    fastk_period=14, slowk_period=3, slowk_matype=0, 
+    slowd_period=3, slowd_matype=0)
     return k, d
 
 df = fetch_OHLCV('ETH/USDT', '5m')
