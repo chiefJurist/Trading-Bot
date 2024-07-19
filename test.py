@@ -109,4 +109,4 @@ def calculate_stochastic_oscillator(df):
 
 df = fetch_OHLCV('ETH/USDT', '5m')
 k, d = calculate_stochastic_oscillator(df)
-print(k[-1], d[-1])
+print(k[499], d[499])
