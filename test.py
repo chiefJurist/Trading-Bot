@@ -81,5 +81,9 @@ print(amount)
 createOrder = binance_futures.create_market_buy_order("ETH/USDT:USDT", amount)
 print("Order:", createOrder)
 
-closeOrder = binance_futures.close_position('ETH/USDT:USDT')
+time.sleep(20)
+
+position = binance_futures.fetch_positions_risk()
+
+closeOrder = binance_futures.create_market_sell_order('ETH/USDT:USDT', abs(float(position['positionAmt'])))
 print("Order:", closeOrder)
