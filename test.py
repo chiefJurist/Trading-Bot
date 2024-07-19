@@ -94,24 +94,6 @@ binance_futures = ccxt.binanceusdm({
 
 
 #Setting STOCHRISI
-# def fetch_OHLCV(symbol, timeframe, limit=500):
-#     bars = binance_futures.fetch_ohlcv(symbol, timeframe, limit=limit)
-#     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
-#     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
-#     return df
-
-# def calculate_stochastic_oscillator(df):
-#     rsi = ta.RSI(df['close'].values, timeperiod=14)
-#     k, d = ta.STOCH(df['high'].values, df['low'].values, df['close'].values, 
-#     fastk_period=14, slowk_period=3, slowk_matype=0, 
-#     slowd_period=3, slowd_matype=0)
-#     return k, d
-
-# df = fetch_OHLCV('ETH/USDT', '5m')
-# k, d = calculate_stochastic_oscillator(df)
-# print(k[499], d[499])
-
-
 def fetch_OHLCV(symbol, timeframe, limit=500):
     bars = binance_futures.fetch_ohlcv(symbol, timeframe, limit=limit)
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
@@ -120,11 +102,29 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
 
 def calculate_stochastic_oscillator(df):
     rsi = ta.RSI(df['close'].values, timeperiod=14)
-    k, d = ta.STOCH(rsi, rsi, rsi, 
-                    fastk_period=14, slowk_period=3, slowk_matype=0, 
-                    slowd_period=3, slowd_matype=0)
+    k, d = ta.STOCH(df['high'].values, df['low'].values, df['close'].values, 
+    fastk_period=14, slowk_period=3, slowk_matype=0, 
+    slowd_period=3, slowd_matype=0)
     return k, d
 
 df = fetch_OHLCV('ETH/USDT', '5m')
 k, d = calculate_stochastic_oscillator(df)
 print(k[499], d[499])
+
+
+# def fetch_OHLCV(symbol, timeframe, limit=500):
+#     bars = binance_futures.fetch_ohlcv(symbol, timeframe, limit=limit)
+#     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+#     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+#     return df
+
+# def calculate_stochastic_oscillator(df):
+#     rsi = ta.RSI(df['close'].values, timeperiod=14)
+#     k, d = ta.STOCH(rsi, rsi, rsi, 
+#                     fastk_period=14, slowk_period=3, slowk_matype=0, 
+#                     slowd_period=3, slowd_matype=0)
+#     return k, d
+
+# df = fetch_OHLCV('ETH/USDT', '5m')
+# k, d = calculate_stochastic_oscillator(df)
+# print(k[499], d[499])
