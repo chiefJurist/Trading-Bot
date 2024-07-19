@@ -101,9 +101,9 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     return df
 
 def calculate_stoch_rsi(df):
-    stoch_rsi_k, stoch_rsi_d = ta.STOCHRSI(df['close'], timeperiod=14)
-    return stoch_rsi_k, stoch_rsi_d
+    k, d = ta.STOCHRSI(df['close'], timeperiod=14)
+    return k, d
 
 df = fetch_OHLCV('ETH/USDT:USDT', '5m')
-stoch_rsi_k, stoch_rsi_d = calculate_stoch_rsi(df)
-print(stoch_rsi_k[499], stoch_rsi_d[499])
+k, d = calculate_stoch_rsi(df)
+print(k[499], d[499])
