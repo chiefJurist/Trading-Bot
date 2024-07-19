@@ -100,12 +100,12 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
 
-def calculate_stoch_rsi(df):
+def calculate_stochastic_oscillator(df):
     # k, d = ta.STOCHRSI(df['close'], timeperiod=14)
     # return k, d
      rsi = ta.RSI(df)
      k, d = ta.STOCH(rsi, rsi, rsi)
 
 df = fetch_OHLCV('ETH/USDT:USDT', '5m')
-k, d = calculate_stoch_rsi(df)
+k, d = calculate_stochastic_oscillator(df)
 print(k[499], d[499])
