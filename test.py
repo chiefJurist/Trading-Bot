@@ -94,32 +94,16 @@ binance_futures = ccxt.binanceusdm({
 
 
 #Setting STOCHRISI
-def fetch_OHLCV(symbol, timeframe, limit=500):
+def fetch_OHLCV(symbol, timeframe, limit=1000):
     bars = binance_futures.fetch_ohlcv(symbol, timeframe, limit=limit)
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
 
-# Function to calculate StochRSI using TA-Lib
-def calculate_stoch_rsi(df, timeperiod, fastk_period, fastd_period, fastd_matype):
-    # Calculate the Stochastic RSI
-    stoch_rsi_k, stoch_rsi_d = ta.STOCHRSI(df['close'], timeperiod=timeperiod, fastk_period=fastk_period, fastd_period=fastd_period, fastd_matype=fastd_matype)
+def calculate_stoch_rsi(df):
+    stoch_rsi_k, stoch_rsi_d = ta.STOCHF(df['close'], timeperiod=14)
     return stoch_rsi_k, stoch_rsi_d
 
-# Fetch OHLCV data
-symbol = 'ETH/USDT:USDT'
-timeframe = '5m'
-df = fetch_OHLCV(symbol, timeframe)
-
-# StochRSI Parameters from Binance
-stoch_rsi_timeperiod = 14  # Length RSI
-fastk_period = 14  # Length Stoch
-fastd_period = 3  # Smooth K
-fastd_matype = 0  # Smooth D, assuming 0 corresponds to SMA in TA-Lib
-
-# Calculate StochRSI
-stoch_rsi_k, stoch_rsi_d = calculate_stoch_rsi(df, stoch_rsi_timeperiod, fastk_period, fastd_period, fastd_matype)
-
-# Print the last values of StochRSI
-print(f"StochRSI K: {stoch_rsi_k[499]}")
-print(f"StochRSI D: {stoch_rsi_d[499]}")
+df = fetch_OHLCV('ETH/USDT:USDT', '5m')
+stoch_rsi_k, stoch_rsi_d = calculate_stoch_rsi(df)
+print(stoch_rsi_k[999], stoch_rsi_d[999])
