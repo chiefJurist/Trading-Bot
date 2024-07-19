@@ -78,7 +78,7 @@ print(current_price)
 amount = balance * 3 / current_price
 print(amount)
 
-createOrder = binance_futures.create_market_buy_order("ETH/USDT:USDT", amount)
+createOrder = binance_futures.create_market_sell_order("ETH/USDT:USDT", amount)
 print("Order:", createOrder)
 
 time.sleep(20)
@@ -87,5 +87,5 @@ positions = binance_futures.fetch_positions_risk()
 print("position:", positions)
 
 for position in positions:
-    closeOrder = binance_futures.create_market_sell_order('ETH/USDT:USDT', abs(float(position['info']['positionAmt'])))
+    closeOrder = binance_futures.create_market_buy_order('ETH/USDT:USDT', abs(float(position['info']['positionAmt'])))
     print("Order:", closeOrder)
