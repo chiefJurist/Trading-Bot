@@ -83,8 +83,9 @@ print("Order:", createOrder)
 
 time.sleep(20)
 
-position = binance_futures.fetch_positions_risk()
-print("position:", position)
+positions = binance_futures.fetch_positions_risk()
+print("position:", positions)
 
-closeOrder = binance_futures.create_market_sell_order('ETH/USDT:USDT', abs(float(position['positionAmt'])))
-print("Order:", closeOrder)
+for position in positions:
+    closeOrder = binance_futures.create_market_sell_order('ETH/USDT:USDT', abs(float(position['positionAmt'])))
+    print("Order:", closeOrder)
