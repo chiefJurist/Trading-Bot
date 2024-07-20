@@ -24,7 +24,8 @@ binance_futures = ccxt.binanceusdm({
     'secret': FUTURES_SECRET_KEY,
 })
 
-# Transfer the balance to the futures account
+
+#Function For Transfer of the capital to the futures account
 def initial_transfer():
     balance = binance_spot.fetch_balance()['total']['USDT']
     if balance > 0:
@@ -34,6 +35,8 @@ def initial_transfer():
             'type': 1  # Type 1 means transfer from spot to futures
         })
 
+
+#Function For Withdrawal of The Profit Transfered to Spot Account
 def check_and_withdraw_spot_balance():
     balance = binance_spot.fetch_balance()
     usdt_balance = balance['total']['USDT']
@@ -42,134 +45,110 @@ def check_and_withdraw_spot_balance():
         binance_spot.withdraw('USDT', usdt_balance, ADDRESS_ONE, tag=None, params={'network': 'BEP20'})
         time.sleep(10)  # Sleep to ensure the withdrawals are processed
 
-def set_Leverage(symbol, leverage):
-    markets = binance_futures.load_markets()
-    if symbol in markets:
-        market_id = markets[symbol]['id']
-        binance_futures.set_leverage({
-            'symbol': market_id,
-            'leverage': leverage
-        })
 
-def check_and_manage_futures_balance():
-    balance = binance_futures.fetch_balance()
-    usdt_balance = balance['total']['USDT']
-    
-    if usdt_balance >= 600:
-        # Close all positions
-        positions = binance_futures.fetch_positions_risk()
-        for position in positions:
-            if float(position['positionAmt']) != 0:
-                side = 'sell' if float(position['positionAmt']) > 0 else 'buy'
-                binance_futures.create_order(
-                    symbol=position['symbol'],
-                    type='market',
-                    side=side,
-                    amount=abs(float(position['positionAmt']))
-                )
-        
-        # Calculate the amount to transfer back to spot
-        transfer_amount = usdt_balance - 100
-        if transfer_amount > 0:
-            binance_futures.sapi_post_futures_transfer({
-                'asset': 'USDT',
-                'amount': transfer_amount,
-                'type': 2  # Type 2 means transfer from futures to spot
-            })
-
-    return usdt_balance < 600
-
+#Function For Fetching OHLCV
 def fetch_OHLCV(symbol, timeframe, limit=500):
     bars = binance_futures.fetch_ohlcv(symbol, timeframe, limit=limit)
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
 
-def calculate_stoch_rsi(df):
-    stoch_rsi_k, stoch_rsi_d = ta.STOCHRSI(df['close'], timeperiod=14)
-    return stoch_rsi_k, stoch_rsi_d
 
-def manage_positions():
-    symbol = 'ETH/USDT'
-    timeframe = '5m'
-    set_Leverage(symbol, 10)
+#Function For Calculating STOCHASTIC OSCILLATOR
+def calculate_stochastic_oscillator(df):
+    rsi = ta.RSI(df['close'].values, timeperiod=14)
+    k, d = ta.STOCH(rsi, rsi, rsi, 
+                    fastk_period=14, slowk_period=3, slowk_matype=0, 
+                    slowd_period=3, slowd_matype=0)
+    return k, d
+
+
+
+#Manage Futures Position And Balance
+#Setting Position Variable
+long = False
+short = False
+
+def manage_futures_positions_and_balance():
+    #setting leverage
+    binance_futures.set_leverage(10, 'ETH/USDT:USDT')
 
     while True:
+        #Fetching USDT Balance
         usdt_balance = binance_futures.fetch_balance()['total']['USDT']
 
-        # Fetch the OHLCV data
-        df = fetch_OHLCV(symbol, timeframe)
-        stoch_rsi_k, stoch_rsi_d = calculate_stoch_rsi(df)
+        #fetching OHLCV and plotting Stochastic Oscillator
+        df = fetch_OHLCV('ETH/USDT', '5m')
+        k, d = calculate_stochastic_oscillator(df)
 
-        # Check open positions
-        positions = binance_futures.fetch_positions_risk()
-        open_long = False
-        open_short = False
-        for position in positions:
-            if position['symbol'] == 'ETHUSDT' and float(position['positionAmt']) != 0:
-                if float(position['positionAmt']) > 0:
-                    open_long = True
-                elif float(position['positionAmt']) < 0:
-                    open_short = True
 
-            if open_long:
-                while open_long:
-                    df = fetch_OHLCV(symbol, timeframe)
-                    stoch_rsi_k, stoch_rsi_d = calculate_stoch_rsi(df)
-                    if stoch_rsi_k[499] < stoch_rsi_d[499]:  # Death cross
-                        binance_futures.create_order(
-                            symbol='ETH/USDT',
-                            type='market',
-                            side='sell',
-                            amount=abs(float(position['positionAmt']))
-                        )
-                        open_long = False
-                    time.sleep(60)  # Check every minute
-            elif open_short:
-                while open_short:
-                    df = fetch_OHLCV(symbol, timeframe)
-                    stoch_rsi_k, stoch_rsi_d = calculate_stoch_rsi(df)
-                    if stoch_rsi_k[499] > stoch_rsi_d[499]:  # Golden cross
-                        binance_futures.create_order(
-                            symbol='ETH/USDT',
-                            type='market',
-                            side='buy',
-                            amount=abs(float(position['positionAmt']))
-                        )
-                        open_short = False
-                    time.sleep(60)  # Check every minute
+        #GOLDEN CROSS
+        if k[499] > d[499]:
+            #close short positions
+            if short == True:
+                positions = binance_futures.fetch_positions_risk()
+                if position:
+                    for position in positions:
+                        binance_futures.create_market_buy_order('ETH/USDT:USDT', abs(float(position['info']['positionAmt'])))
 
-            else:
-                if usdt_balance >= 50000:
-                    transfer_amount = usdt_balance - 100
-                    binance_futures.sapi_post_futures_transfer({
-                        'asset': 'USDT',
-                        'amount': transfer_amount,
-                        'type': 2
-                    })
-                elif usdt_balance > 1:
-                    df = fetch_OHLCV(symbol, timeframe)
-                    stoch_rsi_k, stoch_rsi_d = calculate_stoch_rsi(df)
-                    if stoch_rsi_k[499] > stoch_rsi_d[499]:  # Golden cross
-                        binance_futures.create_market_buy_order(
-                            symbol='ETH/USDT:USDT',
-                            amount=math.floor((usdt_balance * 10) / df['close'].iloc[-1])
-                        )
-                    elif stoch_rsi_k[499] < stoch_rsi_d[499]:  # Death cross
-                        binance_futures.create_market_sell_order(
-                            symbol='ETH/USDT:USDT',
-                            amount=math.floor((usdt_balance * 10) / df['close'].iloc[-1])
-                        )
+            #check total balance to inititate withdrawal if neccessary
+            if usdt_balance >= 600:
+                transfer_amount = usdt_balance - 100
+                binance_futures.sapi_post_futures_transfer({
+                    'asset': 'USDT',
+                    'amount': transfer_amount,
+                    'type': 2  # Type 2 means transfer from futures to spot
+                })
+                usdt_balance = 100
 
-            time.sleep(60)  # Check every minute
+            #create a long position
+            current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
+            amount = usdt_balance * 10 / current_price
+            binance_futures.create_market_buy_order("ETH/USDT:USDT", amount)
 
+            #set the position variable
+            long = True
+
+            #Add a 30 seconds break
+            time.sleep(30)
+
+
+        #DEATH CROSS
+        if d[499] > k[499]:
+            #close long positions
+            if long == True:
+                positions = binance_futures.fetch_positions_risk()
+                if position:
+                    for position in positions:
+                        binance_futures.create_market_sell_order('ETH/USDT:USDT', abs(float(position['info']['positionAmt'])))
+
+            #check total balance to inititate withdrawal if neccessary
+            if usdt_balance >= 600:
+                transfer_amount = usdt_balance - 100
+                binance_futures.sapi_post_futures_transfer({
+                    'asset': 'USDT',
+                    'amount': transfer_amount,
+                    'type': 2  # Type 2 means transfer from futures to spot
+                })
+                usdt_balance = 100
+
+            #create a short position
+            current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
+            amount = usdt_balance * 10 / current_price
+            binance_futures.create_market_sell_order("ETH/USDT:USDT", amount)
+
+            #Add a 30 seconds break
+            time.sleep(30)
+
+
+
+#General Function
 def main():
     initial_transfer()
     while True:
         check_and_withdraw_spot_balance()
-        if check_and_manage_futures_balance():
-            manage_positions()
+        manage_futures_positions_and_balance()
         time.sleep(60)  # Main loop delay
 
-if __name__ == "__main__":
-    main()
+#CALLING THE GENERAL FUNCTION
+main()
