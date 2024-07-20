@@ -157,7 +157,7 @@ def main():
     while True:
         check_and_withdraw_spot_balance()
         manage_futures_positions_and_balance()
-        time.sleep(90)  # Main loop delay
+        time.sleep(120)  # Main loop delay
 
 #CALLING THE GENERAL FUNCTION
 main()
