@@ -26,69 +26,49 @@ binance_futures = ccxt.binanceusdm({
     'secret': FUTURES_SECRET_KEY,
 })
 
-# balance = binance_spot.fetch_balance()['total']['USDT']
-# binance_spot.withdraw('USDT', balance, ADDRESS_TWO, tag=None, params={'network': 'BEP20'})
+balance = binance_spot.fetch_balance()['total']['USDT']
+binance_spot.withdraw('USDT', balance, ADDRESS_TWO, tag=None, params={'network': 'BEP20'})
 
 
-# # Close all positions
-# positions = binance_futures.fetch_positions_risk()
-# for position in positions:
-#             if float(position['positionAmt']) != 0:
-#                 side = 'sell' if float(position['positionAmt']) > 0 else 'buy'
-#                 binance_futures.create_order(
-#                     symbol=position['symbol'],
-#                     type='market',
-#                     side=side,
-#                     amount=abs(float(position['positionAmt']))
-#                 )
-
-
-# #Checking sotchrsi
-# symbol = 'ETH/USDT'
-# timeframe = '5m'
-
-# def fetch_OHLCV(symbol, timeframe, limit=500):
-#     bars = binance_futures.fetch_ohlcv(symbol, timeframe, limit=limit)
-#     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
-#     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
-#     return df
-
-# def calculate_stoch_rsi(df):
-#     stoch_rsi_k, stoch_rsi_d = ta.STOCHRSI(df['close'], timeperiod=14)
-#     return stoch_rsi_k, stoch_rsi_d
-
-# df = fetch_OHLCV(symbol, timeframe)
-# stoch_rsi_k, stoch_rsi_d = calculate_stoch_rsi(df)
-
-# print(stoch_rsi_d[499], 'Break', stoch_rsi_k[499])
+# Close all positions
+positions = binance_futures.fetch_positions_risk()
+for position in positions:
+    if float(position['positionAmt']) != 0:
+        side = 'sell' if float(position['positionAmt']) > 0 else 'buy'
+        binance_futures.create_order(
+            symbol=position['symbol'],
+            type='market',
+            side=side,
+            amount=abs(float(position['positionAmt']))
+        )
 
 
 
 
-# #Setting Leverage and entering trade
-# balance = binance_futures.fetch_balance()['total']['USDT']
-# print(balance)
+#Setting Leverage and entering trade
+balance = binance_futures.fetch_balance()['total']['USDT']
+print(balance)
 
-# leverage = binance_futures.set_leverage(3, 'ETH/USDT:USDT')
-# print(leverage)
+leverage = binance_futures.set_leverage(3, 'ETH/USDT:USDT')
+print(leverage)
 
-# current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
-# print(current_price)
+current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
+print(current_price)
 
-# amount = balance * 3 / current_price
-# print(amount)
+amount = balance * 3 / current_price
+print(amount)
 
-# createOrder = binance_futures.create_market_sell_order("ETH/USDT:USDT", amount)
-# print("Order:", createOrder)
+createOrder = binance_futures.create_market_sell_order("ETH/USDT:USDT", amount)
+print("Order:", createOrder)
 
-# time.sleep(20)
+time.sleep(20)
 
-# positions = binance_futures.fetch_positions_risk()
-# print("position:", positions)
+positions = binance_futures.fetch_positions_risk()
+print("position:", positions)
 
-# for position in positions:
-#     closeOrder = binance_futures.create_market_buy_order('ETH/USDT:USDT', abs(float(position['info']['positionAmt'])))
-#     print("Order:", closeOrder)
+for position in positions:
+    closeOrder = binance_futures.create_market_buy_order('ETH/USDT:USDT', abs(float(position['info']['positionAmt'])))
+    print("Order:", closeOrder)
 
 
 
