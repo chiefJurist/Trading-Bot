@@ -24,7 +24,6 @@ binance_futures = ccxt.binanceusdm({
     'secret': FUTURES_SECRET_KEY,
 })
 
-
 #Function For Transfer of the capital to the futures account
 def initial_transfer():
     balance = binance_spot.fetch_balance()['total']['USDT']
@@ -35,7 +34,6 @@ def initial_transfer():
             'type': 1  # Type 1 means transfer from spot to futures
         })
 
-
 #Function For Withdrawal of The Profit Transfered to Spot Account
 def check_and_withdraw_spot_balance():
     balance = binance_spot.fetch_balance()
@@ -45,14 +43,12 @@ def check_and_withdraw_spot_balance():
         binance_spot.withdraw('USDT', usdt_balance, ADDRESS_ONE, tag=None, params={'network': 'BEP20'})
         time.sleep(10)  # Sleep to ensure the withdrawals are processed
 
-
 #Function For Fetching OHLCV
 def fetch_OHLCV(symbol, timeframe, limit=500):
     bars = binance_futures.fetch_ohlcv(symbol, timeframe, limit=limit)
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
-
 
 #Function For Calculating STOCHASTIC OSCILLATOR
 def calculate_stochastic_oscillator(df):
