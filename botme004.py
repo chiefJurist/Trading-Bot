@@ -83,6 +83,7 @@ def manage_futures_positions_and_balance():
                     #close short positions
                     if position['side'] == 'short':
                         binance_futures.create_market_buy_order('ETH/USDT:USDT', abs(float(position['info']['positionAmt'])))
+                        time.sleep(30)  # Sleep to ensure safety
 
                         #check total balance to inititate withdrawal if neccessary
                         if usdt_balance >= 600:
@@ -93,20 +94,23 @@ def manage_futures_positions_and_balance():
                                 'type': 2  # Type 2 means transfer from futures to spot
                             })
                             usdt_balance = 100
+                            time.sleep(30)  # Sleep to ensure safety
 
                         #create a long position
                         current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
                         amount = usdt_balance * 10 / current_price
 
                         binance_futures.create_market_buy_order("ETH/USDT:USDT", amount)
+                        #Add a 30 seconds break
+                        time.sleep(30)
             else:
                 #create a long position regardless
                 current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
                 amount = usdt_balance * 10 / current_price
 
                 binance_futures.create_market_buy_order("ETH/USDT:USDT", amount)   
-            #Add a 30 seconds break
-            time.sleep(30)
+                #Add a 30 seconds break
+                time.sleep(30)
 
 
         #DEATH CROSS
@@ -118,6 +122,7 @@ def manage_futures_positions_and_balance():
                     if position['side'] == 'long':
                         #close long positions
                         binance_futures.create_market_sell_order('ETH/USDT:USDT', abs(float(position['info']['positionAmt'])))
+                        time.sleep(30)  # Sleep to ensure safety
 
                         #check total balance to inititate withdrawal if neccessary
                         if usdt_balance >= 600:
@@ -128,20 +133,22 @@ def manage_futures_positions_and_balance():
                                 'type': 2  # Type 2 means transfer from futures to spot
                             })
                             usdt_balance = 100
+                            time.sleep(30)  # Sleep to ensure safety
 
                         #create a short position
                         current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
                         amount = usdt_balance * 10 / current_price
 
-                        binance_futures.create_market_sell_order("ETH/USDT:USDT", amount)               
+                        binance_futures.create_market_sell_order("ETH/USDT:USDT", amount)
+                        #Add a 30 seconds break
+                        time.sleep(30)            
             else:
                 #create a short position regardless
                 current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
                 amount = usdt_balance * 10 / current_price
 
-                binance_futures.create_market_sell_order("ETH/USDT:USDT", amount)   
-            #Add a 30 seconds break
-            time.sleep(30)
+                binance_futures.create_market_sell_order("ETH/USDT:USDT", amount)
+                time.sleep(30)  # Sleep to ensure safety
 
 
 #General Function
@@ -150,7 +157,7 @@ def main():
     while True:
         check_and_withdraw_spot_balance()
         manage_futures_positions_and_balance()
-        time.sleep(60)  # Main loop delay
+        time.sleep(90)  # Main loop delay
 
 #CALLING THE GENERAL FUNCTION
 main()
