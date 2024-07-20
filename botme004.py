@@ -85,29 +85,32 @@ def manage_futures_positions_and_balance():
         #GOLDEN CROSS
         if k[499] > d[499]:
             #close short positions
-            if short == True:
+            if short:
                 positions = binance_futures.fetch_positions_risk()
-                if position:
+                if positions:
                     for position in positions:
                         binance_futures.create_market_buy_order('ETH/USDT:USDT', abs(float(position['info']['positionAmt'])))
+                        short = False
 
-            #check total balance to inititate withdrawal if neccessary
-            if usdt_balance >= 600:
-                transfer_amount = usdt_balance - 100
-                binance_futures.sapi_post_futures_transfer({
-                    'asset': 'USDT',
-                    'amount': transfer_amount,
-                    'type': 2  # Type 2 means transfer from futures to spot
-                })
-                usdt_balance = 100
+                    #check total balance to inititate withdrawal if neccessary
+                    if usdt_balance >= 600:
+                        transfer_amount = usdt_balance - 100
+                        binance_futures.sapi_post_futures_transfer({
+                            'asset': 'USDT',
+                            'amount': transfer_amount,
+                            'type': 2  # Type 2 means transfer from futures to spot
+                        })
+                        usdt_balance = 100
 
             #create a long position
-            current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
-            amount = usdt_balance * 10 / current_price
-            binance_futures.create_market_buy_order("ETH/USDT:USDT", amount)
+            if long != True:
+                current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
+                amount = usdt_balance * 10 / current_price
 
-            #set the position variable
-            long = True
+                binance_futures.create_market_buy_order("ETH/USDT:USDT", amount)
+
+                #set the position variable
+                long = True
 
             #Add a 30 seconds break
             time.sleep(30)
@@ -116,30 +119,35 @@ def manage_futures_positions_and_balance():
         #DEATH CROSS
         if d[499] > k[499]:
             #close long positions
-            if long == True:
+            if long:
                 positions = binance_futures.fetch_positions_risk()
-                if position:
+                if positions:
                     for position in positions:
                         binance_futures.create_market_sell_order('ETH/USDT:USDT', abs(float(position['info']['positionAmt'])))
-
-            #check total balance to inititate withdrawal if neccessary
-            if usdt_balance >= 600:
-                transfer_amount = usdt_balance - 100
-                binance_futures.sapi_post_futures_transfer({
-                    'asset': 'USDT',
-                    'amount': transfer_amount,
-                    'type': 2  # Type 2 means transfer from futures to spot
-                })
-                usdt_balance = 100
+                        long = False
+                        
+                    #check total balance to inititate withdrawal if neccessary
+                    if usdt_balance >= 600:
+                        transfer_amount = usdt_balance - 100
+                        binance_futures.sapi_post_futures_transfer({
+                            'asset': 'USDT',
+                            'amount': transfer_amount,
+                            'type': 2  # Type 2 means transfer from futures to spot
+                        })
+                        usdt_balance = 100
 
             #create a short position
-            current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
-            amount = usdt_balance * 10 / current_price
-            binance_futures.create_market_sell_order("ETH/USDT:USDT", amount)
+            if short != True:
+                current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
+                amount = usdt_balance * 10 / current_price
+
+                binance_futures.create_market_buy_order("ETH/USDT:USDT", amount)
+
+                #set the position variable
+                short = True
 
             #Add a 30 seconds break
             time.sleep(30)
-
 
 
 #General Function
