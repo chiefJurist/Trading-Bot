@@ -2,13 +2,12 @@ import ccxt
 import pandas as pd
 import talib as ta
 import time
-import math
 
 # The User's API keys and addresses
-SPOT_API_KEY = 'Io1hIHpNwK2PldQaV45ow3LlUbDW7CqzTnpiyWo3JSOQlm38RLKA0CfDQT0BuOhC'
-SPOT_SECRET_KEY = '6bKn0jotdod18Y7fto7gDBVmO0zMMdR5OrhUpIy2f57qm7o4YE0AWAiQFLSa3GbW'
-FUTURES_API_KEY = 'fvcNgcglEHAoouBoMn1s4NhlyK90CXs5wcjyi2HJm2fSIQpgCnpZHII6c295iUQM'
-FUTURES_SECRET_KEY = 'nsjeRYY6nPxy1cfF07JNU8mhHnxwRB5FO8DHGtfZy9927u26ajnodnaSOLPvK5nV'
+SPOT_API_KEY = 'qeSMvIcWC80rj3Ns0pJV2oJzMxt4lLy4C2eXCU05MenQ9ssQLKJcRrRJEzLjGD4k'
+SPOT_SECRET_KEY = 'aMXwE79fkF6PnbMzdOemYEMNgbmu2ze9aHUGHmtWBT3VUGnXRCkutZ0T5sQmagXn'
+FUTURES_API_KEY = 'ZkUZDQgbuJkk5a1RRODbMpMKcEpcr9Qc81zVD0xmblaPlGbPKwUAA7K9HhvW0aIs'
+FUTURES_SECRET_KEY = 'ReliyQQXHqcOZ14d4thxUTtN3Ei6MVHezNMS9ONB8kqIenZdmeLW0s5hjp3JEE2T'
 
 ADDRESS_ONE = '0x9D95d4751fCc02157d55527Ca4D50588bCC80590'
 
@@ -36,11 +35,10 @@ def initial_transfer():
 
 #Function For Withdrawal of The Profit Transfered to Spot Account
 def check_and_withdraw_spot_balance():
-    balance = binance_spot.fetch_balance()
-    usdt_balance = balance['total']['USDT']
+    usdt_profit_balance = binance_spot.fetch_balance()['total']['USDT']
     
-    if usdt_balance > 500:
-        binance_spot.withdraw('USDT', usdt_balance, ADDRESS_ONE, tag=None, params={'network': 'BEP20'})
+    if usdt_profit_balance > 500:
+        binance_spot.withdraw('USDT', usdt_profit_balance, ADDRESS_ONE, tag=None, params={'network': 'BEP20'})
         time.sleep(10)  # Sleep to ensure the withdrawals are processed
 
 #Function For Fetching OHLCV
@@ -63,13 +61,13 @@ def calculate_stochastic_oscillator(df):
 #Manage Futures Position And Balance
 def manage_futures_positions_and_balance():
     #setting leverage
-    binance_futures.set_leverage(10, 'PEPE/USDT:USDT')
+    binance_futures.set_leverage(10, 'ZRO/USDT:USDT')
 
     #Fetching USDT Balance
     usdt_balance = binance_futures.fetch_balance()['total']['USDT']
 
     #fetching OHLCV and plotting Stochastic Oscillator
-    df = fetch_OHLCV('PEPE/USDT', '5m')
+    df = fetch_OHLCV('ZRO/USDT', '5m')
     k, d = calculate_stochastic_oscillator(df)
 
 
@@ -81,7 +79,7 @@ def manage_futures_positions_and_balance():
             for position in positions:
                 #close short positions
                 if position['side'] == 'short':
-                    binance_futures.create_market_buy_order('PEPE/USDT:USDT', abs(float(position['info']['positionAmt'])))
+                    binance_futures.create_market_buy_order('ZRO/USDT:USDT', abs(float(position['info']['positionAmt'])))
                     time.sleep(10)  # Sleep to ensure safety
 
                     #check total balance to inititate withdrawal if neccessary
@@ -96,18 +94,18 @@ def manage_futures_positions_and_balance():
                         time.sleep(10)  # Sleep to ensure safety
 
                     #create a long position
-                    current_price = binance_futures.fetch_ticker('PEPE/USDT:USDT')['last']
+                    current_price = binance_futures.fetch_ticker('ZRO/USDT:USDT')['last']
                     amount = usdt_balance * 10 / current_price
 
-                    binance_futures.create_market_buy_order("PEPE/USDT:USDT", amount)
+                    binance_futures.create_market_buy_order("ZRO/USDT:USDT", amount)
                     #Add a 30 seconds break
                     time.sleep(10)
         else:
             #create a long position regardless
-            current_price = binance_futures.fetch_ticker('PEPE/USDT:USDT')['last']
+            current_price = binance_futures.fetch_ticker('ZRO/USDT:USDT')['last']
             amount = usdt_balance * 10 / current_price
 
-            binance_futures.create_market_buy_order("PEPE/USDT:USDT", amount)   
+            binance_futures.create_market_buy_order("ZRO/USDT:USDT", amount)   
             #Add a 30 seconds break
             time.sleep(10)
 
@@ -120,7 +118,7 @@ def manage_futures_positions_and_balance():
             for position in positions:
                 if position['side'] == 'long':
                     #close long positions
-                    binance_futures.create_market_sell_order('PEPE/USDT:USDT', abs(float(position['info']['positionAmt'])))
+                    binance_futures.create_market_sell_order('ZRO/USDT:USDT', abs(float(position['info']['positionAmt'])))
                     time.sleep(10)  # Sleep to ensure safety
 
                     #check total balance to inititate withdrawal if neccessary
@@ -135,18 +133,18 @@ def manage_futures_positions_and_balance():
                         time.sleep(10)  # Sleep to ensure safety
 
                     #create a short position
-                    current_price = binance_futures.fetch_ticker('PEPE/USDT:USDT')['last']
+                    current_price = binance_futures.fetch_ticker('ZRO/USDT:USDT')['last']
                     amount = usdt_balance * 10 / current_price
 
-                    binance_futures.create_market_sell_order("PEPE/USDT:USDT", amount)
+                    binance_futures.create_market_sell_order("ZRO/USDT:USDT", amount)
                     #Add a 30 seconds break
                     time.sleep(10)            
         else:
             #create a short position regardless
-            current_price = binance_futures.fetch_ticker('PEPE/USDT:USDT')['last']
+            current_price = binance_futures.fetch_ticker('ZRO/USDT:USDT')['last']
             amount = usdt_balance * 10 / current_price
 
-            binance_futures.create_market_sell_order("PEPE/USDT:USDT", amount)
+            binance_futures.create_market_sell_order("ZRO/USDT:USDT", amount)
             time.sleep(10)  # Sleep to ensure safety
 
 
