@@ -63,13 +63,13 @@ def calculate_stochastic_oscillator(df):
 #Manage Futures Position And Balance
 def manage_futures_positions_and_balance():
     #setting leverage
-    binance_futures.set_leverage(10, '1000PEPE/USDT:USDT')
+    binance_futures.set_leverage(10, 'PEPE/USDT:USDT')
 
     #Fetching USDT Balance
     usdt_balance = binance_futures.fetch_balance()['total']['USDT']
 
     #fetching OHLCV and plotting Stochastic Oscillator
-    df = fetch_OHLCV('1000PEPE/USDT', '5m')
+    df = fetch_OHLCV('PEPE/USDT', '5m')
     k, d = calculate_stochastic_oscillator(df)
 
 
@@ -81,7 +81,7 @@ def manage_futures_positions_and_balance():
             for position in positions:
                 #close short positions
                 if position['side'] == 'short':
-                    binance_futures.create_market_buy_order('1000PEPE/USDT:USDT', abs(float(position['info']['positionAmt'])))
+                    binance_futures.create_market_buy_order('PEPE/USDT:USDT', abs(float(position['info']['positionAmt'])))
                     time.sleep(10)  # Sleep to ensure safety
 
                     #check total balance to inititate withdrawal if neccessary
@@ -96,18 +96,18 @@ def manage_futures_positions_and_balance():
                         time.sleep(10)  # Sleep to ensure safety
 
                     #create a long position
-                    current_price = binance_futures.fetch_ticker('1000PEPE/USDT:USDT')['last']
+                    current_price = binance_futures.fetch_ticker('PEPE/USDT:USDT')['last']
                     amount = usdt_balance * 10 / current_price
 
-                    binance_futures.create_market_buy_order("1000PEPE/USDT:USDT", amount)
+                    binance_futures.create_market_buy_order("PEPE/USDT:USDT", amount)
                     #Add a 30 seconds break
                     time.sleep(10)
         else:
             #create a long position regardless
-            current_price = binance_futures.fetch_ticker('1000PEPE/USDT:USDT')['last']
+            current_price = binance_futures.fetch_ticker('PEPE/USDT:USDT')['last']
             amount = usdt_balance * 10 / current_price
 
-            binance_futures.create_market_buy_order("1000PEPE/USDT:USDT", amount)   
+            binance_futures.create_market_buy_order("PEPE/USDT:USDT", amount)   
             #Add a 30 seconds break
             time.sleep(10)
 
@@ -120,7 +120,7 @@ def manage_futures_positions_and_balance():
             for position in positions:
                 if position['side'] == 'long':
                     #close long positions
-                    binance_futures.create_market_sell_order('1000PEPE/USDT:USDT', abs(float(position['info']['positionAmt'])))
+                    binance_futures.create_market_sell_order('PEPE/USDT:USDT', abs(float(position['info']['positionAmt'])))
                     time.sleep(10)  # Sleep to ensure safety
 
                     #check total balance to inititate withdrawal if neccessary
@@ -135,18 +135,18 @@ def manage_futures_positions_and_balance():
                         time.sleep(10)  # Sleep to ensure safety
 
                     #create a short position
-                    current_price = binance_futures.fetch_ticker('1000PEPE/USDT:USDT')['last']
+                    current_price = binance_futures.fetch_ticker('PEPE/USDT:USDT')['last']
                     amount = usdt_balance * 10 / current_price
 
-                    binance_futures.create_market_sell_order("1000PEPE/USDT:USDT", amount)
+                    binance_futures.create_market_sell_order("PEPE/USDT:USDT", amount)
                     #Add a 30 seconds break
                     time.sleep(10)            
         else:
             #create a short position regardless
-            current_price = binance_futures.fetch_ticker('1000PEPE/USDT:USDT')['last']
+            current_price = binance_futures.fetch_ticker('PEPE/USDT:USDT')['last']
             amount = usdt_balance * 10 / current_price
 
-            binance_futures.create_market_sell_order("1000PEPE/USDT:USDT", amount)
+            binance_futures.create_market_sell_order("PEPE/USDT:USDT", amount)
             time.sleep(10)  # Sleep to ensure safety
 
 
