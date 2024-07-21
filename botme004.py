@@ -8,7 +8,7 @@ import math
 SPOT_API_KEY = 'Io1hIHpNwK2PldQaV45ow3LlUbDW7CqzTnpiyWo3JSOQlm38RLKA0CfDQT0BuOhC'
 SPOT_SECRET_KEY = '6bKn0jotdod18Y7fto7gDBVmO0zMMdR5OrhUpIy2f57qm7o4YE0AWAiQFLSa3GbW'
 FUTURES_API_KEY = 'fvcNgcglEHAoouBoMn1s4NhlyK90CXs5wcjyi2HJm2fSIQpgCnpZHII6c295iUQM'
-FUTURES_SECRET_KEY = 'nsjeRYY6nPxy1cfF07JNU8mhHnxwRB5FO8DHGtfZy9927u26ajnodnaSOLPvK5nV'
+FUTURES_SECRET_KEY = 'nsjeRYY6nPxy1cfF07JNU8mhHnxwRB5FO8DHGtfZy9927u26ajnodna1000PEPEPvK5nV'
 
 ADDRESS_ONE = '0x9D95d4751fCc02157d55527Ca4D50588bCC80590'
 
@@ -63,13 +63,13 @@ def calculate_stochastic_oscillator(df):
 #Manage Futures Position And Balance
 def manage_futures_positions_and_balance():
     #setting leverage
-    binance_futures.set_leverage(10, 'SOL/USDT:USDT')
+    binance_futures.set_leverage(10, '1000PEPE/USDT:USDT')
 
     #Fetching USDT Balance
     usdt_balance = binance_futures.fetch_balance()['total']['USDT']
 
     #fetching OHLCV and plotting Stochastic Oscillator
-    df = fetch_OHLCV('SOL/USDT', '5m')
+    df = fetch_OHLCV('1000PEPE/USDT', '5m')
     k, d = calculate_stochastic_oscillator(df)
 
 
@@ -81,7 +81,7 @@ def manage_futures_positions_and_balance():
             for position in positions:
                 #close short positions
                 if position['side'] == 'short':
-                    binance_futures.create_market_buy_order('SOL/USDT:USDT', abs(float(position['info']['positionAmt'])))
+                    binance_futures.create_market_buy_order('1000PEPE/USDT:USDT', abs(float(position['info']['positionAmt'])))
                     time.sleep(10)  # Sleep to ensure safety
 
                     #check total balance to inititate withdrawal if neccessary
@@ -96,18 +96,18 @@ def manage_futures_positions_and_balance():
                         time.sleep(10)  # Sleep to ensure safety
 
                     #create a long position
-                    current_price = binance_futures.fetch_ticker('SOL/USDT:USDT')['last']
+                    current_price = binance_futures.fetch_ticker('1000PEPE/USDT:USDT')['last']
                     amount = usdt_balance * 10 / current_price
 
-                    binance_futures.create_market_buy_order("SOL/USDT:USDT", amount)
+                    binance_futures.create_market_buy_order("1000PEPE/USDT:USDT", amount)
                     #Add a 30 seconds break
                     time.sleep(10)
         else:
             #create a long position regardless
-            current_price = binance_futures.fetch_ticker('SOL/USDT:USDT')['last']
+            current_price = binance_futures.fetch_ticker('1000PEPE/USDT:USDT')['last']
             amount = usdt_balance * 10 / current_price
 
-            binance_futures.create_market_buy_order("SOL/USDT:USDT", amount)   
+            binance_futures.create_market_buy_order("1000PEPE/USDT:USDT", amount)   
             #Add a 30 seconds break
             time.sleep(10)
 
@@ -120,7 +120,7 @@ def manage_futures_positions_and_balance():
             for position in positions:
                 if position['side'] == 'long':
                     #close long positions
-                    binance_futures.create_market_sell_order('SOL/USDT:USDT', abs(float(position['info']['positionAmt'])))
+                    binance_futures.create_market_sell_order('1000PEPE/USDT:USDT', abs(float(position['info']['positionAmt'])))
                     time.sleep(10)  # Sleep to ensure safety
 
                     #check total balance to inititate withdrawal if neccessary
@@ -135,18 +135,18 @@ def manage_futures_positions_and_balance():
                         time.sleep(10)  # Sleep to ensure safety
 
                     #create a short position
-                    current_price = binance_futures.fetch_ticker('SOL/USDT:USDT')['last']
+                    current_price = binance_futures.fetch_ticker('1000PEPE/USDT:USDT')['last']
                     amount = usdt_balance * 10 / current_price
 
-                    binance_futures.create_market_sell_order("SOL/USDT:USDT", amount)
+                    binance_futures.create_market_sell_order("1000PEPE/USDT:USDT", amount)
                     #Add a 30 seconds break
                     time.sleep(10)            
         else:
             #create a short position regardless
-            current_price = binance_futures.fetch_ticker('SOL/USDT:USDT')['last']
+            current_price = binance_futures.fetch_ticker('1000PEPE/USDT:USDT')['last']
             amount = usdt_balance * 10 / current_price
 
-            binance_futures.create_market_sell_order("SOL/USDT:USDT", amount)
+            binance_futures.create_market_sell_order("1000PEPE/USDT:USDT", amount)
             time.sleep(10)  # Sleep to ensure safety
 
 
