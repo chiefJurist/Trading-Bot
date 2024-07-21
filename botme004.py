@@ -65,90 +65,89 @@ def manage_futures_positions_and_balance():
     #setting leverage
     binance_futures.set_leverage(10, 'ETH/USDT:USDT')
 
-    while True:
-        #Fetching USDT Balance
-        usdt_balance = binance_futures.fetch_balance()['total']['USDT']
+    #Fetching USDT Balance
+    usdt_balance = binance_futures.fetch_balance()['total']['USDT']
 
-        #fetching OHLCV and plotting Stochastic Oscillator
-        df = fetch_OHLCV('ETH/USDT', '5m')
-        k, d = calculate_stochastic_oscillator(df)
+    #fetching OHLCV and plotting Stochastic Oscillator
+    df = fetch_OHLCV('ETH/USDT', '5m')
+    k, d = calculate_stochastic_oscillator(df)
 
 
-        #GOLDEN CROSS
-        if k[499] > d[499]:
-            #Close Shorts If Any And Open A Long Position Regardless
-            positions = binance_futures.fetch_positions_risk()
-            if positions:
-                for position in positions:
-                    #close short positions
-                    if position['side'] == 'short':
-                        binance_futures.create_market_buy_order('ETH/USDT:USDT', abs(float(position['info']['positionAmt'])))
+    #GOLDEN CROSS
+    if k[499] > d[499]:
+        #Close Shorts If Any And Open A Long Position Regardless
+        positions = binance_futures.fetch_positions_risk()
+        if positions:
+            for position in positions:
+                #close short positions
+                if position['side'] == 'short':
+                    binance_futures.create_market_buy_order('ETH/USDT:USDT', abs(float(position['info']['positionAmt'])))
+                    time.sleep(30)  # Sleep to ensure safety
+
+                    #check total balance to inititate withdrawal if neccessary
+                    if usdt_balance >= 600:
+                        transfer_amount = usdt_balance - 100
+                        binance_futures.sapi_post_futures_transfer({
+                            'asset': 'USDT',
+                            'amount': transfer_amount,
+                            'type': 2  # Type 2 means transfer from futures to spot
+                        })
+                        usdt_balance = 100
                         time.sleep(30)  # Sleep to ensure safety
 
-                        #check total balance to inititate withdrawal if neccessary
-                        if usdt_balance >= 600:
-                            transfer_amount = usdt_balance - 100
-                            binance_futures.sapi_post_futures_transfer({
-                                'asset': 'USDT',
-                                'amount': transfer_amount,
-                                'type': 2  # Type 2 means transfer from futures to spot
-                            })
-                            usdt_balance = 100
-                            time.sleep(30)  # Sleep to ensure safety
+                    #create a long position
+                    current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
+                    amount = usdt_balance * 10 / current_price
 
-                        #create a long position
-                        current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
-                        amount = usdt_balance * 10 / current_price
+                    binance_futures.create_market_buy_order("ETH/USDT:USDT", amount)
+                    #Add a 30 seconds break
+                    time.sleep(30)
+        else:
+            #create a long position regardless
+            current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
+            amount = usdt_balance * 10 / current_price
 
-                        binance_futures.create_market_buy_order("ETH/USDT:USDT", amount)
-                        #Add a 30 seconds break
-                        time.sleep(30)
-            else:
-                #create a long position regardless
-                current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
-                amount = usdt_balance * 10 / current_price
-
-                binance_futures.create_market_buy_order("ETH/USDT:USDT", amount)   
-                #Add a 30 seconds break
-                time.sleep(30)
+            binance_futures.create_market_buy_order("ETH/USDT:USDT", amount)   
+            #Add a 30 seconds break
+            time.sleep(30)
 
 
-        #DEATH CROSS
-        if k[499] > d[499]:
-            #Close Longs If Any And Open A Short Position Regardless
-            positions = binance_futures.fetch_positions_risk()
-            if positions:
-                for position in positions:
-                    if position['side'] == 'long':
-                        #close long positions
-                        binance_futures.create_market_sell_order('ETH/USDT:USDT', abs(float(position['info']['positionAmt'])))
+    #DEATH CROSS
+    if d[499] > k[499]:
+        #Close Longs If Any And Open A Short Position Regardless
+        positions = binance_futures.fetch_positions_risk()
+        if positions:
+            for position in positions:
+                if position['side'] == 'long':
+                    #close long positions
+                    binance_futures.create_market_sell_order('ETH/USDT:USDT', abs(float(position['info']['positionAmt'])))
+                    time.sleep(30)  # Sleep to ensure safety
+
+                    #check total balance to inititate withdrawal if neccessary
+                    if usdt_balance >= 600:
+                        transfer_amount = usdt_balance - 100
+                        binance_futures.sapi_post_futures_transfer({
+                            'asset': 'USDT',
+                            'amount': transfer_amount,
+                            'type': 2  # Type 2 means transfer from futures to spot
+                        })
+                        usdt_balance = 100
                         time.sleep(30)  # Sleep to ensure safety
 
-                        #check total balance to inititate withdrawal if neccessary
-                        if usdt_balance >= 600:
-                            transfer_amount = usdt_balance - 100
-                            binance_futures.sapi_post_futures_transfer({
-                                'asset': 'USDT',
-                                'amount': transfer_amount,
-                                'type': 2  # Type 2 means transfer from futures to spot
-                            })
-                            usdt_balance = 100
-                            time.sleep(30)  # Sleep to ensure safety
+                    #create a short position
+                    current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
+                    amount = usdt_balance * 10 / current_price
 
-                        #create a short position
-                        current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
-                        amount = usdt_balance * 10 / current_price
+                    binance_futures.create_market_sell_order("ETH/USDT:USDT", amount)
+                    #Add a 30 seconds break
+                    time.sleep(30)            
+        else:
+            #create a short position regardless
+            current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
+            amount = usdt_balance * 10 / current_price
 
-                        binance_futures.create_market_sell_order("ETH/USDT:USDT", amount)
-                        #Add a 30 seconds break
-                        time.sleep(30)            
-            else:
-                #create a short position regardless
-                current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
-                amount = usdt_balance * 10 / current_price
-
-                binance_futures.create_market_sell_order("ETH/USDT:USDT", amount)
-                time.sleep(30)  # Sleep to ensure safety
+            binance_futures.create_market_sell_order("ETH/USDT:USDT", amount)
+            time.sleep(30)  # Sleep to ensure safety
 
 
 #General Function
