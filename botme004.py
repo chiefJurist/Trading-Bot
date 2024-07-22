@@ -99,7 +99,7 @@ def manage_futures_positions_and_balance():
 
             binance_futures.create_market_buy_order("ZRO/USDT:USDT", amount)   
             #Add a 30 seconds break
-            time.sleep(10)
+            time.sleep(30)
 
 
     #DEATH CROSS
@@ -129,7 +129,7 @@ def manage_futures_positions_and_balance():
             amount = usdt_balance * 10 / current_price
 
             binance_futures.create_market_sell_order("ZRO/USDT:USDT", amount)
-            time.sleep(10)  # Sleep to ensure safety
+            time.sleep(30)  # Sleep to ensure safety
 
 
 #General Function
@@ -138,7 +138,7 @@ def main():
     while True:
         check_and_withdraw_spot_balance()
         manage_futures_positions_and_balance()
-        time.sleep(60)  # Main loop delay
+        time.sleep(120)  # Main loop delay
 
 #CALLING THE GENERAL FUNCTION
 main()
