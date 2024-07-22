@@ -80,7 +80,7 @@ def manage_futures_positions_and_balance():
                 #close short positions
                 if position['side'] == 'short':
                     binance_futures.create_market_buy_order('ZRO/USDT:USDT', abs(float(position['info']['positionAmt'])))
-                    time.sleep(60)  # Sleep to ensure safety
+                    time.sleep(110)  # Sleep to ensure safety
 
                     #check total balance to inititate withdrawal if neccessary
                     # if usdt_balance >= 600:
@@ -113,7 +113,7 @@ def manage_futures_positions_and_balance():
                 if position['side'] == 'long':
                     #close long positions
                     binance_futures.create_market_sell_order('ZRO/USDT:USDT', abs(float(position['info']['positionAmt'])))
-                    time.sleep(60)  # Sleep to ensure safety
+                    time.sleep(110)  # Sleep to ensure safety
 
                     #check total balance to inititate withdrawal if neccessary
                     # if usdt_balance >= 600:
@@ -140,9 +140,9 @@ def manage_futures_positions_and_balance():
 def main():
     initial_transfer()
     while True:
-        check_and_withdraw_spot_balance()
+        #check_and_withdraw_spot_balance()
         manage_futures_positions_and_balance()
-        time.sleep(60)  # Main loop delay
+        time.sleep(10)  # Main loop delay
 
 #CALLING THE GENERAL FUNCTION
 main()
