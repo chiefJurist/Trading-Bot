@@ -92,14 +92,6 @@ def manage_futures_positions_and_balance():
                         })
                         usdt_balance = 100
                         time.sleep(30)  # Sleep to ensure safety
-
-                    #create a long position
-                    current_price = binance_futures.fetch_ticker('ZRO/USDT:USDT')['last']
-                    amount = usdt_balance * 10 / current_price
-
-                    binance_futures.create_market_buy_order("ZRO/USDT:USDT", amount)
-                    #Add a 30 seconds break
-                    time.sleep(30)
         else:
             #create a long position regardless
             current_price = binance_futures.fetch_ticker('ZRO/USDT:USDT')['last']
@@ -130,15 +122,7 @@ def manage_futures_positions_and_balance():
                             'type': 2  # Type 2 means transfer from futures to spot
                         })
                         usdt_balance = 100
-                        time.sleep(30)  # Sleep to ensure safety
-
-                    #create a short position
-                    current_price = binance_futures.fetch_ticker('ZRO/USDT:USDT')['last']
-                    amount = usdt_balance * 10 / current_price
-
-                    binance_futures.create_market_sell_order("ZRO/USDT:USDT", amount)
-                    #Add a 30 seconds break
-                    time.sleep(30)            
+                        time.sleep(30)  # Sleep to ensure safety           
         else:
             #create a short position regardless
             current_price = binance_futures.fetch_ticker('ZRO/USDT:USDT')['last']
