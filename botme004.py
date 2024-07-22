@@ -67,7 +67,7 @@ def manage_futures_positions_and_balance():
     usdt_balance = binance_futures.fetch_balance()['total']['USDT']
 
     #fetching OHLCV and plotting Stochastic Oscillator
-    df = fetch_OHLCV('ZRO/USDT', '5m')
+    df = fetch_OHLCV('ZRO/USDT', '1m')
     k, d = calculate_stochastic_oscillator(df)
 
 
