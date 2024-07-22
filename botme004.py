@@ -80,7 +80,7 @@ def manage_futures_positions_and_balance():
                 #close short positions
                 if position['side'] == 'short':
                     binance_futures.create_market_buy_order('ZRO/USDT:USDT', abs(float(position['info']['positionAmt'])))
-                    time.sleep(10)  # Sleep to ensure safety
+                    time.sleep(30)  # Sleep to ensure safety
 
                     #check total balance to inititate withdrawal if neccessary
                     if usdt_balance >= 600:
@@ -91,7 +91,7 @@ def manage_futures_positions_and_balance():
                             'type': 2  # Type 2 means transfer from futures to spot
                         })
                         usdt_balance = 100
-                        time.sleep(10)  # Sleep to ensure safety
+                        time.sleep(30)  # Sleep to ensure safety
 
                     #create a long position
                     current_price = binance_futures.fetch_ticker('ZRO/USDT:USDT')['last']
@@ -99,7 +99,7 @@ def manage_futures_positions_and_balance():
 
                     binance_futures.create_market_buy_order("ZRO/USDT:USDT", amount)
                     #Add a 30 seconds break
-                    time.sleep(10)
+                    time.sleep(30)
         else:
             #create a long position regardless
             current_price = binance_futures.fetch_ticker('ZRO/USDT:USDT')['last']
@@ -119,7 +119,7 @@ def manage_futures_positions_and_balance():
                 if position['side'] == 'long':
                     #close long positions
                     binance_futures.create_market_sell_order('ZRO/USDT:USDT', abs(float(position['info']['positionAmt'])))
-                    time.sleep(10)  # Sleep to ensure safety
+                    time.sleep(30)  # Sleep to ensure safety
 
                     #check total balance to inititate withdrawal if neccessary
                     if usdt_balance >= 600:
@@ -130,7 +130,7 @@ def manage_futures_positions_and_balance():
                             'type': 2  # Type 2 means transfer from futures to spot
                         })
                         usdt_balance = 100
-                        time.sleep(10)  # Sleep to ensure safety
+                        time.sleep(30)  # Sleep to ensure safety
 
                     #create a short position
                     current_price = binance_futures.fetch_ticker('ZRO/USDT:USDT')['last']
@@ -138,7 +138,7 @@ def manage_futures_positions_and_balance():
 
                     binance_futures.create_market_sell_order("ZRO/USDT:USDT", amount)
                     #Add a 30 seconds break
-                    time.sleep(10)            
+                    time.sleep(30)            
         else:
             #create a short position regardless
             current_price = binance_futures.fetch_ticker('ZRO/USDT:USDT')['last']
@@ -154,7 +154,7 @@ def main():
     while True:
         check_and_withdraw_spot_balance()
         manage_futures_positions_and_balance()
-        time.sleep(120)  # Main loop delay
+        time.sleep(60)  # Main loop delay
 
 #CALLING THE GENERAL FUNCTION
 main()
