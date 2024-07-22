@@ -140,9 +140,13 @@ def manage_futures_positions_and_balance():
 def main():
     initial_transfer()
     while True:
-        #check_and_withdraw_spot_balance()
-        manage_futures_positions_and_balance()
-        time.sleep(20)  # Main loop delay
+        try: 
+            #check_and_withdraw_spot_balance()
+            manage_futures_positions_and_balance()
+            time.sleep(20)  # Main loop delay
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            time.sleep(20)  # Wait for 20 seconds before retrying
 
 #CALLING THE GENERAL FUNCTION
 main()
