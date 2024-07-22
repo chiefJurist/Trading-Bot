@@ -80,18 +80,20 @@ def manage_futures_positions_and_balance():
                 #close short positions
                 if position['side'] == 'short':
                     binance_futures.create_market_buy_order('ZRO/USDT:USDT', abs(float(position['info']['positionAmt'])))
-                    time.sleep(30)  # Sleep to ensure safety
+                    time.sleep(60)  # Sleep to ensure safety
 
                     #check total balance to inititate withdrawal if neccessary
-                    if usdt_balance >= 600:
-                        transfer_amount = usdt_balance - 100
-                        binance_futures.sapi_post_futures_transfer({
-                            'asset': 'USDT',
-                            'amount': transfer_amount,
-                            'type': 2  # Type 2 means transfer from futures to spot
-                        })
-                        usdt_balance = 100
-                        time.sleep(30)  # Sleep to ensure safety
+                    # if usdt_balance >= 600:
+                    #     transfer_amount = usdt_balance - 100
+                    #     binance_futures.sapi_post_futures_transfer({
+                    #         'asset': 'USDT',
+                    #         'amount': transfer_amount,
+                    #         'type': 2  # Type 2 means transfer from futures to spot
+                    #     })
+                    #     usdt_balance = 100
+                    #     time.sleep(30)  # Sleep to ensure safety
+                elif position['side'] == 'long':
+                    pass
         else:
             #create a long position regardless
             current_price = binance_futures.fetch_ticker('ZRO/USDT:USDT')['last']
@@ -111,18 +113,20 @@ def manage_futures_positions_and_balance():
                 if position['side'] == 'long':
                     #close long positions
                     binance_futures.create_market_sell_order('ZRO/USDT:USDT', abs(float(position['info']['positionAmt'])))
-                    time.sleep(30)  # Sleep to ensure safety
+                    time.sleep(60)  # Sleep to ensure safety
 
                     #check total balance to inititate withdrawal if neccessary
-                    if usdt_balance >= 600:
-                        transfer_amount = usdt_balance - 100
-                        binance_futures.sapi_post_futures_transfer({
-                            'asset': 'USDT',
-                            'amount': transfer_amount,
-                            'type': 2  # Type 2 means transfer from futures to spot
-                        })
-                        usdt_balance = 100
-                        time.sleep(30)  # Sleep to ensure safety           
+                    # if usdt_balance >= 600:
+                    #     transfer_amount = usdt_balance - 100
+                    #     binance_futures.sapi_post_futures_transfer({
+                    #         'asset': 'USDT',
+                    #         'amount': transfer_amount,
+                    #         'type': 2  # Type 2 means transfer from futures to spot
+                    #     })
+                    #     usdt_balance = 100
+                    #     time.sleep(30)  # Sleep to ensure safety  
+                elif position['side'] == 'short':
+                    pass        
         else:
             #create a short position regardless
             current_price = binance_futures.fetch_ticker('ZRO/USDT:USDT')['last']
