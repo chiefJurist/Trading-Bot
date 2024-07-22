@@ -61,13 +61,13 @@ def calculate_stochastic_oscillator(df):
 #Manage Futures Position And Balance
 def manage_futures_positions_and_balance():
     #setting leverage
-    binance_futures.set_leverage(10, 'PEOPLE/USDT:USDT')
+    binance_futures.set_leverage(10, 'ZRO/USDT:USDT')
 
     #Fetching USDT Balance
     usdt_balance = binance_futures.fetch_balance()['total']['USDT']
 
     #fetching OHLCV and plotting Stochastic Oscillator
-    df = fetch_OHLCV('PEOPLE/USDT', '5m')
+    df = fetch_OHLCV('ZRO/USDT', '5m')
     k, d = calculate_stochastic_oscillator(df)
 
 
@@ -79,7 +79,7 @@ def manage_futures_positions_and_balance():
             for position in positions:
                 #close short positions
                 if position['side'] == 'short':
-                    binance_futures.create_market_buy_order('PEOPLE/USDT:USDT', abs(float(position['info']['positionAmt'])))
+                    binance_futures.create_market_buy_order('ZRO/USDT:USDT', abs(float(position['info']['positionAmt'])))
                     time.sleep(10)  # Sleep to ensure safety
 
                     #check total balance to inititate withdrawal if neccessary
@@ -96,10 +96,10 @@ def manage_futures_positions_and_balance():
                     pass
         else:
             #create a long position regardless
-            current_price = binance_futures.fetch_ticker('PEOPLE/USDT:USDT')['last']
+            current_price = binance_futures.fetch_ticker('ZRO/USDT:USDT')['last']
             amount = usdt_balance * 10 / current_price
 
-            binance_futures.create_market_buy_order("PEOPLE/USDT:USDT", amount)   
+            binance_futures.create_market_buy_order("ZRO/USDT:USDT", amount)   
             #Add a break
             time.sleep(10)
 
@@ -112,7 +112,7 @@ def manage_futures_positions_and_balance():
             for position in positions:
                 if position['side'] == 'long':
                     #close long positions
-                    binance_futures.create_market_sell_order('PEOPLE/USDT:USDT', abs(float(position['info']['positionAmt'])))
+                    binance_futures.create_market_sell_order('ZRO/USDT:USDT', abs(float(position['info']['positionAmt'])))
                     time.sleep(10)  # Sleep to ensure safety
 
                     #check total balance to inititate withdrawal if neccessary
@@ -129,10 +129,10 @@ def manage_futures_positions_and_balance():
                     pass        
         else:
             #create a short position regardless
-            current_price = binance_futures.fetch_ticker('PEOPLE/USDT:USDT')['last']
+            current_price = binance_futures.fetch_ticker('ZRO/USDT:USDT')['last']
             amount = usdt_balance * 10 / current_price
 
-            binance_futures.create_market_sell_order("PEOPLE/USDT:USDT", amount)
+            binance_futures.create_market_sell_order("ZRO/USDT:USDT", amount)
             time.sleep(10)  # Sleep to ensure safety
 
 
