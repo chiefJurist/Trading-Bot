@@ -36,12 +36,8 @@ def calculate_indicators(df):
     print(df['upper_band'], df['middle_band'], df['lower_band'])
 
     #STOCHASTIC OSILLATOR
-    df['slowk'], df['slowd'] = ta.STOCH(
-        df['high'], df['low'], df['close'],
-        fastk_period=14, slowk_period=3, slowk_matype=0,
-        slowd_period=3, slowd_matype=0
-    )
-    print("Stochastic Oscillator", df['slowk'], df['slowd'])
+    rsi = ta.RSI(df['close'].values, timeperiod=14)
+    k, d = ta.STOCH(rsi, rsi, rsi, fastk_period=14, slowk_period=3, slowk_matype=0, slowd_period=3, slowd_matype=0)
 
 df = fetch_OHLCV('1000PEPE/USDT', '5m')
 calculate_indicators(df)
