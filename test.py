@@ -29,11 +29,13 @@ def fetch_OHLCV(symbol, timeframe):
     return df
 
 def calculate_indicators(df):
+    #BB
     df['upper_band'], df['middle_band'], df['lower_band'] = ta.BBANDS(
         df['close'], timeperiod=20, nbdevup=2, nbdevdn=2
     )
     print(df['upper_band'], df['middle_band'], df['lower_band'])
 
+    #STOCHASTIC OSILLATOR
     df['slowk'], df['slowd'] = ta.STOCH(
         df['high'], df['low'], df['close'],
         fastk_period=14, slowk_period=3, slowk_matype=0,
