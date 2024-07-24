@@ -35,4 +35,4 @@ def calculate_indicators(df):
     print(df['upper_band'], df['middle_band'], df['lower_band'])
 
 df = fetch_OHLCV('1000PEPE/USDT', '5m')
-df['upper_band'], df['middle_band'], df['lower_band'] = calculate_indicators(df)
+calculate_indicators(df)
