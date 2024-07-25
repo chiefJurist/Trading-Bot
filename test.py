@@ -28,7 +28,7 @@ def fetch_OHLCV(symbol, timeframe):
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
 
-def calculate_indicators(df):
+#def calculate_indicators(df):
     # #BB
     # df['upper_band'], df['middle_band'], df['lower_band'] = ta.BBANDS(
     #     df['close'], timeperiod=20, nbdevup=2, nbdevdn=2
@@ -42,13 +42,13 @@ def calculate_indicators(df):
 
     #EMA 
     # EMA with different periods
-    ema1 = ta.EMA(df['close'], timeperiod=7)
-    ema2 = ta.EMA(df['close'], timeperiod=25)
-    ema3 = ta.EMA(df['close'], timeperiod=99)
-    print(ema1.tail(1), ema3.tail(1), ema3.tail(1))
+#     ema1 = ta.EMA(df['close'], timeperiod=7)
+#     ema2 = ta.EMA(df['close'], timeperiod=25)
+#     ema3 = ta.EMA(df['close'], timeperiod=99)
+#     print(ema1.tail(1), ema3.tail(1), ema3.tail(1))
 
-df = fetch_OHLCV('1000PEPE/USDT', '3m')
-calculate_indicators(df)
+# df = fetch_OHLCV('1000PEPE/USDT', '3m')
+# calculate_indicators(df)
 
 orders = binance_futures.fetch_closed_orders('1000BONK/USDT:USDT')
-print(orders[0])
+print(orders.tail(1))
