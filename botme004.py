@@ -55,26 +55,29 @@ def calculate_stoch(df):
 
 #Function for Calculating EMA
 def calculate_ema(df2):
-    ema1, ema2, ema3 = ta.EMA()
+    ema1 = ta.EMA(df2['close'], timeperiod=7)
+    ema2 = ta.EMA(df2['close'], timeperiod=25)
+    ema3 = ta.EMA(df2['close'], timeperiod=99)
 
 #Manage Futures Position And Balance
 def manage_futures_positions_and_balance():
     #setting leverage
     binance_futures.set_leverage(10, '1000BONK/USDT:USDT')
 
-    #Fetching USDT Balance
+    #fetching USDT Balance
     usdt_balance = binance_futures.fetch_balance()['total']['USDT']
 
     #fetching OHLCV and plotting Stochastic Oscillator
     df = fetch_OHLCV('1000BONK/USDT', '5m')
     df2 = fetch_OHLCV('1000BONK/USDT', '3m')
 
+    #calculating indicators
     k, d = calculate_stoch(df)
     ema1, ema2, ema3 = calculate_ema(df2)
 
 
-    #GOLDEN CROSS AT A GOOD MA
-    if k[499] > d[499]:
+    #GOLDEN CROSS AT A GOOD EMA
+    if k[499] > d[499] and ema1[499] > ema2[499] and ema2[499] > ema3[499]:
         #Close Shorts If Any And Open A Long Position Regardless
         positions = binance_futures.fetch_positions_risk()
         if positions:
