@@ -49,3 +49,6 @@ def calculate_indicators(df):
 
 df = fetch_OHLCV('1000PEPE/USDT', '3m')
 calculate_indicators(df)
+
+orders = binance_futures.fetch_closed_orders()
+print(orders)
