@@ -3,6 +3,7 @@ import pandas as pd
 import talib as ta
 import time
 
+
 # The User's API keys and addresses
 SPOT_API_KEY = 'qeSMvIcWC80rj3Ns0pJV2oJzMxt4lLy4C2eXCU05MenQ9ssQLKJcRrRJEzLjGD4k'
 SPOT_SECRET_KEY = 'aMXwE79fkF6PnbMzdOemYEMNgbmu2ze9aHUGHmtWBT3VUGnXRCkutZ0T5sQmagXn'
@@ -11,17 +12,20 @@ FUTURES_SECRET_KEY = 'ReliyQQXHqcOZ14d4thxUTtN3Ei6MVHezNMS9ONB8kqIenZdmeLW0s5hjp
 
 ADDRESS_ONE = '0x9D95d4751fCc02157d55527Ca4D50588bCC80590'
 
+
 # Initialize the Binance Spot exchange
 binance_spot = ccxt.binance({
     'apiKey': SPOT_API_KEY,
     'secret': SPOT_SECRET_KEY,
 })
 
+
 # Initialize the Binance Futures exchange
 binance_futures = ccxt.binanceusdm({
     'apiKey': FUTURES_API_KEY,
     'secret': FUTURES_SECRET_KEY,
 })
+
 
 #Function For Transfer Of The Capital To The Futures Account
 def initial_transfer():
@@ -33,6 +37,7 @@ def initial_transfer():
             'type': 1  # Type 1 means transfer from spot to futures
         })
 
+
 #Function For Withdrawal of The Profit Transfered to Spot Account
 def check_and_withdraw_spot_balance():
     usdt_profit_balance = binance_spot.fetch_balance()['total']['USDT']
@@ -41,12 +46,14 @@ def check_and_withdraw_spot_balance():
         binance_spot.withdraw('USDT', usdt_profit_balance, ADDRESS_ONE, tag=None, params={'network': 'BEP20'})
         time.sleep(10)  # Sleep to ensure the withdrawals are processed
 
+
 #Function For Fetching OHLCV
 def fetch_OHLCV(symbol, timeframe, limit=500):
     bars = binance_futures.fetch_ohlcv(symbol, timeframe, limit=limit)
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
+
 
 #Function For Calculating STOCHASTIC OSCILLATOR
 def calculate_stoch(df):
@@ -58,23 +65,25 @@ def calculate_stoch(df):
                     slowd_period=3, 
                     slowd_matype=0)
 
+
 #Function for Calculating EMA
 def calculate_ema(df2):
     ema1 = ta.EMA(df2['close'], timeperiod=7)
     ema2 = ta.EMA(df2['close'], timeperiod=25)
     ema3 = ta.EMA(df2['close'], timeperiod=99)
 
+
 #Manage Futures Position And Balance
 def manage_futures_positions_and_balance():
     #setting leverage
-    binance_futures.set_leverage(10, '1000BONK/USDT:USDT')
+    binance_futures.set_leverage(10, '1000PEPE/USDT:USDT')
 
     #fetching USDT Balance
     usdt_balance = binance_futures.fetch_balance()['total']['USDT']
 
     #fetching OHLCVs
-    df = fetch_OHLCV('1000BONK/USDT', '5m')
-    df2 = fetch_OHLCV('1000BONK/USDT', '3m')
+    df = fetch_OHLCV('1000PEPE/USDT', '5m')
+    df2 = fetch_OHLCV('1000PEPE/USDT', '3m')
 
     #calculating indicators
     k, d = calculate_stoch(df)
@@ -85,18 +94,36 @@ def manage_futures_positions_and_balance():
     positions = binance_futures.fetch_positions_risk()
     orders = binance_futures.fetch_open_orders()
 
-    #trading logic
+    #MAIN TRADING LOGIC
     if positions != True:
-        #for a golden cross at a good ema
+        #creating order for a golden cross at a good ema
         if k[499] > d[499] and ema1[499] > ema2[499] and ema2[499] > ema3[499]:
             current_price = binance_futures.fetch_ticker('1000PEPE/USDT:USDT')['last']
             amount = usdt_balance * 10 / current_price
             binance_futures.create_market_buy_order("1000PEPE/USDT:USDT", amount)   
             time.sleep(10) #add a break for safety
+        #creating order for a death cross at a good ema
+        elif k[499] < d[499] and ema1[499] < ema2[499] and ema2[499] < ema3[499]:
+            current_price = binance_futures.fetch_ticker('1000PEPE/USDT:USDT')['last']
+            amount = usdt_balance * 10 / current_price
+            binance_futures.create_market_sell_order("1000PEPE/USDT:USDT", amount)   
+            time.sleep(10) #add a break for safety
     elif positions == True and  orders != True:
-        binance_futures.fetch_closed_orders('1000PEPE/USDT:USDT')
-        open_price = float(orders[-1]['info']['avgPrice'])
-        target_price =  open_price + (open_price * 0.0055)
+        #creating order for closing positions
+        for position in positions:
+            if position['side'] == 'short':
+                open_price = position['entryPrice']
+                target_price = open_price  - (open_price * 0.0055)
+                close_amount = abs(float(position['info']['positionAmt']))
+                binance_futures.create_limit_buy_order('1000PEPE/USDT:USDT', close_amount, target_price)
+                time.sleep(10) #add a break for safety
+            elif position['side'] == 'long':
+                open_price = position['entryPrice']
+                target_price = open_price  + (open_price * 0.0055)
+                close_amount = abs(float(position['info']['positionAmt']))
+                binance_futures.create_limit_sell_order('1000PEPE/USDT:USDT', close_amount, target_price)
+                time.sleep(10) #add a break for safety
+                
     else: 
         pass
 
