@@ -59,5 +59,5 @@ def fetch_OHLCV(symbol, timeframe):
 # print(price, target, target2)
 
 #Position
-position = binance_futures.fetch_position_history('1000BONK/USDT:USDT')
+position = binance_futures.fetch_positions_ws('1000BONK/USDT:USDT')
 print(position[-1])
