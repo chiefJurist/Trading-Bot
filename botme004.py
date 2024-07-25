@@ -49,13 +49,13 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     return df
 
 #Function For Calculating STOCHASTIC OSCILLATOR
-def calculate_indicators(df):
+def calculate_stoch(df):
     rsi = ta.RSI(df['close'].values, timeperiod=14)
     k, d = ta.STOCH(rsi, rsi, rsi, fastk_period=14, slowk_period=3, slowk_matype=0, slowd_period=3, slowd_matype=0)
-    #Bollinger Band
-    upper_band, middle_band, lower_band = ta.BBANDS(df['close'], timeperiod=20, nbdevup=2, nbdevdn=2)
-    return k, d, upper_band, middle_band, lower_band 
 
+#Function for Calculating EMA
+def calculate_ema(df2):
+    ema1, ema2, ema3 = ta.EMA()
 
 #Manage Futures Position And Balance
 def manage_futures_positions_and_balance():
@@ -66,11 +66,14 @@ def manage_futures_positions_and_balance():
     usdt_balance = binance_futures.fetch_balance()['total']['USDT']
 
     #fetching OHLCV and plotting Stochastic Oscillator
-    df = fetch_OHLCV('1000BONK/USDT', '1m')
-    k, d = calculate_indicators(df)
+    df = fetch_OHLCV('1000BONK/USDT', '5m')
+    df2 = fetch_OHLCV('1000BONK/USDT', '3m')
+
+    k, d = calculate_stoch(df)
+    ema1, ema2, ema3 = calculate_ema(df2)
 
 
-    #GOLDEN CROSS
+    #GOLDEN CROSS AT A GOOD MA
     if k[499] > d[499]:
         #Close Shorts If Any And Open A Long Position Regardless
         positions = binance_futures.fetch_positions_risk()

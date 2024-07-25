@@ -29,16 +29,20 @@ def fetch_OHLCV(symbol, timeframe):
     return df
 
 def calculate_indicators(df):
-    #BB
-    df['upper_band'], df['middle_band'], df['lower_band'] = ta.BBANDS(
-        df['close'], timeperiod=20, nbdevup=2, nbdevdn=2
-    )
-    print(df['upper_band'], df['middle_band'], df['lower_band'])
+    # #BB
+    # df['upper_band'], df['middle_band'], df['lower_band'] = ta.BBANDS(
+    #     df['close'], timeperiod=20, nbdevup=2, nbdevdn=2
+    # )
+    # print(df['upper_band'], df['middle_band'], df['lower_band'])
 
-    #STOCHASTIC OSILLATOR
-    rsi = ta.RSI(df['close'].values, timeperiod=14)
-    k, d = ta.STOCH(rsi, rsi, rsi, fastk_period=14, slowk_period=3, slowk_matype=0, slowd_period=3, slowd_matype=0)
-    print(k[499],d[499])
+    # #STOCHASTIC OSILLATOR
+    # rsi = ta.RSI(df['close'].values, timeperiod=14)
+    # k, d = ta.STOCH(rsi, rsi, rsi, fastk_period=14, slowk_period=3, slowk_matype=0, slowd_period=3, slowd_matype=0)
+    # print(k[499],d[499])
+
+    #EMA 
+    ema1, ema2, ema3 = ta.EMA()
+    print(ema1, ema2, ema3)
 
 df = fetch_OHLCV('1000PEPE/USDT', '5m')
 calculate_indicators(df)
