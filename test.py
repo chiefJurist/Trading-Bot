@@ -42,9 +42,9 @@ def calculate_indicators(df):
 
     #EMA 
     # EMA with different periods
-    ema1 = ta.EMA(df['close'], timeperiod=50)
-    ema2 = ta.EMA(df['close'], timeperiod=100)
-    ema3 = ta.EMA(df['close'], timeperiod=200)
+    ema1 = ta.EMA(df['close'], timeperiod=7)
+    ema2 = ta.EMA(df['close'], timeperiod=25)
+    ema3 = ta.EMA(df['close'], timeperiod=99)
     print(ema1.tail(1), ema2.tail(1), ema3.tail(1))
 
 df = fetch_OHLCV('1000PEPE/USDT', '3m')
