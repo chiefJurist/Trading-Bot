@@ -23,7 +23,7 @@ binance_futures = ccxt.binanceusdm({
     'secret': FUTURES_SECRET_KEY,
 })
 
-#Function For Transfer of the capital to the futures account
+#Function For Transfer Of The Capital To The Futures Account
 def initial_transfer():
     balance = binance_spot.fetch_balance()['total']['USDT']
     if balance > 0:
@@ -51,7 +51,12 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
 #Function For Calculating STOCHASTIC OSCILLATOR
 def calculate_stoch(df):
     rsi = ta.RSI(df['close'].values, timeperiod=14)
-    k, d = ta.STOCH(rsi, rsi, rsi, fastk_period=14, slowk_period=3, slowk_matype=0, slowd_period=3, slowd_matype=0)
+    k, d = ta.STOCH(rsi, rsi, rsi, 
+                    fastk_period=14, 
+                    slowk_period=3, 
+                    slowk_matype=0, 
+                    slowd_period=3, 
+                    slowd_matype=0)
 
 #Function for Calculating EMA
 def calculate_ema(df2):
@@ -67,7 +72,7 @@ def manage_futures_positions_and_balance():
     #fetching USDT Balance
     usdt_balance = binance_futures.fetch_balance()['total']['USDT']
 
-    #fetching OHLCV and plotting Stochastic Oscillator
+    #fetching OHLCVs
     df = fetch_OHLCV('1000BONK/USDT', '5m')
     df2 = fetch_OHLCV('1000BONK/USDT', '3m')
 
@@ -76,84 +81,24 @@ def manage_futures_positions_and_balance():
     ema1, ema2, ema3 = calculate_ema(df2)
 
 
-    #checking positions
+    #checking positions and orders
     positions = binance_futures.fetch_positions_risk()
+    orders = binance_futures.fetch_open_orders()
+
+    #trading logic
     if positions != True:
         #for a golden cross at a good ema
         if k[499] > d[499] and ema1[499] > ema2[499] and ema2[499] > ema3[499]:
             current_price = binance_futures.fetch_ticker('1000PEPE/USDT:USDT')['last']
             amount = usdt_balance * 10 / current_price
-
             binance_futures.create_market_buy_order("1000PEPE/USDT:USDT", amount)   
-            #Add a break
-            time.sleep(10)
+            time.sleep(10) #add a break for safety
+    elif positions == True and  orders != True:
+        binance_futures.fetch_closed_orders('1000PEPE/USDT:USDT')
+        open_price = float(orders[-1]['info']['avgPrice'])
+        target_price =  open_price + (open_price * 0.0055)
     else: 
         pass
-
-    
-    #GOLDEN CROSS AT A GOOD EMA
-    if k[499] > d[499] and ema1[499] > ema2[499] and ema2[499] > ema3[499]:
-        #Close Shorts If Any And Open A Long Position Regardless
-        positions = binance_futures.fetch_positions_risk()
-        if positions:
-            for position in positions:
-                #close short positions
-                if position['side'] == 'short':
-                    binance_futures.create_market_buy_order('1000BONK/USDT:USDT', abs(float(position['info']['positionAmt'])))
-                    time.sleep(10)  # Sleep to ensure safety
-
-                    #check total balance to inititate withdrawal if neccessary
-                    # if usdt_balance >= 600:
-                    #     transfer_amount = usdt_balance - 100
-                    #     binance_futures.sapi_post_futures_transfer({
-                    #         'asset': 'USDT',
-                    #         'amount': transfer_amount,
-                    #         'type': 2  # Type 2 means transfer from futures to spot
-                    #     })
-                    #     usdt_balance = 100
-                    #     time.sleep(30)  # Sleep to ensure safety
-                elif position['side'] == 'long':
-                    pass
-        else:
-            #create a long position regardless
-            current_price = binance_futures.fetch_ticker('1000BONK/USDT:USDT')['last']
-            amount = usdt_balance * 10 / current_price
-
-            binance_futures.create_market_buy_order("1000BONK/USDT:USDT", amount)   
-            #Add a break
-            time.sleep(10)
-
-
-    #DEATH CROSS
-    if d[499] > k[499]:
-        #Close Longs If Any And Open A Short Position Regardless
-        positions = binance_futures.fetch_positions_risk()
-        if positions:
-            for position in positions:
-                if position['side'] == 'long':
-                    #close long positions
-                    binance_futures.create_market_sell_order('1000BONK/USDT:USDT', abs(float(position['info']['positionAmt'])))
-                    time.sleep(10)  # Sleep to ensure safety
-
-                    #check total balance to inititate withdrawal if neccessary
-                    # if usdt_balance >= 600:
-                    #     transfer_amount = usdt_balance - 100
-                    #     binance_futures.sapi_post_futures_transfer({
-                    #         'asset': 'USDT',
-                    #         'amount': transfer_amount,
-                    #         'type': 2  # Type 2 means transfer from futures to spot
-                    #     })
-                    #     usdt_balance = 100
-                    #     time.sleep(30)  # Sleep to ensure safety  
-                elif position['side'] == 'short':
-                    pass        
-        else:
-            #create a short position regardless
-            current_price = binance_futures.fetch_ticker('1000BONK/USDT:USDT')['last']
-            amount = usdt_balance * 10 / current_price
-
-            binance_futures.create_market_sell_order("1000BONK/USDT:USDT", amount)
-            time.sleep(10)  # Sleep to ensure safety
 
 
 #General Function

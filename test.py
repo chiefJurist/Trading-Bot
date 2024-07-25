@@ -50,9 +50,14 @@ def fetch_OHLCV(symbol, timeframe):
 # df = fetch_OHLCV('1000PEPE/USDT', '3m')
 # calculate_indicators(df)
 
-orders = binance_futures.fetch_closed_orders('1000BONK/USDT:USDT')
-print(orders[-1])
-price = float(orders[-1]['info']['avgPrice'])
-target =  price + (price * 0.005)
-target2 = price - (price * 0.005)
-print(price, target, target2)
+###Orders
+# orders = binance_futures.fetch_closed_orders('1000BONK/USDT:USDT')
+# print(orders[-1])
+# price = float(orders[-1]['info']['avgPrice'])
+# target =  price + (price * 0.0055)
+# target2 = price - (price * 0.0055)
+# print(price, target, target2)
+
+#Position
+position = binance_futures.fetch_position_history('1000BONK/USDT:USDT')
+print(position[-1])
