@@ -52,4 +52,7 @@ def fetch_OHLCV(symbol, timeframe):
 
 orders = binance_futures.fetch_closed_orders('1000BONK/USDT:USDT')
 print(orders[-1])
-print(orders[-1]['info']['avgPrice'])
+price = orders[-1]['info']['avgPrice']
+target =  price + (price * 0.005)
+target2 = price - (price * 0.005)
+print(price, target, target2)
