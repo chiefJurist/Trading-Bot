@@ -75,22 +75,6 @@ def manage_futures_positions_and_balance():
     k, d = calculate_stoch(df)
     ema1, ema2, ema3 = calculate_ema(df2)
 
-
-    #checking positions
-    positions = binance_futures.fetch_positions_risk()
-    if positions != True:
-        #for a golden cross at a good ema
-        if k[499] > d[499] and ema1[499] > ema2[499] and ema2[499] > ema3[499]:
-            current_price = binance_futures.fetch_ticker('1000PEPE/USDT:USDT')['last']
-            amount = usdt_balance * 10 / current_price
-
-            binance_futures.create_market_buy_order("1000PEPE/USDT:USDT", amount)   
-            #Add a break
-            time.sleep(10)
-    else: 
-        pass
-
-    
     #GOLDEN CROSS AT A GOOD EMA
     if k[499] > d[499] and ema1[499] > ema2[499] and ema2[499] > ema3[499]:
         #Close Shorts If Any And Open A Long Position Regardless
