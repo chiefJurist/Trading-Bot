@@ -51,4 +51,4 @@ def fetch_OHLCV(symbol, timeframe):
 # calculate_indicators(df)
 
 orders = binance_futures.fetch_closed_orders('1000BONK/USDT:USDT')
-print(orders.tail(1))
+print(orders[-1])
