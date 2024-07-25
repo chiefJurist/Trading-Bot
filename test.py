@@ -47,5 +47,5 @@ def calculate_indicators(df):
     ema3 = ta.EMA(df['close'], timeperiod=200)
     print(ema1.tail(1), ema2.tail(1), ema3.tail(1))
 
-df = fetch_OHLCV('1000PEPE/USDT', '5m')
+df = fetch_OHLCV('1000PEPE/USDT', '3m')
 calculate_indicators(df)
