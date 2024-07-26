@@ -101,12 +101,26 @@ def manage_futures_positions_and_balance():
             current_price = binance_futures.fetch_ticker('1000PEPE/USDT:USDT')['last']
             amount = usdt_balance * 10 / current_price
             binance_futures.create_market_buy_order("1000PEPE/USDT:USDT", amount)   
+            time.sleep(20) #add a break for safety
+
+            #taking profit order
+            open_price = position['entryPrice']
+            target_price = open_price  + (open_price * 0.0055)
+            close_amount = abs(float(position['info']['positionAmt']))
+            binance_futures.create_limit_sell_order('1000PEPE/USDT:USDT', close_amount, target_price)
             time.sleep(10) #add a break for safety
         #creating order for a death cross at a good ema
         elif k[499] < d[499] and ema1[499] < ema2[499] and ema2[499] < ema3[499]:
             current_price = binance_futures.fetch_ticker('1000PEPE/USDT:USDT')['last']
             amount = usdt_balance * 10 / current_price
             binance_futures.create_market_sell_order("1000PEPE/USDT:USDT", amount)   
+            time.sleep(10) #add a break for safety
+
+            #taking profit order
+            open_price = position['entryPrice']
+            target_price = open_price  - (open_price * 0.0055)
+            close_amount = abs(float(position['info']['positionAmt']))
+            binance_futures.create_limit_buy_order('1000PEPE/USDT:USDT', close_amount, target_price)
             time.sleep(10) #add a break for safety
     elif positions == True and  orders != True:
         #creating order for closing positions
