@@ -82,7 +82,7 @@ def manage_futures_positions_and_balance():
 
     #checking positions and orders
     positions = binance_futures.fetch_positions_risk()
-    orders = binance_futures.fetch_open_orders()
+    orders = binance_futures.fetch_open_orders('1000PEPE/USDT:USDT')
 
     #MAIN TRADING LOGIC
     if len(positions) == 0:
