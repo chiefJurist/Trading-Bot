@@ -68,7 +68,7 @@ def calculate_indicators(df):
     # df['OBV'] = obv
     # print(obv, 'Last two OBV:', obv.tail(2))
 
-df = fetch_OHLCV('1000PEPE/USDT', '5m')
+df = fetch_OHLCV('1000PEPE/USDT:USDT', '5m')
 calculate_indicators(df)
 
 ###Orders
