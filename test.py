@@ -29,6 +29,11 @@ def fetch_OHLCV(symbol, timeframe):
     return df
 
 def calculate_indicators(df):
+    # Ensure data integrity
+    df.dropna(inplace=True)
+    df.reset_index(drop=True, inplace=True)
+
+    
     # #BB
     # df['upper_band'], df['middle_band'], df['lower_band'] = ta.BBANDS(
     #     df['close'], timeperiod=20, nbdevup=2, nbdevdn=2
