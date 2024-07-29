@@ -30,7 +30,7 @@ def fetch_OHLCV(symbol, timeframe):
 
 def calculate_indicators(df):
     #BB
-    upper_band, middle_band, lower_band = ta.BBANDS(df['close'], timeperiod=20, nbdevup=2, nbdevdn=2)
+    upper_band, middle_band, lower_band = ta.BBANDS(df['close'], timeperiod=21, nbdevup=2, nbdevdn=2)
     df['upper_band'] = upper_band
     df['middle_band'] = middle_band
     df['lower_band'] = lower_band
