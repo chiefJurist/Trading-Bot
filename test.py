@@ -66,7 +66,7 @@ def calculate_indicators(df):
     print("Close Prices:\n", df['close'].tail(10))
 
     # Bollinger Bands
-    upperband, middleband, lowerband = ta.BBANDS(df, timeperiod=20, nbdevup=2, nbdevdn=2, matype=0)
+    upperband, middleband, lowerband = ta.BBANDS(df['close'], timeperiod=21, nbdevup=2, nbdevdn=2)
     df['upperband'] = upperband
     df['middleband'] = middleband
     df['lowerband'] = lowerband
