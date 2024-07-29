@@ -29,12 +29,17 @@ def fetch_OHLCV(symbol, timeframe):
     return df
 
 def calculate_indicators(df):
+    # Debugging prints to check data
+    print("DataFrame head:\n", df.head())
+    print("DataFrame tail:\n", df.tail())
+    print("Close prices:\n", df['close'].tail(20))
+    
     #BB
     upper_band, middle_band, lower_band = ta.BBANDS(
         df['close'], timeperiod=21, nbdevup=2, nbdevdn=2
     )
     print(upper_band, middle_band, lower_band)
-    
+
 
     # #STOCHASTIC OSILLATOR
     # rsi = ta.RSI(df['close'].values, timeperiod=14)
