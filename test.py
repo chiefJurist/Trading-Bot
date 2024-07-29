@@ -53,10 +53,15 @@ def calculate_indicators(df):
     # cci = ta.CCI(df['high'], df['low'], df['close'], timeperiod=14)
     # print(cci, 'Last two CCI:', cci.tail(2))
 
-    # Williams %R
-    wr = ta.WILLR(df['high'], df['low'], df['close'], timeperiod=14)
-    df['WILLR'] = wr
-    print(wr, 'Last two Williams %R:', wr.tail(2))
+    # # Williams %R
+    # wr = ta.WILLR(df['high'], df['low'], df['close'], timeperiod=14)
+    # df['WILLR'] = wr
+    # print(wr, 'Last two Williams %R:', wr.tail(2))
+
+    # Momentum (MOM) / Momentum (MTM)
+    momentum = ta.MOM(df['close'], timeperiod=14)
+    df['MOM'] = momentum
+    print(momentum, 'Last two Momentum:', momentum.tail(2))
 
 df = fetch_OHLCV('1000PEPE/USDT', '5m')
 calculate_indicators(df)
