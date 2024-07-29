@@ -29,11 +29,11 @@ def fetch_OHLCV(symbol, timeframe):
     return df
 
 def calculate_indicators(df):
-    # #BB
-    # df['upper_band'], df['middle_band'], df['lower_band'] = ta.BBANDS(
-    #     df['close'], timeperiod=20, nbdevup=2, nbdevdn=2
-    # )
-    # print(df['upper_band'], df['middle_band'], df['lower_band'])
+    #BB
+    df['upper_band'], df['middle_band'], df['lower_band'] = ta.BBANDS(
+        df['close'], timeperiod=20, nbdevup=2, nbdevdn=2
+    )
+    print(df['upper_band'], df['middle_band'], df['lower_band'])
 
     # #STOCHASTIC OSILLATOR
     # rsi = ta.RSI(df['close'].values, timeperiod=14)
@@ -63,10 +63,10 @@ def calculate_indicators(df):
     # df['MOM'] = momentum
     # print(momentum, 'Last two Momentum:', momentum.tail(2))
 
-    # On-Balance Volume (OBV)
-    obv = ta.OBV(df['close'], df['volume'])
-    df['OBV'] = obv
-    print(obv, 'Last two OBV:', obv.tail(2))
+    # # On-Balance Volume (OBV)
+    # obv = ta.OBV(df['close'], df['volume'])
+    # df['OBV'] = obv
+    # print(obv, 'Last two OBV:', obv.tail(2))
 
 df = fetch_OHLCV('1000PEPE/USDT', '5m')
 calculate_indicators(df)
