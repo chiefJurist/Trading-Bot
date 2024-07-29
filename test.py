@@ -30,12 +30,10 @@ def fetch_OHLCV(symbol, timeframe):
 
 def calculate_indicators(df):
     #BB
-    upper_band, middle_band, lower_band = ta.BBANDS(df['close'], timeperiod=21, nbdevup=2, nbdevdn=2)
-    df['upper_band'] = upper_band
-    df['middle_band'] = middle_band
-    df['lower_band'] = lower_band
-    print( 'Last two upper band:', upper_band[499])
-    print( 'Last two lower band:', lower_band[499])
+    df['upper_band'], df['middle_band'], df['lower_band'] = ta.BBANDS(
+        df['close'], timeperiod=21, nbdevup=2, nbdevdn=2
+    )
+    print(df['upper_band'], df['middle_band'], df['lower_band'])
 
     # #STOCHASTIC OSILLATOR
     # rsi = ta.RSI(df['close'].values, timeperiod=14)
