@@ -23,10 +23,15 @@ binance_futures = ccxt.binanceusdm({
 
 #Function For Fetching OHLCV
 def fetch_OHLCV(symbol, timeframe):
-    bars = binance_futures.fetch_ohlcv(symbol, timeframe)
-    df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+    # Fetch OHLCV data from Binance Futures
+    bars = binance_futures.futures_klines(symbol=symbol, interval=timeframe)
+    df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume', 
+                                     'close_time', 'quote_asset_volume', 'number_of_trades', 
+                                     'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume', 'ignore'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
-    return df
+    df['close'] = df['close'].astype(float)
+    df['volume'] = df['volume'].astype(float)
+    return df[['timestamp', 'open', 'high', 'low', 'close', 'volume']]
 
 def calculate_indicators(df):
     # Ensure data integrity
