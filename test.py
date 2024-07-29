@@ -66,13 +66,13 @@ def calculate_indicators(df):
     print("Close Prices:\n", df['close'].tail(10))
 
     # Bollinger Bands
-    upperband, middleband, lowerband = ta.BBANDS(df['close'], timeperiod=21, nbdevup=2, nbdevdn=2)
+    upperband, middleband, lowerband = ta.BBANDS(df['open'], timeperiod=21, nbdevup=2, nbdevdn=2)
     df['upperband'] = upperband
     df['middleband'] = middleband
     df['lowerband'] = lowerband
-    print('Upper Band:', upperband.tail(2))
-    print('Middle Band:', middleband.tail(2))
-    print('Lower Band:', lowerband.tail(2))
+    print('Upper Band:', upperband.tail(1))
+    print('Middle Band:', middleband.tail(1))
+    print('Lower Band:', lowerband.tail(1))
 
 df = fetch_OHLCV('1000PEPE/USDT:USDT', '5m')
 calculate_indicators(df)
