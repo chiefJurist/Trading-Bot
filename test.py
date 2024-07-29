@@ -49,8 +49,8 @@ def calculate_indicators(df):
 
 
     #CCI
-    cci = ta.CCI(df['close'])
-    print(cci, cci[-1])
+    cci = ta.CCI(df['high'], df['low'], df['close'], timeperiod=14)
+    print(cci, cci.tail(10))
 
 df = fetch_OHLCV('1000PEPE/USDT', '5m')
 calculate_indicators(df)
