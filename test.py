@@ -28,7 +28,7 @@ def fetch_OHLCV(symbol, timeframe, limit = 500):
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
 
-def calculate_indicators(df):
+def calculate_indicators(df, window=20, num_std_dev=2):
     # #STOCHASTIC OSILLATOR
     # rsi = ta.RSI(df['close'].values, timeperiod=14)
     # k, d = ta.STOCH(rsi, rsi, rsi, fastk_period=14, slowk_period=3, slowk_matype=0, slowd_period=3, slowd_matype=0)
@@ -66,7 +66,11 @@ def calculate_indicators(df):
     print("Close Prices:\n", df['close'].tail(10))
 
     # Bollinger Bands
-    upperband, middleband, lowerband = ta.BBANDS(df['close'], timeperiod=21, nbdevup=2, nbdevdn=2, matype=0)
+    rolling_mean = df['close'].rolling(window=window).mean()
+    rolling_std = df['close'].rolling(window=window).std()
+    upperband = rolling_mean + (rolling_std * num_std_dev)
+    middleband = rolling_mean
+    lowerband = rolling_mean - (rolling_std * num_std_dev)
     df['upperband'] = upperband
     df['middleband'] = middleband
     df['lowerband'] = lowerband
