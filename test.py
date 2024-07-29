@@ -49,7 +49,7 @@ def calculate_indicators(df):
 
 
     #OBV
-    obv = ta.OBV(df['close'])
+    obv = ta.OBV(df['close'], df['volume'])
     print(obv)
     return obv
 
