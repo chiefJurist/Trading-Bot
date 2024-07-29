@@ -48,10 +48,9 @@ def calculate_indicators(df):
     # print(ema1.tail(1), ema3.tail(1), ema3.tail(1))
 
 
-    #OBV
-    obv = ta.OBV(df['close'], df['volume'])
-    print(obv)
-    return obv
+    #CCI
+    cci = ta.cci(df['close'])
+    print(cci, cci[-1])
 
 df = fetch_OHLCV('1000PEPE/USDT', '5m')
 calculate_indicators(df)
