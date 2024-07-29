@@ -23,14 +23,14 @@ binance_futures = ccxt.binanceusdm({
 
 #Function For Fetching OHLCV
 def fetch_OHLCV(symbol, timeframe, limit):
-    bars = binance_futures.fetch_ohlcv(symbol, timeframe, limit=500)
+    bars = binance_futures.fetch_ohlcv(symbol, timeframe)
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
 
 def calculate_indicators(df):
     #BB
-    upper_band, middle_band, lower_band = ta.BBANDS(
+    middle_band, lower_band, upper_band = ta.BBANDS(
         df['close'], timeperiod=21, nbdevup=2, nbdevdn=2
     )
     print(upper_band, middle_band, lower_band)
