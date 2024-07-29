@@ -58,10 +58,15 @@ def calculate_indicators(df):
     # df['WILLR'] = wr
     # print(wr, 'Last two Williams %R:', wr.tail(2))
 
-    # Momentum (MOM) / Momentum (MTM)
-    momentum = ta.MOM(df['close'], timeperiod=14)
-    df['MOM'] = momentum
-    print(momentum, 'Last two Momentum:', momentum.tail(2))
+    # # Momentum (MOM) / Momentum (MTM)
+    # momentum = ta.MOM(df['close'], timeperiod=14)
+    # df['MOM'] = momentum
+    # print(momentum, 'Last two Momentum:', momentum.tail(2))
+
+    # On-Balance Volume (OBV)
+    obv = ta.OBV(df['close'], df['volume'])
+    df['OBV'] = obv
+    print(obv, 'Last two OBV:', obv.tail(2))
 
 df = fetch_OHLCV('1000PEPE/USDT', '5m')
 calculate_indicators(df)
