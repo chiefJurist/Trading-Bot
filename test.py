@@ -48,10 +48,15 @@ def calculate_indicators(df):
     # print(ema1.tail(1), ema3.tail(1), ema3.tail(1))
 
 
-    #CCI
-    df['typical_price'] = (df['high'] + df['low'] + df['close']) / 3
-    cci = ta.CCI(df['high'], df['low'], df['close'], timeperiod=14)
-    print(cci, 'Last two CCI:', cci.tail(2))
+    # #CCI
+    # df['typical_price'] = (df['high'] + df['low'] + df['close']) / 3
+    # cci = ta.CCI(df['high'], df['low'], df['close'], timeperiod=14)
+    # print(cci, 'Last two CCI:', cci.tail(2))
+
+    # Williams %R
+    wr = ta.WILLR(df['high'], df['low'], df['close'], timeperiod=14)
+    df['WILLR'] = wr
+    print(wr, 'Last two Williams %R:', wr.tail(2))
 
 df = fetch_OHLCV('1000PEPE/USDT', '5m')
 calculate_indicators(df)
