@@ -23,21 +23,17 @@ binance_futures = ccxt.binanceusdm({
 
 #Function For Fetching OHLCV
 def fetch_OHLCV(symbol, timeframe):
-    bars = binance_futures.get_klines(symbol=symbol, interval=timeframe)
-    df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume', 
-                                     'close_time', 'quote_asset_volume', 'number_of_trades', 
-                                     'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume', 'ignore'])
+    bars = binance_futures.fetch_ohlcv(symbol, timeframe)
+    df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
-    df['close'] = df['close'].astype(float)
-    df['volume'] = df['volume'].astype(float)
-    return df[['timestamp', 'open', 'high', 'low', 'close', 'volume']]
+    return df
 
 def calculate_indicators(df):
     # Ensure data integrity
     df.dropna(inplace=True)
     df.reset_index(drop=True, inplace=True)
 
-
+    
     # #BB
     # df['upper_band'], df['middle_band'], df['lower_band'] = ta.BBANDS(
     #     df['close'], timeperiod=20, nbdevup=2, nbdevdn=2
@@ -59,11 +55,10 @@ def calculate_indicators(df):
 
     #OBV
     obv = ta.OBV(df['close'], df['volume'])
-    df['OBV'] = obv
-    print(df[['timestamp', 'close', 'volume', 'OBV']].tail(10))
+    print(obv)
     return obv
 
-df = fetch_OHLCV('1000PEPE/USDT', '3m')
+df = fetch_OHLCV('1000PEPE/USDT', '5m')
 calculate_indicators(df)
 
 ###Orders
