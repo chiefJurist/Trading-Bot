@@ -33,7 +33,7 @@ def calculate_indicators(df):
     df['upper_band'], df['middle_band'], df['lower_band'] = ta.BBANDS(
         df['close'], timeperiod=20, nbdevup=2, nbdevdn=2
     )
-    print(df['upper_band'], df['middle_band'], df['lower_band'])
+    print(df['upper_band'].tail(1), df['middle_band'].tail(1), df['lower_band'].tail(1))
 
     # #STOCHASTIC OSILLATOR
     # rsi = ta.RSI(df['close'].values, timeperiod=14)
