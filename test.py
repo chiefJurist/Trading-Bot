@@ -22,37 +22,18 @@ binance_futures = ccxt.binanceusdm({
 })
 
 #Function For Fetching OHLCV
-def fetch_OHLCV(symbol, timeframe):
-    bars = binance_futures.fetch_ohlcv(symbol, timeframe)
+def fetch_OHLCV(symbol, timeframe, limit = 500):
+    bars = binance_futures.fetch_ohlcv(symbol, timeframe, limit=limit)
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
 
 def calculate_indicators(df):
-    # Debugging prints to check data
-    print("DataFrame head:\n", df.head())
-    print("DataFrame tail:\n", df.tail())
-    print("Close prices:\n", df['close'].tail(20))
-
     #BB
     upper_band, middle_band, lower_band = ta.BBANDS(
         df['close'], timeperiod=21, nbdevup=2, nbdevdn=2
     )
     print(upper_band, middle_band, lower_band)
-
-    # Debugging prints to check BBANDS values
-    print("Upper Band:\n", upper_band.tail(20))
-    print("Middle Band:\n", middle_band.tail(20))
-    print("Lower Band:\n", lower_band.tail(20))
-
-    df['upper_band'] = upper_band
-    df['middle_band'] = middle_band
-    df['lower_band'] = lower_band
-
-    # Print the last two values of each band to match the output format
-    print('Last two upper band:', upper_band.tail(2))
-    print('Last two middle band:', middle_band.tail(2))
-    print('Last two lower band:', lower_band.tail(2))
 
     # #STOCHASTIC OSILLATOR
     # rsi = ta.RSI(df['close'].values, timeperiod=14)
