@@ -45,6 +45,7 @@ def calculate_indicators(df, window=20, num_std_dev=2):
     # #CCI
     # df['typical_price'] = (df['high'] + df['low'] + df['close']) / 3
     # cci = ta.CCI(df['high'], df['low'], df['close'], timeperiod=14)
+    # df['cci'] = cci
     # print(cci, 'Last two CCI:', cci.tail(2))
 
     # # Williams %R
@@ -61,9 +62,6 @@ def calculate_indicators(df, window=20, num_std_dev=2):
     # obv = ta.OBV(df['close'], df['volume'])
     # df['OBV'] = obv
     # print(obv, 'Last two OBV:', obv.tail(2))
-
-    # Print last few rows of close prices to verify input data
-    print("Close Prices:\n", df['close'].tail(10))
 
     # Bollinger Bands
     rolling_mean = df['close'].rolling(window=window).mean()
