@@ -136,7 +136,7 @@ def manage_futures_positions_and_balance():
             if position['side'] == 'short' and k[499] > (d[499] + 15):
                 close_amount = abs(float(position['info']['positionAmt']))
                 binance_futures.create_market_buy_order('1000PEPE/USDT:USDT', close_amount, target_price)
-            elif position['side'] == 'long' and (k[499] + 10) < d[499]:
+            elif position['side'] == 'long' and (k[499] + 15) < d[499]:
                 close_amount = abs(float(position['info']['positionAmt']))
                 binance_futures.create_market_sell_order('1000PEPE/USDT:USDT', close_amount, target_price)
     else:
