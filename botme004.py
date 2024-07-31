@@ -46,7 +46,7 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
 
-#Function For Calculating STOCHASTIC OSCILLATOR
+#Function For Calculating Indicators
 def calculate_indicators(df, window=20, num_std_dev=2):
     #Stochastic Oscillator
     rsi = ta.RSI(df['close'].values, timeperiod=14)
@@ -66,23 +66,21 @@ def calculate_indicators(df, window=20, num_std_dev=2):
 
     return k, d, upperband, middleband, lowerband
 
-#Function for Calculating Bollinger
-
 #Manage Futures Position And Balance
 def manage_futures_positions_and_balance():
-    #setting leverage
+    #Setting leverage
     binance_futures.set_leverage(10, '1000PEPE/USDT:USDT')
 
-    #fetching USDT Balance
+    #Fetching USDT Balance
     usdt_balance = binance_futures.fetch_balance()['total']['USDT']
 
-    #fetching OHLCV
+    #Fetching OHLCV
     df = fetch_OHLCV('1000PEPE/USDT', '5m')
 
-    #calculating indicators
+    #Calculating indicators
     k, d, upperband, middleband, lowerband = calculate_indicators(df)
 
-    #checking positions and orders
+    #Checking positions and orders
     positions = binance_futures.fetch_positions_risk()
     orders = binance_futures.fetch_open_orders('1000PEPE/USDT:USDT')
     current_price = binance_futures.fetch_ticker('1000PEPE/USDT:USDT')['last']
@@ -95,7 +93,7 @@ def manage_futures_positions_and_balance():
             binance_futures.create_market_buy_order("1000PEPE/USDT:USDT", amount)   
             time.sleep(20) #add a break for safety
 
-            #taking profit order
+            #Taking profit order
             recent_order = binance_futures.fetch_closed_orders('1000PEPE/USDT:USDT')[-1]
             open_price = float(recent_order['info']['avgPrice'])
             target_price = open_price  + (open_price * 0.0055)
@@ -108,7 +106,7 @@ def manage_futures_positions_and_balance():
             binance_futures.create_market_sell_order("1000PEPE/USDT:USDT", amount)   
             time.sleep(10) #add a break for safety
 
-            #taking profit order
+            #Taking profit order
             recent_order = binance_futures.fetch_closed_orders('1000PEPE/USDT:USDT')[-1]
             open_price = float(recent_order['info']['avgPrice'])
             target_price = open_price  - (open_price * 0.0055)
