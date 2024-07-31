@@ -4,10 +4,10 @@ import talib as ta
 import time
 
 # The User's API keys and addresses
-SPOT_API_KEY = 'qeSMvIcWC80rj3Ns0pJV2oJzMxt4lLy4C2eXCU05MenQ9ssQLKJcRrRJEzLjGD4k'
-SPOT_SECRET_KEY = 'aMXwE79fkF6PnbMzdOemYEMNgbmu2ze9aHUGHmtWBT3VUGnXRCkutZ0T5sQmagXn'
-FUTURES_API_KEY = 'ZkUZDQgbuJkk5a1RRODbMpMKcEpcr9Qc81zVD0xmblaPlGbPKwUAA7K9HhvW0aIs'
-FUTURES_SECRET_KEY = 'ReliyQQXHqcOZ14d4thxUTtN3Ei6MVHezNMS9ONB8kqIenZdmeLW0s5hjp3JEE2T'
+SPOT_API_KEY = 'ogP4gQPw6Ka4L5EW59vVAlalpbWuQSKxGVTfEbb9YrcMAg97j1kHaJOncciPMz38'
+SPOT_SECRET_KEY = 'VmaNFuEh14rElVB2bPgIX3JMO1ZusOHLxmHoL0RDvRQrS5sXuK9Li9JV1gs0OL6s'
+FUTURES_API_KEY = 'CkPX3ZqS27pqcE1g0PFAEJNoaAXfrde6F4dmw9xi4EXkfOGIKHbdmsifbLGsokqf'
+FUTURES_SECRET_KEY = 'ij7UTix4aa3G6itq7ROW33fSdJMZSNofRog2yHqOTNoW13VN0yIn2O1gp53QFBwq'
 ADDRESS_ONE = '0x9D95d4751fCc02157d55527Ca4D50588bCC80590'
 
 # Initialize the Binance Spot exchange
@@ -133,10 +133,10 @@ def manage_futures_positions_and_balance():
             #Exiting Before A Major Loss
             if position['side'] == 'short' and k[499] > (d[499] + 15):
                 close_amount = abs(float(position['info']['positionAmt']))
-                binance_futures.create_market_buy_order('1000PEPE/USDT:USDT', close_amount, target_price)
+                binance_futures.create_market_buy_order('1000PEPE/USDT:USDT', close_amount)
             elif position['side'] == 'long' and (k[499] + 15) < d[499]:
                 close_amount = abs(float(position['info']['positionAmt']))
-                binance_futures.create_market_sell_order('1000PEPE/USDT:USDT', close_amount, target_price)
+                binance_futures.create_market_sell_order('1000PEPE/USDT:USDT', close_amount)
     else:
         pass
 
