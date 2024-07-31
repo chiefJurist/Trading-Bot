@@ -103,7 +103,7 @@ def manage_futures_positions_and_balance():
             binance_futures.create_limit_sell_order('1000PEPE/USDT:USDT', close_amount, target_price)
             time.sleep(10) #add a break for safety
         #Creating order for a death cross at a good ema
-        elif (k[499] + 10) < d[499] and current_price > middleband[499]:
+        elif (k[499] + 15) < d[499] and current_price > middleband[499]:
             amount = usdt_balance * 10 / current_price
             binance_futures.create_market_sell_order("1000PEPE/USDT:USDT", amount)   
             time.sleep(10) #add a break for safety
