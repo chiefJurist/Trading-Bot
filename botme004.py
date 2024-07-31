@@ -47,7 +47,8 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     return df
 
 #Function For Calculating STOCHASTIC OSCILLATOR
-def calculate_stoch(df):
+def calculate_indicators(df, window=20, num_std_dev=2):
+    #Stochastic Oscillator
     rsi = ta.RSI(df['close'].values, timeperiod=14)
     k, d = ta.STOCH(rsi, rsi, rsi, 
                     fastk_period=14, 
@@ -55,14 +56,17 @@ def calculate_stoch(df):
                     slowk_matype=0, 
                     slowd_period=3, 
                     slowd_matype=0)
-    return k, d
+    
+    #Bollinger Bands
+    rolling_mean = df['close'].rolling(window=window).mean()
+    rolling_std = df['close'].rolling(window=window).std()
+    upperband = rolling_mean + (rolling_std * num_std_dev)
+    middleband = rolling_mean
+    lowerband = rolling_mean - (rolling_std * num_std_dev)
 
-#Function for Calculating EMA
-def calculate_ema(df2):
-    ema1 = ta.EMA(df2['close'], timeperiod=7)
-    ema2 = ta.EMA(df2['close'], timeperiod=25)
-    ema3 = ta.EMA(df2['close'], timeperiod=99)
-    return ema1, ema2, ema3
+    return k, d, upperband, middleband, lowerband
+
+#Function for Calculating Bollinger
 
 #Manage Futures Position And Balance
 def manage_futures_positions_and_balance():
@@ -72,23 +76,21 @@ def manage_futures_positions_and_balance():
     #fetching USDT Balance
     usdt_balance = binance_futures.fetch_balance()['total']['USDT']
 
-    #fetching OHLCVs
+    #fetching OHLCV
     df = fetch_OHLCV('1000PEPE/USDT', '5m')
-    df2 = fetch_OHLCV('1000PEPE/USDT', '3m')
 
     #calculating indicators
-    k, d = calculate_stoch(df)
-    ema1, ema2, ema3 = calculate_ema(df2)
+    k, d, upperband, middleband, lowerband = calculate_indicators(df)
 
     #checking positions and orders
     positions = binance_futures.fetch_positions_risk()
     orders = binance_futures.fetch_open_orders('1000PEPE/USDT:USDT')
+    current_price = binance_futures.fetch_ticker('1000PEPE/USDT:USDT')['last']
 
     #MAIN TRADING LOGIC
     if len(positions) == 0:
-        #Creating order for a golden cross at a good ema
-        if k[499] > d[499] and ema1[499] > ema2[499] and ema2[499] > ema3[499]:
-            current_price = binance_futures.fetch_ticker('1000PEPE/USDT:USDT')['last']
+        #Creating order for a golden cross at a good BB
+        if k.tail(1) > (d.tail(1) + 15) and current_price < middleband:      
             amount = usdt_balance * 10 / current_price
             binance_futures.create_market_buy_order("1000PEPE/USDT:USDT", amount)   
             time.sleep(20) #add a break for safety
@@ -101,8 +103,7 @@ def manage_futures_positions_and_balance():
             binance_futures.create_limit_sell_order('1000PEPE/USDT:USDT', close_amount, target_price)
             time.sleep(10) #add a break for safety
         #Creating order for a death cross at a good ema
-        elif k[499] < d[499] and ema1[499] < ema2[499] and ema2[499] < ema3[499]:
-            current_price = binance_futures.fetch_ticker('1000PEPE/USDT:USDT')['last']
+        elif (k.tail(1) + 10) < d.tail(1) and current_price > middleband:
             amount = usdt_balance * 10 / current_price
             binance_futures.create_market_sell_order("1000PEPE/USDT:USDT", amount)   
             time.sleep(10) #add a break for safety
@@ -115,7 +116,7 @@ def manage_futures_positions_and_balance():
             binance_futures.create_limit_buy_order('1000PEPE/USDT:USDT', close_amount, target_price)
             time.sleep(10) #add a break for safety
     elif len(positions) > 0 and  len(orders) == 0:
-        #creating order for closing positions
+        #Taking Profit By Creating Order For Closing Positions
         for position in positions:
             if position['side'] == 'short':
                 open_price = float(position['entryPrice'])
@@ -129,8 +130,16 @@ def manage_futures_positions_and_balance():
                 close_amount = abs(float(position['info']['positionAmt']))
                 binance_futures.create_limit_sell_order('1000PEPE/USDT:USDT', close_amount, target_price)
                 time.sleep(10) #add a break for safety
-                
-    else: 
+    elif len(positions) > 0 and  len(orders) > 0:
+        for position in positions:
+            #Exiting Before A Major Loss
+            if position['side'] == 'short' and k.tail(1) > (d.tail(1) + 15):
+                close_amount = abs(float(position['info']['positionAmt']))
+                binance_futures.create_market_buy_order('1000PEPE/USDT:USDT', close_amount, target_price)
+            elif position['side'] == 'long' and (k.tail(1) + 10) < d.tail(1):
+                close_amount = abs(float(position['info']['positionAmt']))
+                binance_futures.create_market_sell_order('1000PEPE/USDT:USDT', close_amount, target_price)
+    else:
         pass
 
 
