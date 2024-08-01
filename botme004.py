@@ -88,7 +88,7 @@ def manage_futures_positions_and_balance():
     #MAIN TRADING LOGIC
     if len(positions) == 0:
         #Creating order for a golden cross at a good BB
-        if k[499] > (d[499] + 15) and current_price < middleband[499]:      
+        if k[499] > (d[499] + 15) and k[498] > (d[498] + 15) and k[497] > (d[497] + 15) and k[496] > (d[496] + 15) and k[495] > (d[495] + 15) and k[494] > (d[494] + 15) and current_price < middleband[499]:      
             amount = usdt_balance * 10 / current_price
             binance_futures.create_market_buy_order("1000PEPE/USDT:USDT", amount)   
             time.sleep(20) #add a break for safety
@@ -101,7 +101,7 @@ def manage_futures_positions_and_balance():
             binance_futures.create_limit_sell_order('1000PEPE/USDT:USDT', close_amount, target_price)
             time.sleep(10) #add a break for safety
         #Creating order for a death cross at a good ema
-        elif (k[499] + 15) < d[499] and current_price > middleband[499]:
+        elif (k[499] + 15) < d[499] and (k[498] + 15) < d[498] and (k[497] + 15) < d[497] and (k[496] + 15) < d[496] and (k[495] + 15) < d[495] and (k[494] + 15) < d[494] and current_price > middleband[499]:
             amount = usdt_balance * 10 / current_price
             binance_futures.create_market_sell_order("1000PEPE/USDT:USDT", amount)   
             time.sleep(10) #add a break for safety
@@ -131,12 +131,24 @@ def manage_futures_positions_and_balance():
     elif len(positions) > 0 and  len(orders) > 0:
         for position in positions:
             #Exiting Before A Major Loss
-            if position['side'] == 'short' and k[499] > (d[499] + 15):
-                close_amount = abs(float(position['info']['positionAmt']))
-                binance_futures.create_market_buy_order('1000PEPE/USDT:USDT', close_amount)
+            if position['side'] == 'short':
+                if k[499] > (d[499] + 15) or k[498] > (d[498] + 15) or k[497] > (d[497] + 15) or k[496] > (d[496] + 15) or k[495] > (d[495] + 15) or k[494] > (d[494] + 15):
+                    try:
+                        close_amount = abs(float(position['info']['positionAmt']))
+                        binance_futures.create_market_buy_order('1000PEPE/USDT:USDT', close_amount)
+                    except Exception as e:
+                        while e:
+                            close_amount = abs(float(position['info']['positionAmt']))
+                            binance_futures.create_market_buy_order('1000PEPE/USDT:USDT', close_amount)
             elif position['side'] == 'long' and (k[499] + 15) < d[499]:
-                close_amount = abs(float(position['info']['positionAmt']))
-                binance_futures.create_market_sell_order('1000PEPE/USDT:USDT', close_amount)
+                if (k[499] + 15) < d[499] or (k[498] + 15) < d[498] or (k[497] + 15) < d[497] or (k[496] + 15) < d[496] or (k[495] + 15) < d[495] or (k[494] + 15) < d[494]:
+                    try:
+                        close_amount = abs(float(position['info']['positionAmt']))
+                        binance_futures.create_market_sell_order('1000PEPE/USDT:USDT', close_amount)
+                    except Exception as e:
+                        while e:
+                            close_amount = abs(float(position['info']['positionAmt']))
+                            binance_futures.create_market_sell_order('1000PEPE/USDT:USDT', close_amount)
     else:
         pass
 
@@ -144,6 +156,7 @@ def manage_futures_positions_and_balance():
 #General Function
 def main():
     initial_transfer()
+    
     while True:
         try: 
             #check_and_withdraw_spot_balance()
