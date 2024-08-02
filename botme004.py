@@ -132,23 +132,13 @@ def manage_futures_positions_and_balance():
         for position in positions:
             #Exiting Before A Major Loss
             if position['side'] == 'short':
-                if k[499] > (d[499] + 15) or k[498] > (d[498] + 15) or k[497] > (d[497] + 15) or k[496] > (d[496] + 15) or k[495] > (d[495] + 15) or k[494] > (d[494] + 15):
-                    try:
-                        close_amount = abs(float(position['info']['positionAmt']))
-                        binance_futures.create_market_buy_order('1000PEPE/USDT:USDT', close_amount)
-                    except Exception as e:
-                        while e:
-                            close_amount = abs(float(position['info']['positionAmt']))
-                            binance_futures.create_market_buy_order('1000PEPE/USDT:USDT', close_amount)
-            elif position['side'] == 'long' and (k[499] + 15) < d[499]:
-                if (k[499] + 15) < d[499] or (k[498] + 15) < d[498] or (k[497] + 15) < d[497] or (k[496] + 15) < d[496] or (k[495] + 15) < d[495] or (k[494] + 15) < d[494]:
-                    try:
-                        close_amount = abs(float(position['info']['positionAmt']))
-                        binance_futures.create_market_sell_order('1000PEPE/USDT:USDT', close_amount)
-                    except Exception as e:
-                        while e:
-                            close_amount = abs(float(position['info']['positionAmt']))
-                            binance_futures.create_market_sell_order('1000PEPE/USDT:USDT', close_amount)
+                if k[499] > (d[499] + 15) or k[498] > (d[498] + 15) or k[497] > (d[497] + 15) or k[496] > (d[496] + 15) or k[495] > (d[495] + 15):
+                    close_amount = abs(float(position['info']['positionAmt']))
+                    binance_futures.create_market_buy_order('1000PEPE/USDT:USDT', close_amount)
+            elif position['side'] == 'long':
+                if (k[499] + 15) < d[499] or (k[498] + 15) < d[498] or (k[497] + 15) < d[497] or (k[496] + 15) < d[496] or (k[495] + 15) < d[495]:
+                    close_amount = abs(float(position['info']['positionAmt']))
+                    binance_futures.create_market_sell_order('1000PEPE/USDT:USDT', close_amount)
     else:
         pass
 
