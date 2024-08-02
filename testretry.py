@@ -24,121 +24,113 @@ binance_futures = ccxt.binanceusdm({
 
 # Function for Transfer of Capital to the Futures Account
 def initial_transfer(delay=2):
-    while True:
-        try:
-            balance = binance_spot.fetch_balance()['total']['USDT']
-            if balance > 0:
-                binance_spot.sapi_post_futures_transfer({
-                    'asset': 'USDT',
-                    'amount': balance,
-                    'type': 1  # Type 1 means transfer from spot to futures
-                })
-            return  # Exit function if successful
-        except Exception as e:
-            print(f"Error in initial_transfer: {e}")
-            time.sleep(delay)  # Wait before retrying
+    try:
+        balance = binance_spot.fetch_balance()['total']['USDT']
+        if balance > 0:
+            binance_spot.sapi_post_futures_transfer({
+                'asset': 'USDT',
+                'amount': balance,
+                'type': 1  # Type 1 means transfer from spot to futures
+            })
+    except Exception as e:
+        print(f"Error in initial_transfer: {e}")
+        time.sleep(delay)  # Wait before retrying
+        initial_transfer(delay)  # Recursive call for retry
 
 # Function for Withdrawal of Profit Transferred to Spot Account
 def check_and_withdraw_spot_balance(delay=2):
-    while True:
-        try:
-            usdt_profit_balance = binance_spot.fetch_balance()['total']['USDT']
-            if usdt_profit_balance > 500:
-                binance_spot.withdraw('USDT', usdt_profit_balance, ADDRESS_ONE, tag=None, params={'network': 'BEP20'})
-                time.sleep(10)  # Sleep to ensure the withdrawals are processed
-            return  # Exit function if successful
-        except Exception as e:
-            print(f"Error in check_and_withdraw_spot_balance: {e}")
-            time.sleep(delay)  # Wait before retrying
+    try:
+        usdt_profit_balance = binance_spot.fetch_balance()['total']['USDT']
+        if usdt_profit_balance > 500:
+            binance_spot.withdraw('USDT', usdt_profit_balance, ADDRESS_ONE, tag=None, params={'network': 'BEP20'})
+            time.sleep(10)  # Sleep to ensure the withdrawals are processed
+    except Exception as e:
+        print(f"Error in check_and_withdraw_spot_balance: {e}")
+        time.sleep(delay)  # Wait before retrying
+        check_and_withdraw_spot_balance(delay)  # Recursive call for retry
 
 # Function for Fetching OHLCV
 def fetch_OHLCV(symbol, timeframe, limit=500, delay=2):
-    while True:
-        try:
-            bars = binance_futures.fetch_ohlcv(symbol, timeframe, limit=limit)
-            df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
-            df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
-            return df
-        except Exception as e:
-            print(f"Error in fetch_OHLCV: {e}")
-            time.sleep(delay)  # Wait before retrying
+    try:
+        bars = binance_futures.fetch_ohlcv(symbol, timeframe, limit=limit)
+        df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+        df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+        return df
+    except Exception as e:
+        print(f"Error in fetch_OHLCV: {e}")
+        time.sleep(delay)  # Wait before retrying
+        return fetch_OHLCV(symbol, timeframe, limit, delay)  # Recursive call for retry
 
 # Function for Calculating Indicators
 def calculate_indicators(df, window=20, num_std_dev=2, delay=2):
-    while True:
-        try:
-            # Stochastic Oscillator
-            rsi = ta.RSI(df['close'].values, timeperiod=14)
-            k, d = ta.STOCH(rsi, rsi, rsi, 
-                            fastk_period=14, 
-                            slowk_period=3, 
-                            slowk_matype=0, 
-                            slowd_period=3, 
-                            slowd_matype=0)
-            
-            # Bollinger Bands
-            rolling_mean = df['close'].rolling(window=window).mean()
-            rolling_std = df['close'].rolling(window=window).std()
-            upperband = rolling_mean + (rolling_std * num_std_dev)
-            middleband = rolling_mean
-            lowerband = rolling_mean - (rolling_std * num_std_dev)
+    try:
+        # Stochastic Oscillator
+        rsi = ta.RSI(df['close'].values, timeperiod=14)
+        k, d = ta.STOCH(rsi, rsi, rsi, 
+                        fastk_period=14, 
+                        slowk_period=3, 
+                        slowk_matype=0, 
+                        slowd_period=3, 
+                        slowd_matype=0)
+        
+        # Bollinger Bands
+        rolling_mean = df['close'].rolling(window=window).mean()
+        rolling_std = df['close'].rolling(window=window).std()
+        upperband = rolling_mean + (rolling_std * num_std_dev)
+        middleband = rolling_mean
+        lowerband = rolling_mean - (rolling_std * num_std_dev)
 
-            return k, d, upperband, middleband, lowerband
-        except Exception as e:
-            print(f"Error in calculate_indicators: {e}")
-            time.sleep(delay)  # Wait before retrying
+        return k, d, upperband, middleband, lowerband
+    except Exception as e:
+        print(f"Error in calculate_indicators: {e}")
+        time.sleep(delay)  # Wait before retrying
+        return calculate_indicators(df, window, num_std_dev, delay)  # Recursive call for retry
 
 # Manage Futures Position And Balance
 def manage_futures_positions_and_balance(delay=2):
     # Setting leverage
-    while True:
-        try:
-            binance_futures.set_leverage(10, '1000PEPE/USDT:USDT')
-            break
-        except Exception as e:
-            print(f"Error setting leverage: {e}")
-            time.sleep(delay)
+    try:
+        binance_futures.set_leverage(10, '1000PEPE/USDT:USDT')
+    except Exception as e:
+        print(f"Error setting leverage: {e}")
+        time.sleep(delay)  # Wait before retrying
+        manage_futures_positions_and_balance(delay)  # Recursive call for retry
 
     # Fetching USDT Balance
-    while True:
-        try:
-            usdt_balance = binance_futures.fetch_balance()['total']['USDT']
-            break
-        except Exception as e:
-            print(f"Error fetching USDT balance: {e}")
-            time.sleep(delay)
+    try:
+        usdt_balance = binance_futures.fetch_balance()['total']['USDT']
+    except Exception as e:
+        print(f"Error fetching USDT balance: {e}")
+        time.sleep(delay)  # Wait before retrying
+        manage_futures_positions_and_balance(delay)  # Recursive call for retry
 
     # Fetching OHLCV
-    while True:
-        try:
-            df = fetch_OHLCV('1000PEPE/USDT', '5m')
-            break
-        except Exception as e:
-            print(f"Error fetching OHLCV data: {e}")
-            time.sleep(delay)
+    try:
+        df = fetch_OHLCV('1000PEPE/USDT', '5m')
+    except Exception as e:
+        print(f"Error fetching OHLCV data: {e}")
+        time.sleep(delay)  # Wait before retrying
+        df = fetch_OHLCV('1000PEPE/USDT', '5m', delay=delay)  # Recursive call for retry
 
     # Calculating indicators
-    while True:
-        try:
-            k, d, upperband, middleband, lowerband = calculate_indicators(df)
-            break
-        except Exception as e:
-            print(f"Error calculating indicators: {e}")
-            time.sleep(delay)
+    try:
+        k, d, upperband, middleband, lowerband = calculate_indicators(df)
+    except Exception as e:
+        print(f"Error calculating indicators: {e}")
+        time.sleep(delay)  # Wait before retrying
+        k, d, upperband, middleband, lowerband = calculate_indicators(df, delay=delay)  # Recursive call for retry
 
     # Checking positions and orders
-    while True:
-        try:
-            positions = binance_futures.fetch_positions_risk()
-            orders = binance_futures.fetch_open_orders('1000PEPE/USDT:USDT')
-            break
-        except Exception as e:
-            print(f"Error fetching positions, orders: {e}")
-            time.sleep(delay)
+    try:
+        positions = binance_futures.fetch_positions_risk()
+        orders = binance_futures.fetch_open_orders('1000PEPE/USDT:USDT')
+    except Exception as e:
+        print(f"Error fetching positions, orders: {e}")
+        time.sleep(delay)  # Wait before retrying
+        manage_futures_positions_and_balance(delay)  # Recursive call for retry
 
     # MAIN TRADING LOGIC
     # (Insert trading logic here, ensure you handle retries for each specific case)
-    # This part remains similar to your original code but you should ensure it handles errors appropriately.
 
 # General Function
 def main():
