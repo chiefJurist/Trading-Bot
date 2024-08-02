@@ -100,7 +100,6 @@ def manage_futures_positions_and_balance():
     try:
         positions = binance_futures.fetch_positions_risk()
         orders = binance_futures.fetch_open_orders('1000PEPE/USDT:USDT')
-        current_price = binance_futures.fetch_ticker('1000PEPE/USDT:USDT')['last']
     except Exception as e:
         print(f"Error fetching positions, orders, or current price: {e}")
         return
@@ -109,10 +108,11 @@ def manage_futures_positions_and_balance():
     if len(positions) == 0:
         # Creating order for a golden cross at a good BB
         if k[499] > (d[499] + 15) and k[498] > (d[498] + 15) and k[497] > (d[497] + 15) and k[496] > (d[496] + 15) and k[495] > (d[495] + 15) and k[494] > (d[494] + 15) and current_price < middleband[499]:
-            amount = usdt_balance * 10 / current_price
             try:
+                current_price = binance_futures.fetch_ticker('1000PEPE/USDT:USDT')['last']
+                amount = usdt_balance * 10 / current_price
                 binance_futures.create_market_buy_order("1000PEPE/USDT:USDT", amount)
-                time.sleep(20) # add a break for safety
+                time.sleep(20)  # add a break for safety
 
                 # Taking profit order
                 recent_order = binance_futures.fetch_closed_orders('1000PEPE/USDT:USDT')[-1]
@@ -120,16 +120,17 @@ def manage_futures_positions_and_balance():
                 target_price = open_price + (open_price * 0.0055)
                 close_amount = float(amount)
                 binance_futures.create_limit_sell_order('1000PEPE/USDT:USDT', close_amount, target_price)
-                time.sleep(10) # add a break for safety
+                time.sleep(10)  # add a break for safety
             except Exception as e:
                 print(f"Error creating market buy or limit sell order: {e}")
 
         # Creating order for a death cross at a good EMA
         elif (k[499] + 15) < d[499] and (k[498] + 15) < d[498] and (k[497] + 15) < d[497] and (k[496] + 15) < d[496] and (k[495] + 15) < d[495] and (k[494] + 15) < d[494] and current_price > middleband[499]:
-            amount = usdt_balance * 10 / current_price
             try:
+                current_price = binance_futures.fetch_ticker('1000PEPE/USDT:USDT')['last']
+                amount = usdt_balance * 10 / current_price
                 binance_futures.create_market_sell_order("1000PEPE/USDT:USDT", amount)
-                time.sleep(10) # add a break for safety
+                time.sleep(10)  # add a break for safety
 
                 # Taking profit order
                 recent_order = binance_futures.fetch_closed_orders('1000PEPE/USDT:USDT')[-1]
@@ -137,7 +138,7 @@ def manage_futures_positions_and_balance():
                 target_price = open_price - (open_price * 0.0055)
                 close_amount = float(amount)
                 binance_futures.create_limit_buy_order('1000PEPE/USDT:USDT', close_amount, target_price)
-                time.sleep(10) # add a break for safety
+                time.sleep(10)  # add a break for safety
             except Exception as e:
                 print(f"Error creating market sell or limit buy order: {e}")
 
@@ -150,7 +151,7 @@ def manage_futures_positions_and_balance():
                     target_price = open_price - (open_price * 0.0055)
                     close_amount = abs(float(position['info']['positionAmt']))
                     binance_futures.create_limit_buy_order('1000PEPE/USDT:USDT', close_amount, target_price)
-                    time.sleep(10) # add a break for safety
+                    time.sleep(10)  # add a break for safety
                 except Exception as e:
                     print(f"Error creating limit buy order for short position: {e}")
             elif position['side'] == 'long':
@@ -159,7 +160,7 @@ def manage_futures_positions_and_balance():
                     target_price = open_price + (open_price * 0.0055)
                     close_amount = abs(float(position['info']['positionAmt']))
                     binance_futures.create_limit_sell_order('1000PEPE/USDT:USDT', close_amount, target_price)
-                    time.sleep(10) # add a break for safety
+                    time.sleep(10)  # add a break for safety
                 except Exception as e:
                     print(f"Error creating limit sell order for long position: {e}")
 
@@ -167,19 +168,32 @@ def manage_futures_positions_and_balance():
         for position in positions:
             # Exiting Before A Major Loss
             if position['side'] == 'short':
-                try:
-                    if k[499] > (d[499] + 15) or k[498] > (d[498] + 15) or k[497] > (d[497] + 15) or k[496] > (d[496] + 15) or k[495] > (d[495] + 15):
-                        close_amount = abs(float(position['info']['positionAmt']))
-                        binance_futures.create_market_buy_order('1000PEPE/USDT:USDT', close_amount)
-                except Exception as e:
-                    print(f"Error closing short position: {e}")
+                if k[499] > (d[499] + 15) or k[498] > (d[498] + 15) or k[497] > (d[497] + 15) or k[496] > (d[496] + 15) or k[495] > (d[495] + 15):
+                    try:
+                            close_amount = abs(float(position['info']['positionAmt']))
+
+                            # Cancel all open orders before creating the new market order
+                            for order in orders:
+                                binance_futures.cancel_order(order['id'], '1000PEPE/USDT:USDT')
+                                time.sleep(2)  # add a break for safety
+
+                            binance_futures.create_market_buy_order('1000PEPE/USDT:USDT', close_amount)
+                    except Exception as e:
+                        print(f"Error closing short position: {e}")
+
             elif position['side'] == 'long':
-                try:
-                    if (k[499] + 15) < d[499] or (k[498] + 15) < d[498] or (k[497] + 15) < d[497] or (k[496] + 15) < d[496] or (k[495] + 15) < d[495]:
-                        close_amount = abs(float(position['info']['positionAmt']))
-                        binance_futures.create_market_sell_order('1000PEPE/USDT:USDT', close_amount)
-                except Exception as e:
-                    print(f"Error closing long position: {e}")
+                if (k[499] + 15) < d[499] or (k[498] + 15) < d[498] or (k[497] + 15) < d[497] or (k[496] + 15) < d[496] or (k[495] + 15) < d[495]:
+                    try:
+                            close_amount = abs(float(position['info']['positionAmt']))
+
+                            # Cancel all open orders before creating the new market order
+                            for order in orders:
+                                binance_futures.cancel_order(order['id'], '1000PEPE/USDT:USDT')
+                                time.sleep(2)  # add a break for safety
+
+                            binance_futures.create_market_sell_order('1000PEPE/USDT:USDT', close_amount)
+                    except Exception as e:
+                        print(f"Error closing long position: {e}")
     else:
         pass
 
