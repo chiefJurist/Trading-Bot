@@ -88,7 +88,7 @@ def manage_futures_positions_and_balance():
     # MAIN TRADING LOGIC
     if len(positions) == 0:
         # Creating order for a golden cross at a good BB
-        if k[499] > (d[499] + 15) and k[498] > (d[498] + 15) and k[497] > (d[497] + 15) and k[496] > (d[496] + 15) and k[495] > (d[495] + 15) and k[494] > (d[494] + 15) and current_price < middleband[499]:
+        if k[499] > (d[499] + 15) and current_price < middleband[499]:
             try:
                 def retryFunc1():
                     current_price = binance_futures.fetch_ticker('1000PEPE/USDT:USDT')['last']
@@ -110,7 +110,7 @@ def manage_futures_positions_and_balance():
                 retryFunc1()
 
         # Creating order for a death cross at a good EMA
-        elif (k[499] + 15) < d[499] and (k[498] + 15) < d[498] and (k[497] + 15) < d[497] and (k[496] + 15) < d[496] and (k[495] + 15) < d[495] and (k[494] + 15) < d[494] and current_price > middleband[499]:
+        elif (k[499] + 15) < d[499] and current_price > middleband[499]:
             try:
                 def retryFunc2():
                     current_price = binance_futures.fetch_ticker('1000PEPE/USDT:USDT')['last']
@@ -165,7 +165,7 @@ def manage_futures_positions_and_balance():
         for position in positions:
             # Exiting Before A Major Loss
             if position['side'] == 'short':
-                if k[499] > (d[499] + 15) or k[498] > (d[498] + 15) or k[497] > (d[497] + 15) or k[496] > (d[496] + 15) or k[495] > (d[495] + 15):
+                if k[499] > (d[499] + 15):
                     try:
                         def retryFunc5():
                             close_amount = abs(float(position['info']['positionAmt']))
@@ -183,7 +183,7 @@ def manage_futures_positions_and_balance():
                         retryFunc5()
 
             elif position['side'] == 'long':
-                if (k[499] + 15) < d[499] or (k[498] + 15) < d[498] or (k[497] + 15) < d[497] or (k[496] + 15) < d[496] or (k[495] + 15) < d[495]:
+                if (k[499] + 15) < d[499]:
                     try:
                         def retryFunc6():
                             close_amount = abs(float(position['info']['positionAmt']))
