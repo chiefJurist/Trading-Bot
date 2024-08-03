@@ -28,7 +28,7 @@ def initial_transfer():
     if balance > 0:
         binance_spot.sapi_post_futures_transfer({
             'asset': 'USDT',
-            'amount': 20,
+            'amount': balance,
             'type': 1  # Type 1 means transfer from spot to futures
         })
 
@@ -88,7 +88,7 @@ def manage_futures_positions_and_balance():
     # MAIN TRADING LOGIC
     if len(positions) == 0:
         # Creating order for a golden cross at a good BB
-        if k[499] > (d[499] + 15) and current_price < middleband[499]:
+        if k[499] > (d[499] + 15) and k[498] > (d[498] + 15) and current_price < middleband[499]:
             current_price = binance_futures.fetch_ticker('1000PEPE/USDT:USDT')['last']
             amount = usdt_balance * 10 / current_price
             binance_futures.create_market_buy_order("1000PEPE/USDT:USDT", amount)
@@ -103,7 +103,7 @@ def manage_futures_positions_and_balance():
             time.sleep(10)  # add a break for safety
 
         # Creating order for a death cross at a good EMA
-        elif (k[499] + 15) < d[499] and current_price > middleband[499]:
+        elif (k[499] + 15) < d[499] and (k[498] + 15) < d[498] and current_price > middleband[499]:
             current_price = binance_futures.fetch_ticker('1000PEPE/USDT:USDT')['last']
             amount = usdt_balance * 10 / current_price
             binance_futures.create_market_sell_order("1000PEPE/USDT:USDT", amount)
@@ -143,7 +143,7 @@ def manage_futures_positions_and_balance():
                     # Cancel all open orders before creating the new market order
                     for order in orders:
                         binance_futures.cancel_order(order['id'], '1000PEPE/USDT:USDT')
-                        time.sleep(2)  # add a break for safety
+                        time.sleep(20)  # add a break for safety
 
                     binance_futures.create_market_buy_order('1000PEPE/USDT:USDT', close_amount)
 
@@ -154,7 +154,7 @@ def manage_futures_positions_and_balance():
                     # Cancel all open orders before creating the new market order
                     for order in orders:
                         binance_futures.cancel_order(order['id'], '1000PEPE/USDT:USDT')
-                        time.sleep(2)  # add a break for safety
+                        time.sleep(20)  # add a break for safety
 
                     binance_futures.create_market_sell_order('1000PEPE/USDT:USDT', close_amount)
     else:
