@@ -22,8 +22,8 @@ binance_futures = ccxt.binanceusdm({
     'secret': FUTURES_SECRET_KEY,
 })
 
-binance_futures.set_leverage(3, '1000PEPE/USDT:USDT')
-current_price = binance_futures.fetch_ticker('1000PEPE/USDT:USDT')['last']
+binance_futures.set_leverage(3, 'ETH/USDT:USDT')
+current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
 usdt_balance = binance_futures.fetch_balance()['total']['USDT']
 amount = usdt_balance * 3 / current_price
-binance_futures.create_market_buy_order("1000PEPE/USDT:USDT", amount)
+binance_futures.create_market_buy_order("ETH/USDT:USDT", amount)
