@@ -137,7 +137,7 @@ def manage_futures_positions_and_balance():
         for position in positions:
             # Exiting Before A Major Loss
             if position['side'] == 'short':
-                if k[499] > (d[499] + 15):
+                if k[499] > (d[499] + 15) or k[498] > (d[498] + 15):
                     close_amount = abs(float(position['info']['positionAmt']))
 
                     # Cancel all open orders before creating the new market order
@@ -148,7 +148,7 @@ def manage_futures_positions_and_balance():
                     binance_futures.create_market_buy_order('SOL/USDT:USDT', close_amount)
 
             elif position['side'] == 'long':
-                if (k[499] + 15) < d[499]:
+                if (k[499] + 15) < d[499] or  (k[498] + 15) < d[498]:
                     close_amount = abs(float(position['info']['positionAmt']))
 
                     # Cancel all open orders before creating the new market order
