@@ -88,7 +88,7 @@ def manage_futures_positions_and_balance():
     # MAIN TRADING LOGIC
     if len(positions) == 0:
         # Creating order for a golden cross at a good BB
-        if k[499] > (d[499] + 15) and k[498] > (d[498] + 15) and current_price < middleband[499]:
+        if k[499] > (d[499] + 13) and k[498] > (d[498] + 13) and current_price < middleband[499]:
             current_price = binance_futures.fetch_ticker('SOL/USDT:USDT')['last']
             amount = usdt_balance * 10 / current_price
             binance_futures.create_market_buy_order("SOL/USDT:USDT", amount)
@@ -103,7 +103,7 @@ def manage_futures_positions_and_balance():
             time.sleep(10)  # add a break for safety
 
         # Creating order for a death cross at a good EMA
-        elif (k[499] + 15) < d[499] and (k[498] + 15) < d[498] and current_price > middleband[499]:
+        elif (k[499] + 13) < d[499] and (k[498] + 13) < d[498] and current_price > middleband[499]:
             current_price = binance_futures.fetch_ticker('SOL/USDT:USDT')['last']
             amount = usdt_balance * 10 / current_price
             binance_futures.create_market_sell_order("SOL/USDT:USDT", amount)
@@ -137,7 +137,7 @@ def manage_futures_positions_and_balance():
         for position in positions:
             # Exiting Before A Major Loss
             if position['side'] == 'short':
-                if k[499] > (d[499] + 15) or k[498] > (d[498] + 15):
+                if k[499] > (d[499] + 13) or k[498] > (d[498] + 13):
                     close_amount = abs(float(position['info']['positionAmt']))
 
                     # Cancel all open orders before creating the new market order
@@ -148,7 +148,7 @@ def manage_futures_positions_and_balance():
                     binance_futures.create_market_buy_order('SOL/USDT:USDT', close_amount)
 
             elif position['side'] == 'long':
-                if (k[499] + 15) < d[499] or  (k[498] + 15) < d[498]:
+                if (k[499] + 13) < d[499] or  (k[498] + 13) < d[498]:
                     close_amount = abs(float(position['info']['positionAmt']))
 
                     # Cancel all open orders before creating the new market order
