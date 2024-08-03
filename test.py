@@ -30,9 +30,9 @@ binance_futures.create_market_buy_order("SOL/USDT:USDT", amount)
 
 time.sleep(10)
 
-recent_order = binance_futures.fetch_closed_orders('1000PEPE/USDT:USDT')[-1]
+recent_order = binance_futures.fetch_closed_orders('SOL/USDT:USDT')[-1]
 open_price = float(recent_order['info']['avgPrice'])
 target_price = open_price + (open_price * 0.0055)
 close_amount = float(amount)
-binance_futures.create_limit_sell_order('1000PEPE/USDT:USDT', close_amount, target_price)
+binance_futures.create_limit_sell_order('SOL/USDT:USDT', close_amount, target_price)
 time.sleep(10)  # add a break for safety
