@@ -143,7 +143,7 @@ def manage_futures_positions_and_balance():
                     # Cancel all open orders before creating the new market order
                     for order in orders:
                         binance_futures.cancel_order(order['id'], 'SOL/USDT:USDT')
-                        time.sleep(20)  # add a break for safety
+                        time.sleep(10)  # add a break for safety
 
                     binance_futures.create_market_buy_order('SOL/USDT:USDT', close_amount)
 
@@ -154,7 +154,7 @@ def manage_futures_positions_and_balance():
                     # Cancel all open orders before creating the new market order
                     for order in orders:
                         binance_futures.cancel_order(order['id'], 'SOL/USDT:USDT')
-                        time.sleep(20)  # add a break for safety
+                        time.sleep(10)  # add a break for safety
 
                     binance_futures.create_market_sell_order('SOL/USDT:USDT', close_amount)
     else:
