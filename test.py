@@ -22,8 +22,8 @@ binance_futures = ccxt.binanceusdm({
     'secret': FUTURES_SECRET_KEY,
 })
 
-binance_futures.set_leverage(3, 'SOL/USDT:USDT')
+binance_futures.set_leverage(10, 'SOL/USDT:USDT')
 current_price = binance_futures.fetch_ticker('SOL/USDT:USDT')['last']
 usdt_balance = binance_futures.fetch_balance()['total']['USDT']
-amount = usdt_balance * 3 / current_price
+amount = usdt_balance * 10 / current_price
 binance_futures.create_market_buy_order("SOL/USDT:USDT", amount)
