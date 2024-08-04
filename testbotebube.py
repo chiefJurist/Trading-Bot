@@ -28,7 +28,7 @@ def initial_transfer():
     if balance > 0:
         binance_spot.sapi_post_futures_transfer({
             'asset': 'USDT',
-            'amount': balance,
+            'amount': 10,
             'type': 1  # Type 1 means transfer from spot to futures
         })
 
@@ -69,52 +69,52 @@ def calculate_indicators(df, window=20, num_std_dev=2):
 # Manage Futures Position And Balance
 def manage_futures_positions_and_balance():
     # Setting leverage
-    binance_futures.set_leverage(10, 'SOL/USDT:USDT')
+    binance_futures.set_leverage(10, 'BTC/USDT:USDT')
 
     # Fetching USDT Balance
     usdt_balance = binance_futures.fetch_balance()['total']['USDT']
 
     # Fetching OHLCV
-    df = fetch_OHLCV('SOL/USDT', '5m')
+    df = fetch_OHLCV('BTC/USDT', '5m')
 
     # Calculating indicators
     k, d, upperband, middleband, lowerband = calculate_indicators(df)
 
     # Checking positions and orders
     positions = binance_futures.fetch_positions_risk()
-    orders = binance_futures.fetch_open_orders('SOL/USDT:USDT')
-    current_price = binance_futures.fetch_ticker('SOL/USDT:USDT')['last']
+    orders = binance_futures.fetch_open_orders('BTC/USDT:USDT')
+    current_price = binance_futures.fetch_ticker('BTC/USDT:USDT')['last']
 
     # MAIN TRADING LOGIC
     if len(positions) == 0:
         # Creating order for a golden cross at a good BB
-        if k[499] > (d[499] + 13) and k[498] > (d[498] + 13) and current_price < middleband[499]:
-            current_price = binance_futures.fetch_ticker('SOL/USDT:USDT')['last']
+        if k[499] > (d[499] + 13) and k[498] > (d[498] + 13) and k[497] > (d[497] + 13) and current_price < middleband[499]:
+            current_price = binance_futures.fetch_ticker('BTC/USDT:USDT')['last']
             amount = usdt_balance * 10 / current_price
-            binance_futures.create_market_buy_order("SOL/USDT:USDT", amount)
+            binance_futures.create_market_buy_order("BTC/USDT:USDT", amount)
             time.sleep(20)  # add a break for safety
 
             # Taking profit order
-            recent_order = binance_futures.fetch_closed_orders('SOL/USDT:USDT')[-1]
+            recent_order = binance_futures.fetch_closed_orders('BTC/USDT:USDT')[-1]
             open_price = float(recent_order['info']['avgPrice'])
             target_price = open_price + (open_price * 0.0055)
             close_amount = float(amount)
-            binance_futures.create_limit_sell_order('SOL/USDT:USDT', close_amount, target_price)
+            binance_futures.create_limit_sell_order('BTC/USDT:USDT', close_amount, target_price)
             time.sleep(10)  # add a break for safety
 
         # Creating order for a death cross at a good EMA
-        elif (k[499] + 13) < d[499] and (k[498] + 13) < d[498] and current_price > middleband[499]:
-            current_price = binance_futures.fetch_ticker('SOL/USDT:USDT')['last']
+        elif (k[499] + 13) < d[499] and (k[498] + 13) < d[498] and (k[497] + 13) < d[497] and current_price > middleband[499]:
+            current_price = binance_futures.fetch_ticker('BTC/USDT:USDT')['last']
             amount = usdt_balance * 10 / current_price
-            binance_futures.create_market_sell_order("SOL/USDT:USDT", amount)
+            binance_futures.create_market_sell_order("BTC/USDT:USDT", amount)
             time.sleep(10)  # add a break for safety
 
             # Taking profit order
-            recent_order = binance_futures.fetch_closed_orders('SOL/USDT:USDT')[-1]
+            recent_order = binance_futures.fetch_closed_orders('BTC/USDT:USDT')[-1]
             open_price = float(recent_order['info']['avgPrice'])
             target_price = open_price - (open_price * 0.0055)
             close_amount = float(amount)
-            binance_futures.create_limit_buy_order('SOL/USDT:USDT', close_amount, target_price)
+            binance_futures.create_limit_buy_order('BTC/USDT:USDT', close_amount, target_price)
             time.sleep(10)  # add a break for safety
 
     elif len(positions) > 0 and len(orders) == 0:
@@ -124,13 +124,13 @@ def manage_futures_positions_and_balance():
                 open_price = float(position['entryPrice'])
                 target_price = open_price - (open_price * 0.0055)
                 close_amount = abs(float(position['info']['positionAmt']))
-                binance_futures.create_limit_buy_order('SOL/USDT:USDT', close_amount, target_price)
+                binance_futures.create_limit_buy_order('BTC/USDT:USDT', close_amount, target_price)
                 time.sleep(10)  # add a break for safety
             elif position['side'] == 'long':
                 open_price = float(position['entryPrice'])
                 target_price = open_price + (open_price * 0.0055)
                 close_amount = abs(float(position['info']['positionAmt']))
-                binance_futures.create_limit_sell_order('SOL/USDT:USDT', close_amount, target_price)
+                binance_futures.create_limit_sell_order('BTC/USDT:USDT', close_amount, target_price)
                 time.sleep(10)  # add a break for safety
 
     elif len(positions) > 0 and len(orders) > 0:
@@ -142,10 +142,10 @@ def manage_futures_positions_and_balance():
 
                     # Cancel all open orders before creating the new market order
                     for order in orders:
-                        binance_futures.cancel_order(order['id'], 'SOL/USDT:USDT')
+                        binance_futures.cancel_order(order['id'], 'BTC/USDT:USDT')
                         time.sleep(10)  # add a break for safety
 
-                    binance_futures.create_market_buy_order('SOL/USDT:USDT', close_amount)
+                    binance_futures.create_market_buy_order('BTC/USDT:USDT', close_amount)
 
             elif position['side'] == 'long':
                 if (k[499] + 13) < d[499] or  (k[498] + 13) < d[498]:
@@ -153,16 +153,16 @@ def manage_futures_positions_and_balance():
 
                     # Cancel all open orders before creating the new market order
                     for order in orders:
-                        binance_futures.cancel_order(order['id'], 'SOL/USDT:USDT')
+                        binance_futures.cancel_order(order['id'], 'BTC/USDT:USDT')
                         time.sleep(10)  # add a break for safety
 
-                    binance_futures.create_market_sell_order('SOL/USDT:USDT', close_amount)
+                    binance_futures.create_market_sell_order('BTC/USDT:USDT', close_amount)
     else:
         pass
 
 # General Function
 def main():
-    #initial_transfer()
+    initial_transfer()
     
     while True:
         try:
