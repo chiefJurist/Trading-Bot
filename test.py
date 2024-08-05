@@ -56,22 +56,21 @@ binance_futures = ccxt.binanceusdm({
 # Define the parameters
 symbol = 'BTC/USDT'  # The trading pair
 timeframe = '1m'  # The desired timeframe
-specific_time = '2024-08-05 17:51:00'  # The specific time
+specific_time = '2024-08-05 17:51:00'  # The specific start time
+end_time = '2024-08-05 17:51:59'  # The specific end time
 
-# Convert the specific time to a timestamp in milliseconds
+# Convert the specific time to timestamps in milliseconds
 since_timestamp = int(datetime.datetime.strptime(specific_time, '%Y-%m-%d %H:%M:%S').timestamp() * 1000)
+end_timestamp = int(datetime.datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S').timestamp() * 1000)
 
-# Fetch OHLCV data for the specific time
-ohlcv = binance_futures.fetch_ohlcv(symbol, timeframe, since=since_timestamp, limit=1000)
+# Fetch OHLCV data for a period before and including the specific minute
+ohlcv = binance_futures.fetch_ohlcv(symbol, timeframe, since=since_timestamp - 15 * 60 * 1000, limit=1000)
 
 # Convert the data to a pandas DataFrame
 df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
 
 # Convert timestamp to datetime
 df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
-
-# Set pandas to display all rows
-pd.set_option('display.max_rows', None)
 
 # Calculate the Stochastic Oscillator
 def calculate_stoch(df, k_period=14, d_period=3):
@@ -84,8 +83,11 @@ def calculate_stoch(df, k_period=14, d_period=3):
 # Apply the calculation to the dataframe
 stoch_df = calculate_stoch(df)
 
-# Filter the DataFrame for the exact minute
-stoch_df = stoch_df[stoch_df['timestamp'] == specific_time]
+# Filter the DataFrame for the desired range
+stoch_df = stoch_df[(stoch_df['timestamp'] >= specific_time) & (stoch_df['timestamp'] <= end_time)]
+
+# Set pandas to display all rows
+pd.set_option('display.max_rows', None)
 
 # Display the Stochastic Oscillator values
-print(stoch_df[['timestamp', '%K', '%D']])
+print(stoch_df[['%K', '%D']])
