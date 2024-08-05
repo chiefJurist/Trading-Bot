@@ -62,7 +62,7 @@ specific_time = '2024-08-05 17:51:00'  # The specific time
 since_timestamp = int(datetime.datetime.strptime(specific_time, '%Y-%m-%d %H:%M:%S').timestamp() * 1000)
 
 # Fetch OHLCV data for the specific time
-ohlcv = binance_futures.fetch_ohlcv(symbol, timeframe, since=since_timestamp, limit=1)
+ohlcv = binance_futures.fetch_ohlcv(symbol, timeframe, since=since_timestamp)
 
 # Convert the data to a pandas DataFrame
 df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
