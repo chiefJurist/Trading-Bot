@@ -62,7 +62,7 @@ specific_time = '2024-08-05 17:51:00'  # The specific time
 since_timestamp = int(datetime.datetime.strptime(specific_time, '%Y-%m-%d %H:%M:%S').timestamp() * 1000)
 
 # Fetch OHLCV data for the specific time
-ohlcv = binance_futures.fetch_ohlcv(symbol, timeframe, since=since_timestamp)
+ohlcv = binance_futures.fetch_ohlcv(symbol, timeframe, since=since_timestamp, limit=1000)
 
 # Convert the data to a pandas DataFrame
 df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
@@ -70,11 +70,22 @@ df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', '
 # Convert timestamp to datetime
 df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
 
-# Filter the DataFrame for the exact minute
-df = df[df['timestamp'] == specific_time]
-
 # Set pandas to display all rows
 pd.set_option('display.max_rows', None)
 
-# Display the DataFrame
-print(df)
+# Calculate the Stochastic Oscillator
+def calculate_stoch(df, k_period=14, d_period=3):
+    df['low_min'] = df['low'].rolling(window=k_period).min()
+    df['high_max'] = df['high'].rolling(window=k_period).max()
+    df['%K'] = 100 * ((df['close'] - df['low_min']) / (df['high_max'] - df['low_min']))
+    df['%D'] = df['%K'].rolling(window=d_period).mean()
+    return df
+
+# Apply the calculation to the dataframe
+stoch_df = calculate_stoch(df)
+
+# Filter the DataFrame for the exact minute
+stoch_df = stoch_df[stoch_df['timestamp'] == specific_time]
+
+# Display the Stochastic Oscillator values
+print(stoch_df[['timestamp', '%K', '%D']])
