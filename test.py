@@ -22,31 +22,34 @@ binance_futures = ccxt.binanceusdm({
     'secret': FUTURES_SECRET_KEY,
 })
 
-binance_futures.set_leverage(10, 'SOL/USDT:USDT')
-current_price = binance_futures.fetch_ticker('SOL/USDT:USDT')['last']
-usdt_balance = binance_futures.fetch_balance()['total']['USDT']
-amount = usdt_balance * 10 / current_price
-binance_futures.create_market_buy_order("SOL/USDT:USDT", amount)
+# binance_futures.set_leverage(10, 'SOL/USDT:USDT')
+# current_price = binance_futures.fetch_ticker('SOL/USDT:USDT')['last']
+# usdt_balance = binance_futures.fetch_balance()['total']['USDT']
+# amount = usdt_balance * 10 / current_price
+# binance_futures.create_market_buy_order("SOL/USDT:USDT", amount)
 
-time.sleep(5)
+# time.sleep(5)
 
-recent_order = binance_futures.fetch_closed_orders('SOL/USDT:USDT')[-1]
-open_price = float(recent_order['info']['avgPrice'])
-target_price = open_price + (open_price * 0.0055)
-close_amount = float(amount)
-binance_futures.create_limit_sell_order('SOL/USDT:USDT', close_amount, target_price)
-time.sleep(5)  # add a break for safety
+# recent_order = binance_futures.fetch_closed_orders('SOL/USDT:USDT')[-1]
+# open_price = float(recent_order['info']['avgPrice'])
+# target_price = open_price + (open_price * 0.0055)
+# close_amount = float(amount)
+# binance_futures.create_limit_sell_order('SOL/USDT:USDT', close_amount, target_price)
+# time.sleep(5)  # add a break for safety
 
 
-positions = binance_futures.fetch_positions_risk()
-orders = binance_futures.fetch_open_orders('SOL/USDT:USDT')
+# positions = binance_futures.fetch_positions_risk()
+# orders = binance_futures.fetch_open_orders('SOL/USDT:USDT')
 
-for position in positions:
-    close_amount = abs(float(position['info']['positionAmt']))
+# for position in positions:
+#     close_amount = abs(float(position['info']['positionAmt']))
 
-    # Cancel all open orders before creating the new market order
-    for order in orders:
-        binance_futures.cancel_order(order['id'], 'SOL/USDT:USDT')
-        time.sleep(5)  # add a break for safety
+#     # Cancel all open orders before creating the new market order
+#     for order in orders:
+#         binance_futures.cancel_order(order['id'], 'SOL/USDT:USDT')
+#         time.sleep(5)  # add a break for safety
 
-    binance_futures.create_market_sell_order('SOL/USDT:USDT', close_amount)
+#     binance_futures.create_market_sell_order('SOL/USDT:USDT', close_amount)
+
+balance = binance_futures.fetch_balance()['total']['USDT']
+print(balance)
