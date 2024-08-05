@@ -51,5 +51,5 @@ binance_futures = ccxt.binanceusdm({
 
 #     binance_futures.create_market_sell_order('SOL/USDT:USDT', close_amount)
 
-balance = binance_spot.fetch_balance()['total']['USDT']
+balance = binance_futures.fetch_balance()['total']['USDT']
 print(balance)
