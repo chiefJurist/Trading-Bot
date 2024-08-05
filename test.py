@@ -2,6 +2,7 @@ import ccxt
 import pandas as pd
 import talib as ta
 import time
+import datetime
 
 # The User's API keys and addresses
 SPOT_API_KEY = 'FoQ10hJJ697zQQqU2rlWyXnODUaBud8pbe5CzxujtuAY6GnbxciJQaqX4gzVZlum'
@@ -51,5 +52,29 @@ binance_futures = ccxt.binanceusdm({
 
 #     binance_futures.create_market_sell_order('SOL/USDT:USDT', close_amount)
 
-balance = binance_futures.fetch_balance()['total']['USDT']
-print(balance)
+
+# Define the parameters
+symbol = 'BTC/USDT'  # The trading pair
+timeframe = '1m'  # The desired timeframe
+specific_time = '2024-08-05 17:51:00'  # The specific time
+
+# Convert the specific time to a timestamp in milliseconds
+since_timestamp = int(datetime.datetime.strptime(specific_time, '%Y-%m-%d %H:%M:%S').timestamp() * 1000)
+
+# Fetch OHLCV data for the specific time
+ohlcv = binance_futures.fetch_ohlcv(symbol, timeframe, since=since_timestamp, limit=1)
+
+# Convert the data to a pandas DataFrame
+df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+
+# Convert timestamp to datetime
+df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+
+# Filter the DataFrame for the exact minute
+df = df[df['timestamp'] == specific_time]
+
+# Set pandas to display all rows
+pd.set_option('display.max_rows', None)
+
+# Display the DataFrame
+print(df)
