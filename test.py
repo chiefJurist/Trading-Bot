@@ -52,7 +52,7 @@ def calculate_indicators(df,window=20, num_std_dev=2):
 df = fetch_OHLCV('BTC/USDT:USDT', '1m')
 
 #Calculating indicators
-k, d = calculate_indicators(df)
+k, d, upperband, middleband, lowerband = calculate_indicators(df)
 
 # pd.options.display.max_rows = 2000
 
