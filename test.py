@@ -31,8 +31,8 @@ timestamp = dt.timestamp()
 
 
 #Fetch OHLCV
-def fetch_OHLCV(symbol, timeframe, timestamp, limit=500):
-    bars = binance_futures.fetch_ohlcv(symbol, timeframe, since=timestamp, limit=limit)
+def fetch_OHLCV(symbol, timeframe, since, limit=500):
+    bars = binance_futures.fetch_ohlcv(symbol, timeframe, since, limit=limit)
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
@@ -57,7 +57,7 @@ def calculate_indicators(df,window=20, num_std_dev=2):
 
     return k, d, upperband, middleband, lowerband
 
-df = fetch_OHLCV('BTC/USDT:USDT', '1m')
+df = fetch_OHLCV('BTC/USDT:USDT', '1m', timestamp)
 
 #Calculating indicators
 k, d, upperband, middleband, lowerband = calculate_indicators(df)
