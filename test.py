@@ -54,8 +54,6 @@ df = fetch_OHLCV('BTC/USDT:USDT', '1m')
 #Calculating indicators
 k, d, upperband, middleband, lowerband = calculate_indicators(df)
 
-pd.options.display.max_rows = 2000
-
 k_d = pd.DataFrame({'k': k, 'd': d})
 
 print(k_d)
