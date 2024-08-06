@@ -24,7 +24,7 @@ binance_futures = ccxt.binanceusdm({
 })
 
 
-def fetch_OHLCV(symbol, timeframe, limit=1000):
+def fetch_OHLCV(symbol, timeframe, limit=500):
     bars = binance_futures.fetch_ohlcv(symbol, timeframe, limit=limit)
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
