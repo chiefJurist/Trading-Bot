@@ -56,4 +56,4 @@ k, d = calculate_indicators(df)
 
 # pd.options.display.max_rows = 2000
 
-print(k,d)
+print(k[499], d[499])
