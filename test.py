@@ -23,13 +23,21 @@ binance_futures = ccxt.binanceusdm({
     'secret': FUTURES_SECRET_KEY,
 })
 
+#For Date
+dt = datetime(2024, 8, 6, 12, 34, 56)
 
+# Convert the datetime object to a timestamp
+timestamp = dt.timestamp()
+
+
+#Fetch OHLCV
 def fetch_OHLCV(symbol, timeframe, limit=500):
     bars = binance_futures.fetch_ohlcv(symbol, timeframe, limit=limit)
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
 
+#Calculate Indicators
 def calculate_indicators(df,window=20, num_std_dev=2):
     #Stochastic Oscillator
     rsi = ta.RSI(df['close'].values, timeperiod=14)
@@ -54,10 +62,11 @@ df = fetch_OHLCV('BTC/USDT:USDT', '1m')
 #Calculating indicators
 k, d, upperband, middleband, lowerband = calculate_indicators(df)
 
+#Convert to dataframe for easy display
 k_d = pd.DataFrame({'k': k, 'd': d})
 
 # Set display options
 pd.set_option('display.max_rows', None)
 pd.set_option('display.float_format', lambda x: '%.6f' % x)
 
-print(k_d)
+print(k_d, timestamp)
