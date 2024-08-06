@@ -24,7 +24,7 @@ binance_futures = ccxt.binanceusdm({
 })
 
 
-def fetch_OHLCV(symbol, timeframe, limit=500):
+def fetch_OHLCV(symbol, timeframe, limit=1000):
     bars = binance_futures.fetch_ohlcv(symbol, timeframe, limit=limit)
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
@@ -54,7 +54,7 @@ df = fetch_OHLCV('BTC/USDT:USDT', '1m')
 #Calculating indicators
 k, d, upperband, middleband, lowerband = calculate_indicators(df)
 
-# pd.options.display.max_rows = 2000
+pd.options.display.max_rows = 2000
 
 k_d = pd.DataFrame({'k': k, 'd': d})
 
