@@ -30,7 +30,7 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
 
-def calculate_indicators(df):
+def calculate_indicators(df,window=20, num_std_dev=2):
     #Stochastic Oscillator
     rsi = ta.RSI(df['close'].values, timeperiod=14)
     k, d = ta.STOCH(rsi, rsi, rsi, 
@@ -40,14 +40,14 @@ def calculate_indicators(df):
                     slowd_period=3, 
                     slowd_matype=0)
     
-    # #Bollinger Bands
-    # rolling_mean = df['close'].rolling(window=window).mean()
-    # rolling_std = df['close'].rolling(window=window).std()
-    # upperband = rolling_mean + (rolling_std * num_std_dev)
-    # middleband = rolling_mean
-    # lowerband = rolling_mean - (rolling_std * num_std_dev)
+    #Bollinger Bands
+    rolling_mean = df['close'].rolling(window=window).mean()
+    rolling_std = df['close'].rolling(window=window).std()
+    upperband = rolling_mean + (rolling_std * num_std_dev)
+    middleband = rolling_mean
+    lowerband = rolling_mean - (rolling_std * num_std_dev)
 
-    return k, d #upperband, middleband, lowerband
+    return k, d, upperband, middleband, lowerband
 
 df = fetch_OHLCV('BTC/USDT:USDT', '1m')
 
