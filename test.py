@@ -24,7 +24,7 @@ binance_futures = ccxt.binanceusdm({
 })
 
 #For Date
-dt = datetime(2024, 8, 6, 12, 34, 56)
+dt = datetime.datetime(2024, 8, 6, 1, 0, 0)
 
 # Convert the datetime object to a timestamp
 timestamp = dt.timestamp()
@@ -69,4 +69,4 @@ k_d = pd.DataFrame({'k': k, 'd': d})
 pd.set_option('display.max_rows', None)
 pd.set_option('display.float_format', lambda x: '%.6f' % x)
 
-print(k_d, timestamp)
+print(k_d, dt, timestamp)
