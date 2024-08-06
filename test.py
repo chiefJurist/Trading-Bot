@@ -24,15 +24,15 @@ binance_futures = ccxt.binanceusdm({
 })
 
 #For Date
-dt = '2024-08-06 01:00:00'
+dt = datetime.datetime(2024, 8, 6, 1, 0, 0)
 
 # Convert the datetime object to a timestamp
 timestamp = dt.timestamp()
 
 
 #Fetch OHLCV
-def fetch_OHLCV(symbol, timeframe, limit=500):
-    bars = binance_futures.fetch_ohlcv(symbol, timeframe, limit=limit)
+def fetch_OHLCV(symbol, timeframe, timestamp, limit=500):
+    bars = binance_futures.fetch_ohlcv(symbol, timeframe, since=timestamp, limit=limit)
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
@@ -69,4 +69,4 @@ k_d = pd.DataFrame({'k': k, 'd': d})
 pd.set_option('display.max_rows', None)
 pd.set_option('display.float_format', lambda x: '%.6f' % x)
 
-print(k_d, dt, timestamp)
+print(k_d, timestamp)
