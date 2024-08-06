@@ -56,4 +56,6 @@ k, d, upperband, middleband, lowerband = calculate_indicators(df)
 
 # pd.options.display.max_rows = 2000
 
-print(k[499], d[499])
+k_d = pd.DataFrame({'k': k, 'd': d})
+
+print(k_d)
