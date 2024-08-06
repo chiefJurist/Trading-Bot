@@ -23,31 +23,37 @@ binance_futures = ccxt.binanceusdm({
     'secret': FUTURES_SECRET_KEY,
 })
 
-# binance_futures.set_leverage(10, 'SOL/USDT:USDT')
-# current_price = binance_futures.fetch_ticker('SOL/USDT:USDT')['last']
-# usdt_balance = binance_futures.fetch_balance()['total']['USDT']
-# amount = usdt_balance * 10 / current_price
-# binance_futures.create_market_buy_order("SOL/USDT:USDT", amount)
 
-# time.sleep(5)
+def fetch_OHLCV(symbol, timeframe, limit=500):
+    bars = binance_futures.fetch_ohlcv(symbol, timeframe, limit=limit)
+    df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+    df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+    return df
 
-# recent_order = binance_futures.fetch_closed_orders('SOL/USDT:USDT')[-1]
-# open_price = float(recent_order['info']['avgPrice'])
-# target_price = open_price + (open_price * 0.0055)
-# close_amount = float(amount)
-# binance_futures.create_limit_sell_order('SOL/USDT:USDT', close_amount, target_price)
-# time.sleep(5)  # add a break for safety
+def calculate_indicators(df, window=20, num_std_dev=2):
+    #Stochastic Oscillator
+    rsi = ta.RSI(df['close'].values, timeperiod=14)
+    k, d = ta.STOCH(rsi, rsi, rsi, 
+                    fastk_period=14, 
+                    slowk_period=3, 
+                    slowk_matype=0, 
+                    slowd_period=3, 
+                    slowd_matype=0)
+    
+    #Bollinger Bands
+    rolling_mean = df['close'].rolling(window=window).mean()
+    rolling_std = df['close'].rolling(window=window).std()
+    upperband = rolling_mean + (rolling_std * num_std_dev)
+    middleband = rolling_mean
+    lowerband = rolling_mean - (rolling_std * num_std_dev)
 
+    return k, d, upperband, middleband, lowerband
 
-# positions = binance_futures.fetch_positions_risk()
-# orders = binance_futures.fetch_open_orders('SOL/USDT:USDT')
+df = fetch_OHLCV('1000PEPE/USDT', '5m')
 
-# for position in positions:
-#     close_amount = abs(float(position['info']['positionAmt']))
+#Calculating indicators
+k, d, upperband, middleband, lowerband = calculate_indicators(df)
 
-#     # Cancel all open orders before creating the new market order
-#     for order in orders:
-#         binance_futures.cancel_order(order['id'], 'SOL/USDT:USDT')
-#         time.sleep(5)  # add a break for safety
+pd.options.display.max_rows = 2000
 
-#     binance_futures.create_market_sell_order('SOL/USDT:USDT', close_amount)
+print(k, d)
