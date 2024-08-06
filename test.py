@@ -49,7 +49,7 @@ def calculate_indicators(df,window=20, num_std_dev=2):
 
     return k, d, upperband, middleband, lowerband
 
-df = fetch_OHLCV('BTC/USDT:USDT', '5m')
+df = fetch_OHLCV('BTC/USDT:USDT', '1   m')
 
 #Calculating indicators
 k, d, upperband, middleband, lowerband = calculate_indicators(df)
