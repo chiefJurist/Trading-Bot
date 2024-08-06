@@ -27,7 +27,7 @@ binance_futures = ccxt.binanceusdm({
 dt = datetime.datetime(2024, 8, 6, 1, 0, 0)
 
 # Convert the datetime object to a timestamp
-timestamp = dt.timestamp()
+timestamp = dt.timestamp() *1000 #converting to milliseconds too
 
 
 #Fetch OHLCV
