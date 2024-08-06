@@ -56,6 +56,8 @@ k, d, upperband, middleband, lowerband = calculate_indicators(df)
 
 k_d = pd.DataFrame({'k': k, 'd': d})
 
-# pd.options.display.max_rows = 2000
+# Set display options
+pd.set_option('display.max_rows', None)
+pd.set_option('display.float_format', lambda x: '%.6f' % x)
 
 print(k_d)
