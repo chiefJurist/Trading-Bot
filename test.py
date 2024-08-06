@@ -24,7 +24,7 @@ binance_futures = ccxt.binanceusdm({
 })
 
 #For Date
-dt = datetime.datetime(2024, 8, 6, 1, 0, 0)
+dt = datetime.datetime(2024, 8, 6, 0, 30, 0)
 
 # Convert the datetime object to a timestamp
 timestamp = int(dt.timestamp() *1000) #converting to milliseconds too
