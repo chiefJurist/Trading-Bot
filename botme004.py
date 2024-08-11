@@ -69,76 +69,50 @@ def calculate_indicators(df, window=20, num_std_dev=2):
 #Manage Futures Position And Balance
 def manage_futures_positions_and_balance():
     #Setting leverage
-    binance_futures.set_leverage(10, '1000PEPE/USDT:USDT')
+    binance_futures.set_leverage(10, 'BTC/USDT:USDT')
 
     #Fetching USDT Balance
     usdt_balance = binance_futures.fetch_balance()['total']['USDT']
 
     #Fetching OHLCV
-    df = fetch_OHLCV('1000PEPE/USDT', '5m')
+    df = fetch_OHLCV('BTC/USDT', '1m')
 
     #Calculating indicators
     k, d, upperband, middleband, lowerband = calculate_indicators(df)
 
     #Checking positions and orders
     positions = binance_futures.fetch_positions_risk()
-    orders = binance_futures.fetch_open_orders('1000PEPE/USDT:USDT')
-    current_price = binance_futures.fetch_ticker('1000PEPE/USDT:USDT')['last']
+    orders = binance_futures.fetch_open_orders('BTC/USDT:USDT')
+    current_price = binance_futures.fetch_ticker('BTC/USDT:USDT')['last']
 
     #MAIN TRADING LOGIC
     if len(positions) == 0:
-        #Creating order for a golden cross at a good BB
-        if k[499] > (d[499] + 15) and k[498] > (d[498] + 15) and k[497] > (d[497] + 15) and k[496] > (d[496] + 15) and k[495] > (d[495] + 15) and k[494] > (d[494] + 15) and current_price < middleband[499]:      
+        #Creating order for a golden cross
+        if k[498] > d[498] :      
             amount = usdt_balance * 10 / current_price
-            binance_futures.create_market_buy_order("1000PEPE/USDT:USDT", amount)   
-            time.sleep(20) #add a break for safety
-
-            #Taking profit order
-            recent_order = binance_futures.fetch_closed_orders('1000PEPE/USDT:USDT')[-1]
-            open_price = float(recent_order['info']['avgPrice'])
-            target_price = open_price  + (open_price * 0.0055)
-            close_amount = float(amount)
-            binance_futures.create_limit_sell_order('1000PEPE/USDT:USDT', close_amount, target_price)
-            time.sleep(10) #add a break for safety
-        #Creating order for a death cross at a good ema
-        elif (k[499] + 15) < d[499] and (k[498] + 15) < d[498] and (k[497] + 15) < d[497] and (k[496] + 15) < d[496] and (k[495] + 15) < d[495] and (k[494] + 15) < d[494] and current_price > middleband[499]:
-            amount = usdt_balance * 10 / current_price
-            binance_futures.create_market_sell_order("1000PEPE/USDT:USDT", amount)   
+            binance_futures.create_market_buy_order("BTC/USDT:USDT", amount)   
             time.sleep(10) #add a break for safety
 
-            #Taking profit order
-            recent_order = binance_futures.fetch_closed_orders('1000PEPE/USDT:USDT')[-1]
-            open_price = float(recent_order['info']['avgPrice'])
-            target_price = open_price  - (open_price * 0.0055)
-            close_amount = float(amount)
-            binance_futures.create_limit_buy_order('1000PEPE/USDT:USDT', close_amount, target_price)
+        #Creating order for a death cross
+        elif k[498] < d[498]:
+            amount = usdt_balance * 10 / current_price
+            binance_futures.create_market_sell_order("BTC/USDT:USDT", amount)   
             time.sleep(10) #add a break for safety
-    elif len(positions) > 0 and  len(orders) == 0:
+
+    elif len(positions) > 0:
         #Taking Profit By Creating Order For Closing Positions
         for position in positions:
             if position['side'] == 'short':
-                open_price = float(position['entryPrice'])
-                target_price = open_price  - (open_price * 0.0055)
-                close_amount = abs(float(position['info']['positionAmt']))
-                binance_futures.create_limit_buy_order('1000PEPE/USDT:USDT', close_amount, target_price)
-                time.sleep(10) #add a break for safety
-            elif position['side'] == 'long':
-                open_price = float(position['entryPrice'])
-                target_price = open_price  + (open_price * 0.0055)
-                close_amount = abs(float(position['info']['positionAmt']))
-                binance_futures.create_limit_sell_order('1000PEPE/USDT:USDT', close_amount, target_price)
-                time.sleep(10) #add a break for safety
-    elif len(positions) > 0 and  len(orders) > 0:
-        for position in positions:
-            #Exiting Before A Major Loss
-            if position['side'] == 'short':
-                if k[499] > (d[499] + 15) or k[498] > (d[498] + 15) or k[497] > (d[497] + 15) or k[496] > (d[496] + 15) or k[495] > (d[495] + 15):
+                if k[498] > d[498] or k[498] == d[498]:
                     close_amount = abs(float(position['info']['positionAmt']))
-                    binance_futures.create_market_buy_order('1000PEPE/USDT:USDT', close_amount)
+                    binance_futures.create_market_buy_order('BTC/USDT:USDT', close_amount)
+                    time.sleep(10) #add a break for safety
             elif position['side'] == 'long':
-                if (k[499] + 15) < d[499] or (k[498] + 15) < d[498] or (k[497] + 15) < d[497] or (k[496] + 15) < d[496] or (k[495] + 15) < d[495]:
+                if k[498] < d[498] or k[498] == d[498]:
                     close_amount = abs(float(position['info']['positionAmt']))
-                    binance_futures.create_market_sell_order('1000PEPE/USDT:USDT', close_amount)
+                    binance_futures.create_market_sell_order('BTC/USDT:USDT', close_amount)
+                    time.sleep(10) #add a break for safety
+    
     else:
         pass
 
