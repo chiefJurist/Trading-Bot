@@ -88,13 +88,13 @@ def manage_futures_positions_and_balance():
     #MAIN TRADING LOGIC
     if len(positions) == 0:
         #Creating order for a golden cross
-        if k[498] > d[498] :      
+        if k[498] > d[498] and k[497] < d[497] :      
             amount = usdt_balance * 10 / current_price
             binance_futures.create_market_buy_order("BTC/USDT:USDT", amount)   
             time.sleep(10) #add a break for safety
 
         #Creating order for a death cross
-        elif k[498] < d[498]:
+        elif k[498] < d[498] and k[497] > d[497]:
             amount = usdt_balance * 10 / current_price
             binance_futures.create_market_sell_order("BTC/USDT:USDT", amount)   
             time.sleep(10) #add a break for safety
