@@ -4,10 +4,10 @@ import talib as ta
 import time
 
 # The User's API keys and addresses
-SPOT_API_KEY = 'ogP4gQPw6Ka4L5EW59vVAlalpbWuQSKxGVTfEbb9YrcMAg97j1kHaJOncciPMz38'
-SPOT_SECRET_KEY = 'VmaNFuEh14rElVB2bPgIX3JMO1ZusOHLxmHoL0RDvRQrS5sXuK9Li9JV1gs0OL6s'
-FUTURES_API_KEY = 'CkPX3ZqS27pqcE1g0PFAEJNoaAXfrde6F4dmw9xi4EXkfOGIKHbdmsifbLGsokqf'
-FUTURES_SECRET_KEY = 'ij7UTix4aa3G6itq7ROW33fSdJMZSNofRog2yHqOTNoW13VN0yIn2O1gp53QFBwq'
+SPOT_API_KEY = 'lwObDP3Fcjia0OxQfombVxtG032NZWuFE4ctgKZPxBJYzblviFUd3ONUFAuOwcJq'
+SPOT_SECRET_KEY = 'PIx7RsETsxoqkJUaltX5pssmHnCMSXqUmb0lJv5OHR4RxS9kOtN2UCeYAtqFFAVm'
+FUTURES_API_KEY = 'FGqsynCXzPJoBJvcLG28EkQg2HvWlE4ANzt9Q3IIVH1iCqvuZ3jQh4Ipw2SzcpYn'
+FUTURES_SECRET_KEY = 'Tg0IcgRO3Xh7PhxfSUs6MfheM46uWa7BIydrLy2Q3ker2VWIQlMvHBmiq566EVEz'
 ADDRESS_ONE = '0x9D95d4751fCc02157d55527Ca4D50588bCC80590'
 
 # Initialize the Binance Spot exchange
@@ -31,13 +31,37 @@ def initial_transfer():
             'amount': balance,
             'type': 1  # Type 1 means transfer from spot to futures
         })
+    time.sleep(10)  # add a break for safety
 
-#Function For Withdrawal of The Profit Transfered to Spot Account
-def check_and_withdraw_spot_balance():
-    usdt_profit_balance = binance_spot.fetch_balance()['total']['USDT']
-    if usdt_profit_balance > 500:
-        binance_spot.withdraw('USDT', usdt_profit_balance, ADDRESS_ONE, tag=None, params={'network': 'BEP20'})
-        time.sleep(10)  # Sleep to ensure the withdrawals are processed
+#Function For Tranfering Profit From Futures To Spot
+def transfer_and_withdraw_profit():
+    futures_usdt_profit = binance_futures.fetch_balance()['total']['USDT']
+    if futures_usdt_profit >= 600 : 
+        positions = binance_futures.fetch_positions_risk()
+        orders = binance_futures.fetch_open_orders('BTC/USDT:USDT')
+        #cancel all orders
+        for order in orders:
+            binance_futures.cancel_order(order['id'], 'BTC/USDT:USDT')
+            time.sleep(10)  # add a break for safety
+        #close all poitions
+        for position in positions:
+            if position['side'] == 'short':
+                close_amount = abs(float(position['info']['positionAmt']))
+                binance_futures.create_market_buy_order('BTC/USDT:USDT', close_amount)
+            elif position['side'] == 'long':
+                close_amount = abs(float(position['info']['positionAmt']))
+                binance_futures.create_market_sell_order('BTC/USDT:USDT', close_amount)
+
+        #transfering the profit
+        binance_spot.sapi_post_futures_transfer({
+            'asset': 'USDT',
+            'amount': 502,
+            'type': 2  # Type 2 means transfer from futures to spot
+        })
+        time.sleep(10)  # add a break for safety
+
+        #Withdrawing The Tranferred Profit
+        binance_spot.withdraw('USDT', 501, ADDRESS_ONE, tag=None, params={'network': 'BEP20'})
 
 #Function For Fetching OHLCV
 def fetch_OHLCV(symbol, timeframe, limit=500):
@@ -47,7 +71,7 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     return df
 
 #Function For Calculating Indicators
-def calculate_indicators(df, window=20, num_std_dev=2):
+def calculate_indicators(df, window=20, num_std_dev=1):
     #Stochastic Oscillator
     rsi = ta.RSI(df['close'].values, timeperiod=14)
     k, d = ta.STOCH(rsi, rsi, rsi, 
@@ -75,10 +99,15 @@ def manage_futures_positions_and_balance():
     usdt_balance = binance_futures.fetch_balance()['total']['USDT']
 
     #Fetching OHLCV
-    df = fetch_OHLCV('BTC/USDT', '1m')
+    df = fetch_OHLCV('BTC/USDT', '5m')
 
     #Calculating indicators
     k, d, upperband, middleband, lowerband = calculate_indicators(df)
+
+    #Closing Prices of candles
+    last_close = df['close'].iloc[-2]       # Last candle close
+    second_last_close = df['close'].iloc[-3] # Second to last candle close
+    third_last_close = df['close'].iloc[-4] # third to last candle close
 
     #Checking positions and orders
     positions = binance_futures.fetch_positions_risk()
@@ -86,35 +115,99 @@ def manage_futures_positions_and_balance():
     current_price = binance_futures.fetch_ticker('BTC/USDT:USDT')['last']
 
     #MAIN TRADING LOGIC
-    if len(positions) == 0:
-        #Creating order for a golden cross
-        if k[498] > d[498] and k[497] < d[497] :      
-            amount = usdt_balance * 10 / current_price
-            binance_futures.create_market_buy_order("BTC/USDT:USDT", amount)   
-            time.sleep(10) #add a break for safety
+    # Managing Positions When There Is No Open Position
+    if len(positions) == 0: 
+        # Managing Long Positions
+        if k[498] > d[498] and k[497] > d[497] and k[496] > d[496]:  
+            if last_close > lowerband and second_last_close > lowerband and third_last_close < lowerband:
+                amount = usdt_balance * 5 / current_price #using half of the capital
+                binance_futures.create_market_buy_order("BTC/USDT:USDT", amount)   
+                time.sleep(10) #add a break for safety
+                # Taking profit order
+                recent_order = binance_futures.fetch_closed_orders('BTC/USDT:USDT')[-1]
+                open_price = float(recent_order['info']['avgPrice'])
+                target_price = open_price + (open_price * 0.0155)
+                close_amount = float(amount)
+                binance_futures.create_limit_sell_order('BTC/USDT:USDT', close_amount, target_price)
+                time.sleep(10)  # add a break for safety
 
-        #Creating order for a death cross
-        elif k[498] < d[498] and k[497] > d[497]:
-            amount = usdt_balance * 10 / current_price
-            binance_futures.create_market_sell_order("BTC/USDT:USDT", amount)   
-            time.sleep(10) #add a break for safety
+        # Managing Short Poitions
+        if k[498] < d[498]:  
+            if last_close < upperband and second_last_close > upperband :
+                amount = usdt_balance * 5 / current_price #using half of the capital
+                binance_futures.create_market_sell_order("BTC/USDT:USDT", amount)   
+                time.sleep(10) #add a break for safety
+                # Taking profit order
+                recent_order = binance_futures.fetch_closed_orders('BTC/USDT:USDT')[-1]
+                open_price = float(recent_order['info']['avgPrice'])
+                target_price = open_price + (open_price * 0.0155)
+                close_amount = float(amount)
+                binance_futures.create_limit_buy_order('BTC/USDT:USDT', close_amount, target_price)
+                time.sleep(10)  # add a break for safety
 
-    elif len(positions) > 0:
-        #Taking Profit By Creating Order For Closing Positions
-        for position in positions:
-            if position['side'] == 'short':
-                if k[498] > d[498] or k[498] == d[498]:
-                    close_amount = abs(float(position['info']['positionAmt']))
-                    binance_futures.create_market_buy_order('BTC/USDT:USDT', close_amount)
-                    time.sleep(10) #add a break for safety
-            elif position['side'] == 'long':
-                if k[498] < d[498] or k[498] == d[498]:
+
+    # Managing Long Positions When A Short Position Is Open
+    elif len(positions) == 1 and positions[0]['side'] == 'short': 
+        if k[498] > d[498] and k[497] > d[497] and k[496] > d[496]:  
+            if last_close < upperband and second_last_close > upperband :
+                amount = usdt_balance * 5 / current_price #using half of the capital
+                binance_futures.create_market_buy_order("BTC/USDT:USDT", amount)   
+                time.sleep(10) #add a break for safety
+                # Taking profit order
+                recent_order = binance_futures.fetch_closed_orders('BTC/USDT:USDT')[-1]
+                open_price = float(recent_order['info']['avgPrice'])
+                target_price = open_price + (open_price * 0.0155)
+                close_amount = float(amount)
+                binance_futures.create_limit_sell_order('BTC/USDT:USDT', close_amount, target_price)
+                time.sleep(10)  # add a break for safety
+                    
+
+    # Managing Short Positions When A Long Position Is Open
+    elif len(positions) == 1 and positions[0]['side'] == 'long': 
+        if k[498] < d[498]:  
+            if last_close < upperband and second_last_close > upperband :
+                amount = usdt_balance * 5 / current_price #using half of the capital
+                binance_futures.create_market_sell_order("BTC/USDT:USDT", amount)   
+                time.sleep(10) #add a break for safety
+                # Taking profit order
+                recent_order = binance_futures.fetch_closed_orders('BTC/USDT:USDT')[-1]
+                open_price = float(recent_order['info']['avgPrice'])
+                target_price = open_price + (open_price * 0.0155)
+                close_amount = float(amount)
+                binance_futures.create_limit_buy_order('BTC/USDT:USDT', close_amount, target_price)
+                time.sleep(10)  # add a break for safety
+
+
+    #Managing Open Long Positions For Risk Management
+    if k[498] < d[498] and last_close < lowerband:
+        if positions:
+            for position in positions:
+                if position['side'] == 'long':
+                    #canceling the take profit order before creating a market order for closing position
+                    for order in orders:
+                        if order['side'] == 'sell' and order['type'] == 'limit':  # Only cancel orders for long
+                            binance_futures.cancel_order(order['id'], 'BTC/USDT:USDT')
+                            time.sleep(10)  # add a break for safety
+
+                    #creating a market order for closing position
                     close_amount = abs(float(position['info']['positionAmt']))
                     binance_futures.create_market_sell_order('BTC/USDT:USDT', close_amount)
-                    time.sleep(10) #add a break for safety
-    
-    else:
-        pass
+
+    #Managing Open Short Positions For Risk Management
+    if k[498] > d[498] and last_close > upperband:
+         if positions:
+            for position in positions:
+                if position['side'] == 'short':
+                        #canceling the take profit order before creating a market order for closing position
+                        for order in orders:
+                            if order['side'] == 'buy' and order['type'] == 'limit':  # Only cancel buy orders
+                                binance_futures.cancel_order(order['id'], 'BTC/USDT:USDT')
+                                time.sleep(10)  # add a break for safety
+
+                        #creating a market order for closing position
+                        close_amount = abs(float(position['info']['positionAmt']))
+                        binance_futures.create_market_buy_order('BTC/USDT:USDT', close_amount)
+
 
 
 #General Function
@@ -123,12 +216,12 @@ def main():
     
     while True:
         try: 
-            #check_and_withdraw_spot_balance()
+            transfer_and_withdraw_profit()
             manage_futures_positions_and_balance()
             time.sleep(5)  # Main loop delay
         except Exception as e:
             print(f"An error occurred: {e}")
-            time.sleep(20)  # Wait for 20 seconds before retrying
+            time.sleep(10)  # Wait for 10 seconds before retrying
 
 #CALLING THE GENERAL FUNCTION
 main()
