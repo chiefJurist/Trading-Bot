@@ -35,33 +35,69 @@ def initial_transfer():
 
 #Function For Tranfering Profit From Futures To Spot
 def transfer_and_withdraw_profit():
-    futures_usdt_profit = binance_futures.fetch_balance()['total']['USDT']
-    if futures_usdt_profit >= 600 : 
+    try:
+        # Fetch balances and positions
+        futures_balance = binance_futures.fetch_balance()
         positions = binance_futures.fetch_positions_risk()
-        orders = binance_futures.fetch_open_orders('BTC/USDT:USDT')
-        #cancel all orders
-        for order in orders:
-            binance_futures.cancel_order(order['id'], 'BTC/USDT:USDT')
-            time.sleep(10)  # add a break for safety
-        #close all poitions
+
+        # Get USDT balance
+        usdt_balance = futures_balance['total']['USDT']
+        
+        # Calculate total unrealized PnL from open positions
+        unrealized_pnl = 0 
         for position in positions:
-            if position['side'] == 'short':
-                close_amount = abs(float(position['info']['positionAmt']))
-                binance_futures.create_market_buy_order('BTC/USDT:USDT', close_amount)
-            elif position['side'] == 'long':
-                close_amount = abs(float(position['info']['positionAmt']))
-                binance_futures.create_market_sell_order('BTC/USDT:USDT', close_amount)
+            if position['symbol'] == 'BTC/USDT:USDT':  # Example, you can add more pairs if needed
+                unrealized_pnl += float(position['unrealizedPnl'])
+        
+        # Calculate total equity (balance + unrealized PnL)
+        total_equity = usdt_balance + unrealized_pnl
 
-        #transfering the profit
-        binance_spot.sapi_post_futures_transfer({
-            'asset': 'USDT',
-            'amount': 502,
-            'type': 2  # Type 2 means transfer from futures to spot
-        })
-        time.sleep(10)  # add a break for safety
+        # Check if the total equity is greater than or equal to 600
+        if total_equity >= 600:
+            orders = binance_futures.fetch_open_orders('BTC/USDT:USDT')
 
-        #Withdrawing The Tranferred Profit
-        binance_spot.withdraw('USDT', 501, ADDRESS_ONE, tag=None, params={'network': 'BEP20'})
+            # Cancel all open orders
+            for order in orders:
+                try:
+                    binance_futures.cancel_order(order['id'], 'BTC/USDT:USDT')
+                    time.sleep(10)  # Add a break for safety
+                except Exception as e:
+                    print(f"Failed to cancel order {order['id']}: {e}")
+
+            # Close all positions
+            for position in positions:
+                try:
+                    close_amount = abs(float(position['info']['positionAmt']))
+                    if position['side'] == 'short':
+                        binance_futures.create_market_buy_order('BTC/USDT:USDT', close_amount)
+                    elif position['side'] == 'long':
+                        binance_futures.create_market_sell_order('BTC/USDT:USDT', close_amount)
+                except Exception as e:
+                    print(f"Failed to close position: {e}")
+
+            # Transfer the profit to Spot
+            try:
+                binance_spot.sapi_post_futures_transfer({
+                    'asset': 'USDT',
+                    'amount': 502,
+                    'type': 2  # Transfer from Futures to Spot
+                })
+                time.sleep(10)  # Add a break for safety
+            except Exception as e:
+                print(f"Failed to transfer USDT: {e}")
+
+            # Check Spot balance before withdrawal
+            spot_balance = binance_spot.fetch_balance()['total']['USDT']
+            if spot_balance >= 501:
+                # Withdraw the transferred profit
+                binance_spot.withdraw('USDT', 501, ADDRESS_ONE, tag=None, params={'network': 'BEP20'})
+            else:
+                print(f"Insufficient Spot balance for withdrawal: {spot_balance}")
+    
+    except Exception as e:
+        print(f"Error in transfer_and_withdraw_profit: {e}")
+
+
 
 #Function For Fetching OHLCV
 def fetch_OHLCV(symbol, timeframe, limit=500):
@@ -120,63 +156,85 @@ def manage_futures_positions_and_balance():
         # Managing Long Positions
         if k[498] > d[498] and k[497] > d[497] and k[496] > d[496]:  
             if last_close > lowerband and second_last_close > lowerband and third_last_close < lowerband:
-                amount = usdt_balance * 5 / current_price #using half of the capital
-                binance_futures.create_market_buy_order("BTC/USDT:USDT", amount)   
-                time.sleep(10) #add a break for safety
+                try:
+                    amount = usdt_balance * 5 / current_price #using half of the capital
+                    binance_futures.create_market_buy_order("BTC/USDT:USDT", amount)   
+                    time.sleep(10) #add a break for safety
+                except Exception as e:
+                    print(f"Error in opening long positions when no position is opened: {e}")
                 # Taking profit order
-                recent_order = binance_futures.fetch_closed_orders('BTC/USDT:USDT')[-1]
-                open_price = float(recent_order['info']['avgPrice'])
-                target_price = open_price + (open_price * 0.0155)
-                close_amount = float(amount)
-                binance_futures.create_limit_sell_order('BTC/USDT:USDT', close_amount, target_price)
-                time.sleep(10)  # add a break for safety
+                try:
+                    recent_order = binance_futures.fetch_closed_orders('BTC/USDT:USDT')[-1]
+                    open_price = float(recent_order['info']['avgPrice'])
+                    target_price = open_price + (open_price * 0.0155)
+                    close_amount = float(amount)
+                    binance_futures.create_limit_sell_order('BTC/USDT:USDT', close_amount, target_price)
+                    time.sleep(10)  # add a break for safety
+                except Exception as e:
+                    print(f"Error in creating close order long positions when no position is opened: {e}")
 
         # Managing Short Poitions
         if k[498] < d[498]:  
             if last_close < upperband and second_last_close > upperband :
-                amount = usdt_balance * 5 / current_price #using half of the capital
-                binance_futures.create_market_sell_order("BTC/USDT:USDT", amount)   
-                time.sleep(10) #add a break for safety
+                try:
+                    amount = usdt_balance * 5 / current_price #using half of the capital
+                    binance_futures.create_market_sell_order("BTC/USDT:USDT", amount)   
+                    time.sleep(10) #add a break for safety
+                except Exception as e:
+                    print(f"Error in opening short positions when no position is opened: {e}")
                 # Taking profit order
-                recent_order = binance_futures.fetch_closed_orders('BTC/USDT:USDT')[-1]
-                open_price = float(recent_order['info']['avgPrice'])
-                target_price = open_price + (open_price * 0.0155)
-                close_amount = float(amount)
-                binance_futures.create_limit_buy_order('BTC/USDT:USDT', close_amount, target_price)
-                time.sleep(10)  # add a break for safety
+                try:
+                    recent_order = binance_futures.fetch_closed_orders('BTC/USDT:USDT')[-1]
+                    open_price = float(recent_order['info']['avgPrice'])
+                    target_price = open_price + (open_price * 0.0155)
+                    close_amount = float(amount)
+                    binance_futures.create_limit_buy_order('BTC/USDT:USDT', close_amount, target_price)
+                    time.sleep(10)  # add a break for safety
+                except Exception as e:
+                    print(f"Error in creating close order for short positions when no position is opened: {e}")
 
 
     # Managing Long Positions When A Short Position Is Open
     elif len(positions) == 1 and positions[0]['side'] == 'short': 
         if k[498] > d[498] and k[497] > d[497] and k[496] > d[496]:  
             if last_close < upperband and second_last_close > upperband :
-                amount = usdt_balance * 5 / current_price #using half of the capital
-                binance_futures.create_market_buy_order("BTC/USDT:USDT", amount)   
-                time.sleep(10) #add a break for safety
+                try:
+                    amount = usdt_balance * 5 / current_price #using half of the capital
+                    binance_futures.create_market_buy_order("BTC/USDT:USDT", amount)   
+                    time.sleep(10) #add a break for safety
+                except Exception as e:
+                    print(f"Error in opening long positions when a position is opened: {e}")
                 # Taking profit order
-                recent_order = binance_futures.fetch_closed_orders('BTC/USDT:USDT')[-1]
-                open_price = float(recent_order['info']['avgPrice'])
-                target_price = open_price + (open_price * 0.0155)
-                close_amount = float(amount)
-                binance_futures.create_limit_sell_order('BTC/USDT:USDT', close_amount, target_price)
-                time.sleep(10)  # add a break for safety
-                    
+                try:
+                    recent_order = binance_futures.fetch_closed_orders('BTC/USDT:USDT')[-1]
+                    open_price = float(recent_order['info']['avgPrice'])
+                    target_price = open_price + (open_price * 0.0155)
+                    close_amount = float(amount)
+                    binance_futures.create_limit_sell_order('BTC/USDT:USDT', close_amount, target_price)
+                    time.sleep(10)  # add a break for safety
+                except Exception as e:
+                    print(f"Error in creating close order for long positions when a position is opened: {e}")
 
     # Managing Short Positions When A Long Position Is Open
     elif len(positions) == 1 and positions[0]['side'] == 'long': 
         if k[498] < d[498]:  
             if last_close < upperband and second_last_close > upperband :
-                amount = usdt_balance * 5 / current_price #using half of the capital
-                binance_futures.create_market_sell_order("BTC/USDT:USDT", amount)   
-                time.sleep(10) #add a break for safety
+                try:
+                    amount = usdt_balance * 5 / current_price #using half of the capital
+                    binance_futures.create_market_sell_order("BTC/USDT:USDT", amount)   
+                    time.sleep(10) #add a break for safety
+                except Exception as e:
+                    print(f"Error in opening short positions when a position is opened: {e}")
                 # Taking profit order
-                recent_order = binance_futures.fetch_closed_orders('BTC/USDT:USDT')[-1]
-                open_price = float(recent_order['info']['avgPrice'])
-                target_price = open_price + (open_price * 0.0155)
-                close_amount = float(amount)
-                binance_futures.create_limit_buy_order('BTC/USDT:USDT', close_amount, target_price)
-                time.sleep(10)  # add a break for safety
-
+                try:
+                    recent_order = binance_futures.fetch_closed_orders('BTC/USDT:USDT')[-1]
+                    open_price = float(recent_order['info']['avgPrice'])
+                    target_price = open_price + (open_price * 0.0155)
+                    close_amount = float(amount)
+                    binance_futures.create_limit_buy_order('BTC/USDT:USDT', close_amount, target_price)
+                    time.sleep(10)  # add a break for safety
+                except Exception as e:
+                    print(f"Error in creating close order for short positions when a position is opened: {e}")
 
     #Managing Open Long Positions For Risk Management
     if k[498] < d[498] and last_close < lowerband:
@@ -186,12 +244,18 @@ def manage_futures_positions_and_balance():
                     #canceling the take profit order before creating a market order for closing position
                     for order in orders:
                         if order['side'] == 'sell' and order['type'] == 'limit':  # Only cancel orders for long
-                            binance_futures.cancel_order(order['id'], 'BTC/USDT:USDT')
-                            time.sleep(10)  # add a break for safety
+                            try:
+                                binance_futures.cancel_order(order['id'], 'BTC/USDT:USDT')
+                                time.sleep(10)  # add a break for safety
+                            except Exception as e:
+                                print(f"Error in canceling close order for long position so that we can close position: {e}")
 
                     #creating a market order for closing position
-                    close_amount = abs(float(position['info']['positionAmt']))
-                    binance_futures.create_market_sell_order('BTC/USDT:USDT', close_amount)
+                    try:
+                        close_amount = abs(float(position['info']['positionAmt']))
+                        binance_futures.create_market_sell_order('BTC/USDT:USDT', close_amount)
+                    except Exception as e:
+                        print(f"Error in closing long position for risk management: {e}")
 
     #Managing Open Short Positions For Risk Management
     if k[498] > d[498] and last_close > upperband:
@@ -201,12 +265,18 @@ def manage_futures_positions_and_balance():
                         #canceling the take profit order before creating a market order for closing position
                         for order in orders:
                             if order['side'] == 'buy' and order['type'] == 'limit':  # Only cancel buy orders
-                                binance_futures.cancel_order(order['id'], 'BTC/USDT:USDT')
-                                time.sleep(10)  # add a break for safety
+                                try:
+                                    binance_futures.cancel_order(order['id'], 'BTC/USDT:USDT')
+                                    time.sleep(10)  # add a break for safety
+                                except Exception as e:
+                                    print(f"Error in canceling close order for short position so that we can close position: {e}")
 
                         #creating a market order for closing position
-                        close_amount = abs(float(position['info']['positionAmt']))
-                        binance_futures.create_market_buy_order('BTC/USDT:USDT', close_amount)
+                        try:
+                            close_amount = abs(float(position['info']['positionAmt']))
+                            binance_futures.create_market_buy_order('BTC/USDT:USDT', close_amount)
+                        except Exception as e:
+                            print(f"Error in closing long position for risk management: {e}")
 
 
 
