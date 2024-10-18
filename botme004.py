@@ -155,7 +155,7 @@ def manage_futures_positions_and_balance():
     if len(positions) == 0: 
         # Managing Long Positions
         if k[498] > d[498] and k[497] > d[497]:  
-            if last_close > lowerband and second_last_close > lowerband and third_last_close < lowerband:
+            if last_close > lowerband[498] and second_last_close > lowerband[497] and third_last_close < lowerband[496]:
                 try:
                     amount = usdt_balance * 10 / current_price #using half of the capital
                     binance_futures.create_market_buy_order("BTC/USDT:USDT", amount)   
@@ -175,7 +175,7 @@ def manage_futures_positions_and_balance():
 
         # Managing Short Poitions
         if k[498] < d[498]:  
-            if last_close < upperband and second_last_close > upperband :
+            if last_close < upperband[498] and second_last_close > upperband[497] :
                 try:
                     amount = usdt_balance * 10 / current_price #using half of the capital
                     binance_futures.create_market_sell_order("BTC/USDT:USDT", amount)   
@@ -197,7 +197,7 @@ def manage_futures_positions_and_balance():
     # Managing Long Positions When A Short Position Is Open
     elif len(positions) == 1 and positions[0]['side'] == 'short': 
         if k[498] > d[498] and k[497] > d[497]:  
-            if last_close > lowerband and second_last_close > lowerband and third_last_close < lowerband:
+            if last_close > lowerband[498] and second_last_close > lowerband[497] and third_last_close < lowerband[496]:
                 try:
                     amount = usdt_balance * 20 / current_price #using the entire  capital
                     binance_futures.create_market_buy_order("BTC/USDT:USDT", amount)   
@@ -218,7 +218,7 @@ def manage_futures_positions_and_balance():
     # Managing Short Positions When A Long Position Is Open
     elif len(positions) == 1 and positions[0]['side'] == 'long': 
         if k[498] < d[498]:  
-            if last_close < upperband and second_last_close > upperband :
+            if last_close < upperband[498] and second_last_close > upperband[497] :
                 try:
                     amount = usdt_balance * 20 / current_price #using the entire capital
                     binance_futures.create_market_sell_order("BTC/USDT:USDT", amount)   
@@ -237,7 +237,7 @@ def manage_futures_positions_and_balance():
                     print(f"Error in creating close order for short positions when a position is opened: {e}")
 
     #Managing Open Long Positions For Risk Management
-    if k[498] < d[498] and last_close < lowerband:
+    if k[498] < d[498] and last_close < lowerband[498]:
         if positions:
             for position in positions:
                 if position['side'] == 'long':
@@ -258,7 +258,7 @@ def manage_futures_positions_and_balance():
                         print(f"Error in closing long position for risk management: {e}")
 
     #Managing Open Short Positions For Risk Management
-    if k[498] > d[498] and last_close > upperband:
+    if k[498] > d[498] and last_close > upperband[498]:
          if positions:
             for position in positions:
                 if position['side'] == 'short':
