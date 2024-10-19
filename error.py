@@ -31,24 +31,24 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
 
-# Function For Calculating Bollinger Bands using Pandas with higher precision
+# Function For Calculating Bollinger Bands with rounding to 6 significant figures
 def calculate_bollinger_bands(df, window=20, num_std_dev=1.0):
-    # Calculate the moving average (middle band) with precision
-    middle_band = df['close'].rolling(window=window, min_periods=1).mean()
+    # Calculate the moving average (middle band) and round it to 6 significant figures
+    middle_band = df['close'].rolling(window=window, min_periods=1).mean().round(6)
 
-    # Calculate the standard deviation with precision
+    # Calculate the standard deviation and use it to derive the upper and lower bands
     std_dev = df['close'].rolling(window=window, min_periods=1).std()
 
-    # Calculate the upper and lower bands
-    upper_band = middle_band + (std_dev * num_std_dev)
-    lower_band = middle_band - (std_dev * num_std_dev)
+    # Calculate the upper and lower bands and round them to 6 significant figures
+    upper_band = (middle_band + (std_dev * num_std_dev)).round(6)
+    lower_band = (middle_band - (std_dev * num_std_dev)).round(6)
 
     return upper_band, middle_band, lower_band
 
 # Fetching OHLCV data
 df = fetch_OHLCV('1000PEPE/USDT:USDT', '5m')
 
-# Calculating Bollinger Bands using Pandas
+# Calculating Bollinger Bands with rounding
 upper_band, middle_band, lower_band = calculate_bollinger_bands(df)
 
 # Closing Prices of candles
