@@ -34,7 +34,7 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
 # Function For Calculating Bollinger Bands with rounding to 6 significant figures
 def calculate_bollinger_bands(df, window=20, num_std_dev=0.975):
     # Calculate the moving average (middle band) and round it to 6 significant figures
-    middle_band_calc = df['close'].rolling(window=window, min_periods=1).mean()
+    middle_band_calc = df['close'].rolling(window=window, min_periods=1).mean().round(7)
 
     # Calculate the standard deviation and use it to derive the upper and lower bands
     std_dev = df['close'].rolling(window=window, min_periods=1).std()
@@ -47,7 +47,7 @@ def calculate_bollinger_bands(df, window=20, num_std_dev=0.975):
     return upper_band, middle_band, lower_band
 
 # Fetching OHLCV data
-df = fetch_OHLCV('1000PEPE/USDT:USDT', '5m')
+df = fetch_OHLCV('BTC/USDT:USDT', '5m')
 
 # Calculating Bollinger Bands with rounding
 upper_band, middle_band, lower_band = calculate_bollinger_bands(df)
