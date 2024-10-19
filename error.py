@@ -32,8 +32,10 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
 
-# Function to approximate to 6 significant figures
+# Function to approximate to 6 significant figures and handle NaN values
 def round_to_six_sig_figs(value):
+    if pd.isna(value):  # Check if the value is NaN
+        return np.nan
     if value == 0:
         return 0
     # Calculate the magnitude (order of magnitude)
