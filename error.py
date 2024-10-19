@@ -31,58 +31,39 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
 
-#Function For Calculating Indicators
-def calculate_indicators(df, window=20, num_std_dev=1.0):
-    #Stochastic Oscillator
-    rsi = ta.RSI(df['close'].values, timeperiod=14)
-    k, d = ta.STOCH(rsi, rsi, rsi, 
-                    fastk_period=14, 
-                    slowk_period=3, 
-                    slowk_matype=0, 
-                    slowd_period=3, 
-                    slowd_matype=0)
-    return k, d
-    
-    #Bollinger Bands
-    
+# Function For Calculating Bollinger Bands using Pandas with higher precision
 def calculate_bollinger_bands(df, window=20, num_std_dev=1.0):
-        # Calculating the moving average (middle band)
-        middle_band = df['close'].rolling(window=window).mean()
+    # Calculate the moving average (middle band) with precision
+    middle_band = df['close'].rolling(window=window, min_periods=1).mean()
 
-        # Calculating the standard deviation
-        std_dev = df['close'].rolling(window=window).std()
+    # Calculate the standard deviation with precision
+    std_dev = df['close'].rolling(window=window, min_periods=1).std()
 
-        # Calculating the upper and lower bands
-        upper_band = middle_band + (std_dev * num_std_dev)
-        lower_band = middle_band - (std_dev * num_std_dev)
+    # Calculate the upper and lower bands
+    upper_band = middle_band + (std_dev * num_std_dev)
+    lower_band = middle_band - (std_dev * num_std_dev)
 
-        return upper_band, middle_band, lower_band
+    return upper_band, middle_band, lower_band
 
-#Fetching OHLCV
-df = fetch_OHLCV('BTC/USDT', '5m')
+# Fetching OHLCV data
+df = fetch_OHLCV('1000PEPE/USDT:USDT', '5m')
 
-#Calculating indicators
-k, d = calculate_indicators(df)
-upper_band, middle_band, lower_band =calculate_bollinger_bands(df) 
+# Calculating Bollinger Bands using Pandas
+upper_band, middle_band, lower_band = calculate_bollinger_bands(df)
 
-#Closing Prices of candles
+# Closing Prices of candles
 last_close = df['close'].iloc[-2]       # Last candle close
 second_last_close = df['close'].iloc[-3] # Second to last candle close
-third_last_close = df['close'].iloc[-4] # third to last candle s
+third_last_close = df['close'].iloc[-4] # third to last candle close
 
-print('k[498 = ]' , k[498])
-print('k[497 = ]' , k[497])
-print('k[496 = ]' , k[496])
-print('d[498 = ]' , d[498])
-print('d[497 = ]' , d[497])
-print('d[496 = ]' , d[496])
-print('upperband[498 = ]' , upper_band[498])
-print('upperband[497 = ]' , upper_band[497])
-print('upperband[496 = ]' , upper_band[496])
-print('middleband[498 = ]' ,middle_band[498])
-print('middleband[497 = ]' ,middle_band[497])
-print('middleband[496 = ]' ,middle_band[496])
-print('lowerband[498 = ]' , lower_band[498])
-print('lowerband[497 = ]' , lower_band[497])
-print('lowerband[496 = ]' , lower_band[496])
-print('last_close, second_last_close, third_last_close = ' , last_close, second_last_close, third_last_close)
+# Print Bollinger Band results for the last few candles
+print('upperband[498] =', upper_band.iloc[-2])
+print('upperband[497] =', upper_band.iloc[-3])
+print('upperband[496] =', upper_band.iloc[-4])
+print('lowerband[498] =', lower_band.iloc[-2])
+print('lowerband[497] =', lower_band.iloc[-3])
+print('lowerband[496] =', lower_band.iloc[-4])
+print('middleband[498] =', middle_band.iloc[-2])
+print('middleband[497] =', middle_band.iloc[-3])
+print('middleband[496] =', middle_band.iloc[-4])
+print('last_close, second_last_close, third_last_close =', last_close, second_last_close, third_last_close)
