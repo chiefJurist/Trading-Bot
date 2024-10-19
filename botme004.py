@@ -2,6 +2,8 @@ import ccxt
 import pandas as pd
 import talib as ta
 import time
+import math
+import numpy as np
 
 # The User's API keys and addresses
 SPOT_API_KEY = 'lwObDP3Fcjia0OxQfombVxtG032NZWuFE4ctgKZPxBJYzblviFUd3ONUFAuOwcJq'
@@ -106,8 +108,15 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
 
+# Function to approximate to 6 significant figures and handle NaN values
+def significant_figures(x):
+    if pd.isna(x) or x == 0:  # Check for NaN or zero
+        return np.nan if pd.isna(x) else 0
+    else:
+        return round(x, 6 - int(math.floor(math.log10(abs(x)))) - 1)
+    
 #Function For Calculating Indicators
-def calculate_indicators(df, window=20, num_std_dev=1):
+def calculate_indicators(df, window=20, num_std_dev=0.975):
     #Stochastic Oscillator
     rsi = ta.RSI(df['close'].values, timeperiod=14)
     k, d = ta.STOCH(rsi, rsi, rsi, 
@@ -118,12 +127,15 @@ def calculate_indicators(df, window=20, num_std_dev=1):
                     slowd_matype=0)
     
     #Bollinger Bands
-    rolling_mean = df['close'].rolling(window=window).mean()
-    rolling_std = df['close'].rolling(window=window).std()
-    upperband = rolling_mean + (rolling_std * num_std_dev)
-    middleband = rolling_mean
-    lowerband = rolling_mean - (rolling_std * num_std_dev)
-
+    # Calculate the moving average (middle band) and round it to 6 significant figures
+    middle_band_calc = df['close'].rolling(window=window, min_periods=1).mean()
+    middleband = middle_band_calc.apply(significant_figures)
+    # Calculate the standard deviation and use it to derive the upper and lower bands
+    std_dev = df['close'].rolling(window=window, min_periods=1).std()
+    # Calculate the upper and lower bands and round them to 6 significant figures
+    upperband = (middleband + (std_dev * num_std_dev)).apply(significant_figures)
+    lowerband = (middleband - (std_dev * num_std_dev)) .apply(significant_figures)
+    
     return k, d, upperband, middleband, lowerband
 
 #Manage Futures Position And Balance
