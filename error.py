@@ -34,14 +34,15 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
 # Function For Calculating Bollinger Bands with rounding to 6 significant figures
 def calculate_bollinger_bands(df, window=20, num_std_dev=1.0):
     # Calculate the moving average (middle band) and round it to 6 significant figures
-    middle_band = df['close'].rolling(window=window, min_periods=1).mean().round(7)
+    middle_band_calc = df['close'].rolling(window=window, min_periods=1).mean()
 
     # Calculate the standard deviation and use it to derive the upper and lower bands
     std_dev = df['close'].rolling(window=window, min_periods=1).std()
 
     # Calculate the upper and lower bands and round them to 6 significant figures
-    upper_band = (middle_band + (std_dev * num_std_dev)).round(7)
-    lower_band = (middle_band - (std_dev * num_std_dev)).round(7)
+    upper_band = (middle_band_calc + (std_dev * num_std_dev)).round(7)
+    middle_band_calc = df['close'].rolling(window=window, min_periods=1).mean().round(7)
+    lower_band = (middle_band_calc - (std_dev * num_std_dev)).round(7)
 
     return upper_band, middle_band, lower_band
 
@@ -60,10 +61,10 @@ third_last_close = df['close'].iloc[-4] # third to last candle close
 print('upperband[498] =', upper_band.iloc[-2])
 print('upperband[497] =', upper_band.iloc[-3])
 print('upperband[496] =', upper_band.iloc[-4])
-print('lowerband[498] =', lower_band.iloc[-2])
-print('lowerband[497] =', lower_band.iloc[-3])
-print('lowerband[496] =', lower_band.iloc[-4])
 print('middleband[498] =', middle_band.iloc[-2])
 print('middleband[497] =', middle_band.iloc[-3])
 print('middleband[496] =', middle_band.iloc[-4])
+print('lowerband[498] =', lower_band.iloc[-2])
+print('lowerband[497] =', lower_band.iloc[-3])
+print('lowerband[496] =', lower_band.iloc[-4])
 print('last_close, second_last_close, third_last_close =', last_close, second_last_close, third_last_close)
