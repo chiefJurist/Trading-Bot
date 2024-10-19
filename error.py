@@ -23,17 +23,17 @@ binance_futures = ccxt.binanceusdm({
     'secret': FUTURES_SECRET_KEY,
 })
 
-
-#Function For Fetching OHLCV
+# Function For Fetching OHLCV
 def fetch_OHLCV(symbol, timeframe, limit=500):
     bars = binance_futures.fetch_ohlcv(symbol, timeframe, limit=limit)
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
 
-#Function For Calculating Indicators
-def calculate_indicators(df, window=21, num_std_dev=1.0):
-    #Stochastic Oscillator
+
+# Function For Calculating Indicators (properly using Ta-Lib BBANDS)
+def calculate_indicators(df, window=20, num_std_dev=1):
+    # Stochastic Oscillator
     rsi = ta.RSI(df['close'].values, timeperiod=14)
     k, d = ta.STOCH(rsi, rsi, rsi, 
                     fastk_period=14, 
@@ -42,39 +42,41 @@ def calculate_indicators(df, window=21, num_std_dev=1.0):
                     slowd_period=3, 
                     slowd_matype=0)
     
-    #Bollinger Bands
+    # Bollinger Bands (properly using Ta-Lib)
     upperband, middleband, lowerband = ta.BBANDS(df['close'].values, 
                                                  timeperiod=window, 
                                                  nbdevup=num_std_dev, 
                                                  nbdevdn=num_std_dev, 
-                                                 matype=0)  # Set matype=0 for SMA (simple moving average)v
+                                                 matype=0)  # matype=0 means SMA (Simple Moving Average)
 
     return k, d, upperband, middleband, lowerband
 
-#Fetching OHLCV
+
+# Fetching OHLCV
 df = fetch_OHLCV('1000PEPE/USDT:USDT', '5m')
 
-#Calculating indicators
+# Calculating indicators
 k, d, upperband, middleband, lowerband = calculate_indicators(df)
 
-#Closing Prices of candles
+# Closing Prices of candles
 last_close = df['close'].iloc[-2]       # Last candle close
 second_last_close = df['close'].iloc[-3] # Second to last candle close
-third_last_close = df['close'].iloc[-4] # third to last candle s
+third_last_close = df['close'].iloc[-4]  # Third to last candle close
 
-print('k[498 = ]' , k[498])
-print('k[497 = ]' , k[497])
-print('k[496 = ]' , k[496])
-print('d[498 = ]' , d[498])
-print('d[497 = ]' , d[497])
-print('d[496 = ]' , d[496])
-print('upperband[498 = ]' , upperband[498])
-print('upperband[497 = ]' , upperband[497])
-print('upperband[496 = ]' , upperband[496])
-print('lowerband[498 = ]' , lowerband[498])
-print('lowerband[497 = ]' , lowerband[497])
-print('lowerband[496 = ]' , lowerband[496])
-print('middleband[498 = ]' ,middleband[498])
-print('middleband[497 = ]' ,middleband[497])
-print('middleband[496 = ]' ,middleband[496])
-print('last_close, second_last_close, third_last_close = ' , last_close, second_last_close, third_last_close)
+# Print the calculated values
+print('k[498] =', k[498])
+print('k[497] =', k[497])
+print('k[496] =', k[496])
+print('d[498] =', d[498])
+print('d[497] =', d[497])
+print('d[496] =', d[496])
+print('upperband[498] =', upperband[-2])
+print('upperband[497] =', upperband[-3])
+print('upperband[496] =', upperband[-4])
+print('lowerband[498] =', lowerband[-2])
+print('lowerband[497] =', lowerband[-3])
+print('lowerband[496] =', lowerband[-4])
+print('middleband[498] =', middleband[-2])
+print('middleband[497] =', middleband[-3])
+print('middleband[496] =', middleband[-4])
+print('last_close, second_last_close, third_last_close =', last_close, second_last_close, third_last_close)
