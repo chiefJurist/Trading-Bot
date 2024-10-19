@@ -47,7 +47,7 @@ def round_to_six_sig_figs(value):
     # Round the scaled value, rounding the 7th digit into the 6th
     rounded_scaled_value = round(scaled_value)
     # Scale back down to the original magnitude and return the rounded value
-    return rounded_scaled_value * 10**(magnitude - 5)
+    return rounded_scaled_value * 10**(magnitude - 6)
 
 
 # Function For Calculating Bollinger Bands with rounding to 6 significant figures
