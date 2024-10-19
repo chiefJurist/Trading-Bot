@@ -42,14 +42,12 @@ def calculate_indicators(df, window=20, num_std_dev=1):
                     slowd_period=3, 
                     slowd_matype=0)
     
-
     #Bollinger Bands
-    # **Exponential Moving Average (EMA)**
-    ema = ta.EMA(df['close'].values, timeperiod=window)
+    middleband= ta.BBANDS(df['close'].values, timeperiod=20, nbdevup=1, nbdevdn=1, matype=0)
     rolling_std = df['close'].rolling(window=window).std()
-    upperband = ema + (rolling_std * num_std_dev)
-    middleband = ema
-    lowerband = ema - (rolling_std * num_std_dev)
+    upperband = middleband + (rolling_std * num_std_dev)
+    middleband = middleband
+    lowerband = middleband - (rolling_std * num_std_dev)
 
     return k, d, upperband, middleband, lowerband
 
@@ -76,7 +74,7 @@ print('upperband[496 = ]' , upperband[496])
 print('lowerband[498 = ]' , lowerband[498])
 print('lowerband[497 = ]' , lowerband[497])
 print('lowerband[496 = ]' , lowerband[496])
-print('mimiddleband[498 = ]' ,middleband[498])
-print('mimiddleband[497 = ]' ,middleband[497])
-print('mimiddleband[496 = ]' ,middleband[496])
+print('middleband[498 = ]' ,middleband[498])
+print('middleband[497 = ]' ,middleband[497])
+print('middleband[496 = ]' ,middleband[496])
 print('last_close, second_last_close, third_last_close = ' , last_close, second_last_close, third_last_close)
