@@ -34,36 +34,37 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
 
 # Function to approximate to 6 significant figures and handle NaN values
 def significant_figures(num):
-    # Convert the number to a string to loop through digits
-    num_str = str(num)
+    # Check if the number is NaN
+    if pd.isna(num):
+        return np.nan
 
-    # To store the first six digits we care about
+    # Convert the number to a string (in case it's a float) and preserve the sign
+    num_str = str(num)
     result = []
     found_first_non_zero = False
-    
-    # Loop through the digits
-    for i, digit in enumerate(num_str):
-        if digit != '0' and not found_first_non_zero:
-            # Found the first non-zero digit, begin collecting digits
-            found_first_non_zero = True
 
-        if found_first_non_zero:
-            result.append(int(digit))
-        
-        # Stop once we collect 6 digits
-        if len(result) == 6:
-            # Now check the 7th digit if it exists
-            if i + 1 < len(num_str) and int(num_str[i + 1]) >= 5:
-                # Add 1 to the 6th digit if the 7th is 5 or greater
-                result[-1] += 1
-            break
+    # Loop through the characters in the string version of the number
+    for i, char in enumerate(num_str):
+        # Skip non-digit characters (such as '.' or '-')
+        if char.isdigit():
+            if char != '0' and not found_first_non_zero:
+                found_first_non_zero = True
+
+            if found_first_non_zero:
+                result.append(int(char))
+
+            # Stop once we've collected 6 significant digits
+            if len(result) == 6:
+                # Check if the next character is a digit to round
+                if i + 1 < len(num_str) and num_str[i + 1].isdigit() and int(num_str[i + 1]) >= 5:
+                    result[-1] += 1
+                break
 
     # Join the digits back into a single number
-    return int(''.join(map(str, result)))
-
-# Example
-num = 123456789
-print(significant_figures(num))  # Output: 123457
+    if result:
+        return float(''.join(map(str, result)))
+    else:
+        return 0  # If no significant digits are found, return 0
 
 
 # Function For Calculating Bollinger Bands with rounding to 6 significant figures
