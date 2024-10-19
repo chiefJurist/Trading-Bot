@@ -56,7 +56,7 @@ def calculate_bollinger_bands(df, window=20, num_std_dev=0.975):
     return upperband, middleband, lowerband
 
 # Fetching OHLCV data
-df = fetch_OHLCV('100PEPE/USDT:USDT', '5m')
+df = fetch_OHLCV('1000PEPE/USDT:USDT', '5m')
 
 # Calculating Bollinger Bands with rounding
 upperband, middleband, lowerband = calculate_bollinger_bands(df)
