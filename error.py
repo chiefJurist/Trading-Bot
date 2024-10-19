@@ -33,35 +33,51 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     return df
 
 # Function to approximate to 6 significant figures and handle NaN values
-def round_to_six_sig_figs(value):
-    if pd.isna(value):  # Check if the value is NaN
-        return np.nan
-    if value == 0:
-        return 0
-    # Calculate the magnitude (order of magnitude)
-    magnitude = int(np.floor(np.log10(abs(value))))
-    # Normalize the value to the range [1, 10) by dividing by 10^magnitude
-    normalized_value = value / 10**magnitude
-    # Multiply by 10^6 to retain the first six significant figures
-    scaled_value = normalized_value * 10**6
-    # Round the scaled value, rounding the 7th digit into the 6th
-    rounded_scaled_value = round(scaled_value)
-    # Scale back down to the original magnitude and return the rounded value
-    return rounded_scaled_value * 10**(magnitude - 6)
+def significant_figures(num):
+    # Convert the number to a string to loop through digits
+    num_str = str(num)
+
+    # To store the first six digits we care about
+    result = []
+    found_first_non_zero = False
+    
+    # Loop through the digits
+    for i, digit in enumerate(num_str):
+        if digit != '0' and not found_first_non_zero:
+            # Found the first non-zero digit, begin collecting digits
+            found_first_non_zero = True
+
+        if found_first_non_zero:
+            result.append(int(digit))
+        
+        # Stop once we collect 6 digits
+        if len(result) == 6:
+            # Now check the 7th digit if it exists
+            if i + 1 < len(num_str) and int(num_str[i + 1]) >= 5:
+                # Add 1 to the 6th digit if the 7th is 5 or greater
+                result[-1] += 1
+            break
+
+    # Join the digits back into a single number
+    return int(''.join(map(str, result)))
+
+# Example
+num = 123456789
+print(significant_figures(num))  # Output: 123457
 
 
 # Function For Calculating Bollinger Bands with rounding to 6 significant figures
 def calculate_bollinger_bands(df, window=20, num_std_dev=0.975):
     # Calculate the moving average (middle band) and round it to 6 significant figures
     middle_band_calc = df['close'].rolling(window=window, min_periods=1).mean()
-    middle_band = middle_band_calc.apply(round_to_six_sig_figs)
+    middle_band = significant_figures(middle_band_calc)
 
     # Calculate the standard deviation and use it to derive the upper and lower bands
     std_dev = df['close'].rolling(window=window, min_periods=1).std()
 
     # Calculate the upper and lower bands and round them to 6 significant figures
-    upper_band = (middle_band_calc + (std_dev * num_std_dev)).apply(round_to_six_sig_figs)
-    lower_band = (middle_band_calc - (std_dev * num_std_dev)).apply(round_to_six_sig_figs)
+    upper_band = significant_figures((middle_band_calc + (std_dev * num_std_dev)))
+    lower_band = significant_figures((middle_band_calc - (std_dev * num_std_dev))) 
 
     return upper_band, middle_band, lower_band
 
