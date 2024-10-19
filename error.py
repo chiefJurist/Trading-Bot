@@ -46,7 +46,6 @@ def calculate_indicators(df, window=20, num_std_dev=1):
     middleband= ta.BBANDS(df['close'].values, timeperiod=20, nbdevup=1, nbdevdn=1, matype=0)
     rolling_std = df['close'].rolling(window=window).std()
     upperband = middleband + (rolling_std * num_std_dev)
-    middleband = middleband
     lowerband = middleband - (rolling_std * num_std_dev)
 
     return k, d, upperband, middleband, lowerband
