@@ -60,11 +60,11 @@ k, d, upperband, middleband, lowerband = calculate_indicators(df)
 #Closing Prices of candles
 last_close = df['close'].iloc[-2]       # Last candle close
 second_last_close = df['close'].iloc[-3] # Second to last candle close
-third_last_close = df['close'].iloc[-4] # third to last candle close
+third_last_close = df['close'].iloc[-4] # third to last candle s
 
-print('k[498 = ]' + k[498])
-print('k[497 = ]' + k[497])
-print('k[496 = ]' + k[496])
-print('k[498 = ]' + k[498])
-print('k[497 = ]' + k[497])
-print('last_close, second_last_close, third_last_close = ' + last_close, second_last_close, third_last_close)
+print('k[498 = ]' , k[498])
+print('k[497 = ]' , k[497])
+print('k[496 = ]' , k[496])
+print('k[498 = ]' , k[498])
+print('k[497 = ]' , k[497])
+print('last_close, second_last_close, third_last_close = ' , last_close, second_last_close, third_last_close)
