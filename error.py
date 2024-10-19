@@ -35,8 +35,8 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
 
 # Function to approximate to 6 significant figures and handle NaN values
 def significant_figures(x):
-    if x == 0:
-        return 0
+    if pd.isna(x) or x == 0:  # Check for NaN or zero
+        return np.nan if pd.isna(x) else 0
     else:
         return round(x, 6 - int(math.floor(math.log10(abs(x)))) - 1)
 
@@ -50,8 +50,8 @@ def calculate_bollinger_bands(df, window=20, num_std_dev=0.975):
     std_dev = df['close'].rolling(window=window, min_periods=1).std()
 
     # Calculate the upper and lower bands and round them to 6 significant figures
-    upper_band = (middle_band_calc + (std_dev * num_std_dev)).apply(significant_figures)
-    lower_band = (middle_band_calc - (std_dev * num_std_dev)) 
+    upper_band = (middle_band + (std_dev * num_std_dev)).apply(significant_figures)
+    lower_band = (middle_band - (std_dev * num_std_dev)) .apply(significant_figures)
 
     return upper_band, middle_band, lower_band
 
