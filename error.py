@@ -1,5 +1,6 @@
 import ccxt
 import pandas as pd
+import numpy as np
 import talib as ta
 import time
 import datetime
@@ -31,18 +32,38 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
 
+# Function to approximate to 6 significant figures
+def round_to_six_sig_figs(value):
+    if value == 0:
+        return 0
+    # Calculate the magnitude (order of magnitude)
+    magnitude = int(np.floor(np.log10(abs(value))))
+    # Normalize the value to the range [1, 10) by dividing by 10^magnitude
+    normalized_value = value / 10**magnitude
+    # Multiply by 10^6 to retain the first six significant figures
+    scaled_value = normalized_value * 10**6
+    # Round the scaled value, rounding the 7th digit into the 6th
+    rounded_scaled_value = round(scaled_value)
+    # Scale back down to the original magnitude and return the rounded value
+    return rounded_scaled_value * 10**(magnitude - 6)
+
 # Function For Calculating Bollinger Bands with rounding to 6 significant figures
 def calculate_bollinger_bands(df, window=20, num_std_dev=0.975):
     # Calculate the moving average (middle band) and round it to 6 significant figures
-    middle_band_calc = df['close'].rolling(window=window, min_periods=1).mean()
+    middle_band_calc = df['close'].rolling(window=window, min_periods=1).mean().apply(round_to_six_sig_figs)
 
     # Calculate the standard deviation and use it to derive the upper and lower bands
     std_dev = df['close'].rolling(window=window, min_periods=1).std()
 
-    # Calculate the upper and lower bands and round them to 6 significant figures
-    upper_band = (middle_band_calc + (std_dev * num_std_dev))
-    middle_band = df['close'].rolling(window=window, min_periods=1).mean()
-    lower_band = (middle_band_calc - (std_dev * num_std_dev))
+    # Calculate the upper and lower bands
+    upper_band = middle_band_calc + (std_dev * num_std_dev).apply(round_to_six_sig_figs)
+    middle_band =  middle_band_calc
+    lower_band = middle_band_calc - (std_dev * num_std_dev).apply(round_to_six_sig_figs)
+    
+    # Round the bands to 6 significant figures using the approximation method
+    upper_band = upper_band.apply(round_to_six_sig_figs)
+    middle_band = middle_band_calc.apply(round_to_six_sig_figs)
+    lower_band = lower_band.apply(round_to_six_sig_figs)
 
     return upper_band, middle_band, lower_band
 
@@ -55,7 +76,7 @@ upper_band, middle_band, lower_band = calculate_bollinger_bands(df)
 # Closing Prices of candles
 last_close = df['close'].iloc[-2]       # Last candle close
 second_last_close = df['close'].iloc[-3] # Second to last candle close
-third_last_close = df['close'].iloc[-4] # third to last candle close
+third_last_close = df['close'].iloc[-4] # Third to last candle close
 
 # Print Bollinger Band results for the last few candles
 print('upperband[498] =', upper_band.iloc[-2])
