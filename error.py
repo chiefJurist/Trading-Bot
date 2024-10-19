@@ -1,7 +1,7 @@
 import ccxt
 import pandas as pd
-import numpy as np
 import talib as ta
+import numpy as np
 import time
 import datetime
 
@@ -47,6 +47,7 @@ def round_to_six_sig_figs(value):
     # Scale back down to the original magnitude and return the rounded value
     return rounded_scaled_value * 10**(magnitude - 6)
 
+
 # Function For Calculating Bollinger Bands with rounding to 6 significant figures
 def calculate_bollinger_bands(df, window=20, num_std_dev=0.975):
     # Calculate the moving average (middle band) and round it to 6 significant figures
@@ -56,13 +57,9 @@ def calculate_bollinger_bands(df, window=20, num_std_dev=0.975):
     # Calculate the standard deviation and use it to derive the upper and lower bands
     std_dev = df['close'].rolling(window=window, min_periods=1).std()
 
-    # Calculate the upper and lower bands
-    upper_band_calc = middle_band + (std_dev * num_std_dev).apply(round_to_six_sig_figs)
-    lower_band_calc = middle_band - (std_dev * num_std_dev).apply(round_to_six_sig_figs)
-    
-    # Round the bands to 6 significant figures using the approximation method
-    upper_band = upper_band_calc.apply(round_to_six_sig_figs)
-    lower_band = lower_band_calc.apply(round_to_six_sig_figs)
+    # Calculate the upper and lower bands and round them to 6 significant figures
+    upper_band = (middle_band_calc + (std_dev * num_std_dev)).apply(round_to_six_sig_figs)
+    lower_band = (middle_band_calc - (std_dev * num_std_dev)).apply(round_to_six_sig_figs)
 
     return upper_band, middle_band, lower_band
 
@@ -75,7 +72,7 @@ upper_band, middle_band, lower_band = calculate_bollinger_bands(df)
 # Closing Prices of candles
 last_close = df['close'].iloc[-2]       # Last candle close
 second_last_close = df['close'].iloc[-3] # Second to last candle close
-third_last_close = df['close'].iloc[-4] # Third to last candle close
+third_last_close = df['close'].iloc[-4] # third to last candle close
 
 # Print Bollinger Band results for the last few candles
 print('upperband[498] =', upper_band.iloc[-2])
