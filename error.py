@@ -50,20 +50,19 @@ def round_to_six_sig_figs(value):
 # Function For Calculating Bollinger Bands with rounding to 6 significant figures
 def calculate_bollinger_bands(df, window=20, num_std_dev=0.975):
     # Calculate the moving average (middle band) and round it to 6 significant figures
-    middle_band_calc = df['close'].rolling(window=window, min_periods=1).mean().apply(round_to_six_sig_figs)
+    middle_band_calc = df['close'].rolling(window=window, min_periods=1).mean()
+    middle_band = middle_band_calc.apply(round_to_six_sig_figs)
 
     # Calculate the standard deviation and use it to derive the upper and lower bands
     std_dev = df['close'].rolling(window=window, min_periods=1).std()
 
     # Calculate the upper and lower bands
-    upper_band = middle_band_calc + (std_dev * num_std_dev).apply(round_to_six_sig_figs)
-    middle_band =  middle_band_calc
-    lower_band = middle_band_calc - (std_dev * num_std_dev).apply(round_to_six_sig_figs)
+    upper_band_calc = middle_band + (std_dev * num_std_dev).apply(round_to_six_sig_figs)
+    lower_band_calc = middle_band - (std_dev * num_std_dev).apply(round_to_six_sig_figs)
     
     # Round the bands to 6 significant figures using the approximation method
-    upper_band = upper_band.apply(round_to_six_sig_figs)
-    middle_band = middle_band_calc.apply(round_to_six_sig_figs)
-    lower_band = lower_band.apply(round_to_six_sig_figs)
+    upper_band = upper_band_calc.apply(round_to_six_sig_figs)
+    lower_band = lower_band_calc.apply(round_to_six_sig_figs)
 
     return upper_band, middle_band, lower_band
 
