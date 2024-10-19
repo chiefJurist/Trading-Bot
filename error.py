@@ -43,12 +43,11 @@ def calculate_indicators(df, window=21, num_std_dev=1.0):
                     slowd_matype=0)
     
     #Bollinger Bands
-    _, middleband, _= ta.BBANDS(df['close'].values, timeperiod=20)
-
-    rolling_std = df['close'].rolling(window=window).std()
-
-    upperband = middleband + (rolling_std * num_std_dev)
-    lowerband = middleband - (rolling_std * num_std_dev)
+    upperband, middleband, lowerband = ta.BBANDS(df['close'].values, 
+                                                 timeperiod=window, 
+                                                 nbdevup=num_std_dev, 
+                                                 nbdevdn=num_std_dev, 
+                                                 matype=0)  # Set matype=0 for SMA (simple moving average)v
 
     return k, d, upperband, middleband, lowerband
 
