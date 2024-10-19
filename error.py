@@ -59,7 +59,7 @@ def calculate_bollinger_bands(df, window=20, num_std_dev=1.0):
         return upper_band, middle_band, lower_band
 
 #Fetching OHLCV
-df = fetch_OHLCV('PEPE/USDT', '5m')
+df = fetch_OHLCV('BTC/USDT', '5m')
 
 #Calculating indicators
 k, d = calculate_indicators(df)
