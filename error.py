@@ -26,7 +26,7 @@ binance_futures = ccxt.binanceusdm({
 
 #Function For Fetching OHLCV
 def fetch_OHLCV(symbol, timeframe, limit=500):
-    bars = binance_futures.fetch_ohlcv(symbol, timeframe, limit=limit)
+    bars = binance_spot.fetch_ohlcv(symbol, timeframe, limit=limit)
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
@@ -59,7 +59,7 @@ def calculate_bollinger_bands(df, window=20, num_std_dev=1.0):
         return upper_band, middle_band, lower_band
 
 #Fetching OHLCV
-df = fetch_OHLCV('1000PEPE/USDT:USDT', '5m')
+df = fetch_OHLCV('PEPE/USDT', '5m')
 
 #Calculating indicators
 k, d = calculate_indicators(df)
@@ -79,10 +79,10 @@ print('d[496 = ]' , d[496])
 print('upperband[498 = ]' , upper_band[498])
 print('upperband[497 = ]' , upper_band[497])
 print('upperband[496 = ]' , upper_band[496])
-print('lowerband[498 = ]' , lower_band[498])
-print('lowerband[497 = ]' , lower_band[497])
-print('lowerband[496 = ]' , lower_band[496])
 print('middleband[498 = ]' ,middle_band[498])
 print('middleband[497 = ]' ,middle_band[497])
 print('middleband[496 = ]' ,middle_band[496])
+print('lowerband[498 = ]' , lower_band[498])
+print('lowerband[497 = ]' , lower_band[497])
+print('lowerband[496 = ]' , lower_band[496])
 print('last_close, second_last_close, third_last_close = ' , last_close, second_last_close, third_last_close)
