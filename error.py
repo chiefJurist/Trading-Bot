@@ -43,7 +43,7 @@ def round_to_six_sig_figs(value):
     # Normalize the value to the range [1, 10) by dividing by 10^magnitude
     normalized_value = value / 10**magnitude
     # Multiply by 10^6 to retain the first six significant figures
-    scaled_value = normalized_value * 10**6
+    scaled_value = normalized_value * 10**5
     # Round the scaled value, rounding the 7th digit into the 6th
     rounded_scaled_value = round(scaled_value)
     # Scale back down to the original magnitude and return the rounded value
