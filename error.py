@@ -23,17 +23,17 @@ binance_futures = ccxt.binanceusdm({
     'secret': FUTURES_SECRET_KEY,
 })
 
-# Function For Fetching OHLCV
+
+#Function For Fetching OHLCV
 def fetch_OHLCV(symbol, timeframe, limit=500):
     bars = binance_futures.fetch_ohlcv(symbol, timeframe, limit=limit)
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
 
-
-# Function For Calculating Indicators (properly using Ta-Lib BBANDS)
-def calculate_indicators(df, window=20, num_std_dev=1):
-    # Stochastic Oscillator
+#Function For Calculating Indicators
+def calculate_indicators(df, window=20, num_std_dev=1.0):
+    #Stochastic Oscillator
     rsi = ta.RSI(df['close'].values, timeperiod=14)
     k, d = ta.STOCH(rsi, rsi, rsi, 
                     fastk_period=14, 
@@ -41,42 +41,48 @@ def calculate_indicators(df, window=20, num_std_dev=1):
                     slowk_matype=0, 
                     slowd_period=3, 
                     slowd_matype=0)
+    return k, d
     
-    # Bollinger Bands (properly using Ta-Lib)
-    upperband, middleband, lowerband = ta.BBANDS(df['close'].values, 
-                                                 timeperiod=window, 
-                                                 nbdevup=num_std_dev, 
-                                                 nbdevdn=num_std_dev, 
-                                                 matype=0)  # matype=0 means SMA (Simple Moving Average)
+    #Bollinger Bands
+    
+def calculate_bollinger_bands(df, window=20, num_std_dev=1.0):
+        # Calculating the moving average (middle band)
+        middle_band = df['close'].rolling(window=window).mean()
 
-    return k, d, upperband, middleband, lowerband
+        # Calculating the standard deviation
+        std_dev = df['close'].rolling(window=window).std()
 
+        # Calculating the upper and lower bands
+        upper_band = middle_band + (std_dev * num_std_dev)
+        lower_band = middle_band - (std_dev * num_std_dev)
 
-# Fetching OHLCV
+        return upper_band, middle_band, lower_band
+
+#Fetching OHLCV
 df = fetch_OHLCV('1000PEPE/USDT:USDT', '5m')
 
-# Calculating indicators
-k, d, upperband, middleband, lowerband = calculate_indicators(df)
+#Calculating indicators
+k, d = calculate_indicators(df)
+upper_band, middle_band, lower_band =calculate_bollinger_bands(df) 
 
-# Closing Prices of candles
+#Closing Prices of candles
 last_close = df['close'].iloc[-2]       # Last candle close
 second_last_close = df['close'].iloc[-3] # Second to last candle close
-third_last_close = df['close'].iloc[-4]  # Third to last candle close
+third_last_close = df['close'].iloc[-4] # third to last candle s
 
-# Print the calculated values
-print('k[498] =', k[498])
-print('k[497] =', k[497])
-print('k[496] =', k[496])
-print('d[498] =', d[498])
-print('d[497] =', d[497])
-print('d[496] =', d[496])
-print('upperband[498] =', upperband[-2])
-print('upperband[497] =', upperband[-3])
-print('upperband[496] =', upperband[-4])
-print('lowerband[498] =', lowerband[-2])
-print('lowerband[497] =', lowerband[-3])
-print('lowerband[496] =', lowerband[-4])
-print('middleband[498] =', middleband[-2])
-print('middleband[497] =', middleband[-3])
-print('middleband[496] =', middleband[-4])
-print('last_close, second_last_close, third_last_close =', last_close, second_last_close, third_last_close)
+print('k[498 = ]' , k[498])
+print('k[497 = ]' , k[497])
+print('k[496 = ]' , k[496])
+print('d[498 = ]' , d[498])
+print('d[497 = ]' , d[497])
+print('d[496 = ]' , d[496])
+print('upperband[498 = ]' , upper_band[498])
+print('upperband[497 = ]' , upper_band[497])
+print('upperband[496 = ]' , upper_band[496])
+print('lowerband[498 = ]' , lower_band[498])
+print('lowerband[497 = ]' , lower_band[497])
+print('lowerband[496 = ]' , lower_band[496])
+print('middleband[498 = ]' ,middle_band[498])
+print('middleband[497 = ]' ,middle_band[497])
+print('middleband[496 = ]' ,middle_band[496])
+print('last_close, second_last_close, third_last_close = ' , last_close, second_last_close, third_last_close)
