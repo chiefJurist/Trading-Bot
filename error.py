@@ -2,6 +2,7 @@ import ccxt
 import pandas as pd
 import talib as ta
 import numpy as np
+import math
 import time
 import datetime
 
@@ -33,39 +34,11 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     return df
 
 # Function to approximate to 6 significant figures and handle NaN values
-def significant_figures(num):
-    # Check if the number is NaN
-    if pd.isna(num):
-        return np.nan
-
-    # Convert the number to a string (in case it's a float) and preserve the sign
-    num_str = str(num)
-    result = []
-    found_first_non_zero = False
-
-    # Loop through the characters in the string version of the number
-    for i, char in enumerate(num_str):
-        # Skip non-digit characters (such as '.' or '-')
-        if char.isdigit():
-            if char != '0' and not found_first_non_zero:
-                found_first_non_zero = True
-
-            if found_first_non_zero:
-                result.append(int(char))
-
-            # Stop once we've collected 6 significant digits
-            if len(result) == 6:
-                # Check if the next character is a digit to round
-                if i + 1 < len(num_str) and num_str[i + 1].isdigit() and int(num_str[i + 1]) >= 5:
-                    result[-1] += 1
-                break
-
-    # Join the digits back into a single number
-    if result:
-        return float(''.join(map(str, result)))
+def significant_figures(x):
+    if x == 0:
+        return 0
     else:
-        return 0  # If no significant digits are found, return 0
-
+        return round(x, 6 - int(math.floor(math.log10(abs(x)))) - 1)
 
 # Function For Calculating Bollinger Bands with rounding to 6 significant figures
 def calculate_bollinger_bands(df, window=20, num_std_dev=0.975):
