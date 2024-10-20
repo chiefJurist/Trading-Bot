@@ -169,7 +169,7 @@ def manage_futures_positions_and_balance():
         if k[498] > d[498] and k[497] > d[497]:  
             if last_close > lowerband[498] and second_last_close > lowerband[497] and third_last_close < lowerband[496]:
                 try:
-                    amount = usdt_balance * 4.5 / current_price #using half of the capital
+                    amount = usdt_balance * 5 / current_price #using half of the capital
                     binance_futures.create_market_buy_order("1000PEPE/USDT:USDT", amount)   
                     time.sleep(10) #add a break for safety
                 except Exception as e:
@@ -189,7 +189,7 @@ def manage_futures_positions_and_balance():
         if k[498] < d[498]:  
             if last_close < upperband[498] and second_last_close > upperband[497] :
                 try:
-                    amount = usdt_balance * 4.5 / current_price #using half of the capital
+                    amount = usdt_balance * 5 / current_price #using half of the capital
                     binance_futures.create_market_sell_order("1000PEPE/USDT:USDT", amount)   
                     time.sleep(10) #add a break for safety
                 except Exception as e:
@@ -211,7 +211,7 @@ def manage_futures_positions_and_balance():
         if k[498] > d[498] and k[497] > d[497]:  
             if last_close > lowerband[498] and second_last_close > lowerband[497] and third_last_close < lowerband[496]:
                 try:
-                    amount = usdt_balance * 9 / current_price #using the entire  capital
+                    amount = usdt_balance * 9.8 / current_price #using the entire  capital
                     binance_futures.create_market_buy_order("1000PEPE/USDT:USDT", amount)   
                     time.sleep(10) #add a break for safety
                 except Exception as e:
@@ -232,7 +232,7 @@ def manage_futures_positions_and_balance():
         if k[498] < d[498]:  
             if last_close < upperband[498] and second_last_close > upperband[497] :
                 try:
-                    amount = usdt_balance * 9 / current_price #using the entire capital
+                    amount = usdt_balance * 9.8 / current_price #using the entire capital
                     binance_futures.create_market_sell_order("1000PEPE/USDT:USDT", amount)   
                     time.sleep(10) #add a break for safety
                 except Exception as e:
