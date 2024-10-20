@@ -80,3 +80,4 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
 
 #Fetching USDT Balance
 usdt_balance = binance_futures.fetch_balance()['total']['USDT']
+print(usdt_balance)
