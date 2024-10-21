@@ -95,4 +95,4 @@ for order in closed_orders[-2:] :
     print (order['info'])
 
 for order in open_orders :
-    print (order['info'])
+    binance_futures.cancel_order(order['id'])
