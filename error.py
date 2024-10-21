@@ -95,4 +95,4 @@ for position in positions:
     print(position['entryPrice'])
 
 for order in closed_orders[-2:] :
-    print (order['id'])
+    print (order['avgPrice'])
