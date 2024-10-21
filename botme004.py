@@ -163,8 +163,8 @@ def manage_futures_positions_and_balance():
                     print(f"Error in opening long positions when no position is opened: {e}")
                 # Taking profit order
                 try:
-                    new_position_entry = binance_futures.fetch_positions_risk()[-1]['entryPrice']
-                    target_price = new_position_entry + (new_position_entry * 0.0155)
+                    open_price = binance_futures.fetch_closed_orders('1000PEPE/USDT:USDT')[-1]['average']
+                    target_price = open_price + (open_price * 0.0155)
                     close_amount = float(amount)
                     binance_futures.create_limit_sell_order('1000PEPE/USDT:USDT', close_amount, target_price)
                     time.sleep(10)  # add a break for safety
@@ -182,8 +182,8 @@ def manage_futures_positions_and_balance():
                     print(f"Error in opening short positions when no position is opened: {e}")
                 # Taking profit order
                 try:
-                    new_position_entry = binance_futures.fetch_positions_risk()[-1]['entryPrice']
-                    target_price = new_position_entry + (new_position_entry * 0.0155)
+                    open_price = binance_futures.fetch_closed_orders('1000PEPE/USDT:USDT')[-1]['average']
+                    target_price = open_price + (open_price * 0.0155)
                     close_amount = float(amount)
                     binance_futures.create_limit_buy_order('1000PEPE/USDT:USDT', close_amount, target_price)
                     time.sleep(10)  # add a break for safety
@@ -203,8 +203,8 @@ def manage_futures_positions_and_balance():
                     print(f"Error in opening long positions when a position is opened: {e}")
                 # Taking profit order
                 try:
-                    new_position_entry = binance_futures.fetch_positions_risk()[-1]['entryPrice']
-                    target_price = new_position_entry + (new_position_entry * 0.0155)
+                    open_price = binance_futures.fetch_closed_orders('1000PEPE/USDT:USDT')[-1]['average']
+                    target_price = open_price + (open_price * 0.0155)
                     close_amount = float(amount)
                     binance_futures.create_limit_sell_order('1000PEPE/USDT:USDT', close_amount, target_price)
                     time.sleep(10)  # add a break for safety
@@ -223,8 +223,8 @@ def manage_futures_positions_and_balance():
                     print(f"Error in opening short positions when a position is opened: {e}")
                 # Taking profit order
                 try:
-                    new_position_entry = binance_futures.fetch_positions_risk()[-1]['entryPrice']
-                    target_price = new_position_entry + (new_position_entry * 0.0155)
+                    open_price = binance_futures.fetch_closed_orders('1000PEPE/USDT:USDT')[-1]['average']
+                    target_price = open_price + (open_price * 0.0155)
                     close_amount = float(amount)
                     binance_futures.create_limit_buy_order('1000PEPE/USDT:USDT', close_amount, target_price)
                     time.sleep(10)  # add a break for safety
