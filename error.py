@@ -89,7 +89,7 @@ open_orders = binance_futures.fetch_open_orders('1000PEPE/USDT:USDT')
 current_price = binance_futures.fetch_ticker('1000PEPE/USDT:USDT')['last']
 
 for position in positions:
-    print(position['entryPrice'])
+    print(position)
 
 for order in closed_orders[-2:] :
     print (order['info'])
