@@ -86,9 +86,8 @@ print(usdt_balance)
 positions = binance_futures.fetch_positions_risk()
 orders = binance_futures.fetch_closed_orders('1000PEPE/USDT:USDT')
 current_price = binance_futures.fetch_ticker('1000PEPE/USDT:USDT')['last']
-print(orders)
 
 for position in positions:
     print(position['entryPrice'])
 for order in orders[-2:] :
-    print (order['avgPrice'])
+    print (order['info']['avgPrice'])
