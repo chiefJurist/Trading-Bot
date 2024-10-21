@@ -88,11 +88,11 @@ closed_orders = binance_futures.fetch_closed_orders('1000PEPE/USDT:USDT')
 open_orders = binance_futures.fetch_open_orders('1000PEPE/USDT:USDT')
 current_price = binance_futures.fetch_ticker('1000PEPE/USDT:USDT')['last']
 
+# for order in open_orders :
+#     binance_futures.cancel_order(order['id'], '1000PEPE/USDT:USDT')
+
 for position in positions:
     print(position)
 
 for order in closed_orders[-2:] :
-    print (order['info'])
-
-for order in open_orders :
-    binance_futures.cancel_order(order['id'], '1000PEPE/USDT:USDT')
+    print (order)
