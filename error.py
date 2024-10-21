@@ -87,3 +87,6 @@ positions = binance_futures.fetch_positions_risk()
 orders = binance_futures.fetch_open_orders('1000PEPE/USDT:USDT')
 current_price = binance_futures.fetch_ticker('1000PEPE/USDT:USDT')['last']
 print(positions)
+
+for position in positions:
+    print(position['side'])
