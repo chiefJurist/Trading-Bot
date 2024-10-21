@@ -94,7 +94,7 @@ print("Latest Position Entry Price ", positions[-1]['entryPrice'])
 #     binance_futures.cancel_order(order['id'], '1000PEPE/USDT:USDT')
 
 for position in positions:
-    print(position['entryPrice'])
+    print(position['contracts'])
 
 for order in closed_orders[-2:] :
     print (order['average'])
