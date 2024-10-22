@@ -193,7 +193,7 @@ def manage_futures_positions_and_balance():
                         "timeInForce": "GTC"     # Good 'til canceled; adjust as necessary
                     }
                 )
-                time.sleep(10)  # add a break for safety
+                time.sleep(360)  # add a break for safety
             except Exception as e:
                 print(f"Error in creating close order long positions: {e}")
 
@@ -228,7 +228,7 @@ def manage_futures_positions_and_balance():
                         "timeInForce": "GTC"     # Good 'til canceled; adjust as necessary
                     }
                 )
-                time.sleep(10)  # add a break for safety
+                time.sleep(360)  # add a break for safety
             except Exception as e:
                 print(f"Error in creating close order for short positions: {e}")
 
