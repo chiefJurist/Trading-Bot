@@ -166,7 +166,7 @@ def manage_futures_positions_and_balance():
     if k[498] > d[498] and k[497] > d[497]:  
         if last_close > lowerband[498] and second_last_close > lowerband[497] and third_last_close < lowerband[496]:
             try:
-                amount = usdt_balance * 5 / current_price #using half of the capital
+                amount = usdt_balance * 4.9 / current_price #using half of the capital
                 binance_futures.create_order(
                     symbol="1000PEPE/USDT:USDT",  # Symbol for the asset
                     side="BUY",                   # Buy to open a long position
@@ -176,7 +176,7 @@ def manage_futures_positions_and_balance():
                 )
                 time.sleep(10) #add a break for safety
             except Exception as e:
-                print(f"Error in opening long positions when no position is opened: {e}")
+                print(f"Error in opening long positions: {e}")
             # Taking profit order
             try:
                 open_price = binance_futures.fetch_closed_orders('1000PEPE/USDT:USDT')[-1]['average']
@@ -188,18 +188,20 @@ def manage_futures_positions_and_balance():
                     type='LIMIT',                 # Limit order
                     amount=close_amount,          # Amount to sell
                     price=target_price,           # Target price for the limit order
-                    params={"positionSide": "LONG"},          # Specify "LONG" to close the long position
-                    timeInForce='GTC'             # Good 'til canceled; adjust as necessary
+                    params = {
+                        "positionSide": "LONG",  # Specify "LONG" to close the long position
+                        "timeInForce": "GTC"     # Good 'til canceled; adjust as necessary
+                    }
                 )
                 time.sleep(10)  # add a break for safety
             except Exception as e:
-                print(f"Error in creating close order long positions when no position is opened: {e}")
+                print(f"Error in creating close order long positions: {e}")
 
     # Managing Short Poitions
     if k[498] < d[498]:  
         if last_close < upperband[498] and second_last_close > upperband[497] :
             try:
-                amount = usdt_balance * 5 / current_price #using half of the capital
+                amount = usdt_balance * 4.9 / current_price #using half of the capital
                 binance_futures.create_order(
                     symbol='1000PEPE/USDT:USDT',  # Symbol for the asset
                     side='SELL',                  # Sell to open a short position
@@ -209,7 +211,7 @@ def manage_futures_positions_and_balance():
                 )
                 time.sleep(10) #add a break for safety
             except Exception as e:
-                print(f"Error in opening short positions when no position is opened: {e}")
+                print(f"Error in opening short positions : {e}")
             # Taking profit order
             try:
                 open_price = binance_futures.fetch_closed_orders('1000PEPE/USDT:USDT')[-1]['average']
@@ -221,12 +223,14 @@ def manage_futures_positions_and_balance():
                     type='LIMIT',                 # Limit order
                     amount=close_amount,          # Amount to buy
                     price=target_price,           # Target price for the limit order
-                    params={"positionSide": "SHORT"},         # Specify "SHORT" to close the short position
-                    timeInForce='GTC'             # Good 'til canceled; adjust as necessary
+                    params = {
+                        "positionSide": "SHORT",  # Specify "SHORT" to close the short position
+                        "timeInForce": "GTC"     # Good 'til canceled; adjust as necessary
+                    }
                 )
                 time.sleep(10)  # add a break for safety
             except Exception as e:
-                print(f"Error in creating close order for short positions when no position is opened: {e}")
+                print(f"Error in creating close order for short positions: {e}")
 
 
 
