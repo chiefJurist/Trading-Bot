@@ -150,86 +150,73 @@ def manage_futures_positions_and_balance():
     current_price = binance_futures.fetch_ticker('1000PEPE/USDT:USDT')['last']
 
     #MAIN TRADING LOGIC
-    # Managing Positions When There Is No Open Position
-    if len(positions) == 0: 
-        # Managing Long Positions
-        if k[498] > d[498] and k[497] > d[497]:  
-            if last_close > lowerband[498] and second_last_close > lowerband[497] and third_last_close < lowerband[496]:
-                try:
-                    amount = usdt_balance * 5 / current_price #using half of the capital
-                    binance_futures.create_market_buy_order("1000PEPE/USDT:USDT", amount)   
-                    time.sleep(10) #add a break for safety
-                except Exception as e:
-                    print(f"Error in opening long positions when no position is opened: {e}")
-                # Taking profit order
-                try:
-                    open_price = binance_futures.fetch_closed_orders('1000PEPE/USDT:USDT')[-1]['average']
-                    target_price = open_price + (open_price * 0.0155)
-                    close_amount = float(amount)
-                    binance_futures.create_limit_sell_order('1000PEPE/USDT:USDT', close_amount, target_price)
-                    time.sleep(10)  # add a break for safety
-                except Exception as e:
-                    print(f"Error in creating close order long positions when no position is opened: {e}")
+    # Managing Long Positions
+    if k[498] > d[498] and k[497] > d[497]:  
+        if last_close > lowerband[498] and second_last_close > lowerband[497] and third_last_close < lowerband[496]:
+            try:
+                amount = usdt_balance * 5 / current_price #using half of the capital
+                binance_futures.create_order(
+                    symbol="1000PEPE/USDT:USDT",  # Symbol for the asset
+                    side="BUY",                   # Buy to open a long position
+                    type="MARKET",                 # Market order
+                    amount=amount,                 # Amount of asset to buy
+                    positionSide="LONG"            # Specify "LONG" since you're in Hedge Mode
+                )
+                time.sleep(10) #add a break for safety
+            except Exception as e:
+                print(f"Error in opening long positions when no position is opened: {e}")
+            # Taking profit order
+            try:
+                open_price = binance_futures.fetch_closed_orders('1000PEPE/USDT:USDT')[-1]['average']
+                target_price = open_price + (open_price * 0.0155)
+                close_amount = float(amount)
+                binance_futures.create_order(
+                    symbol='1000PEPE/USDT:USDT',  # Symbol for the asset
+                    side='SELL',                  # Sell to close the long position
+                    type='LIMIT',                 # Limit order
+                    amount=close_amount,          # Amount to sell
+                    price=target_price,           # Target price for the limit order
+                    positionSide='LONG',          # Specify "LONG" to close the long position
+                    timeInForce='GTC'             # Good 'til canceled; adjust as necessary
+                )
+                time.sleep(10)  # add a break for safety
+            except Exception as e:
+                print(f"Error in creating close order long positions when no position is opened: {e}")
 
-        # Managing Short Poitions
-        if k[498] < d[498]:  
-            if last_close < upperband[498] and second_last_close > upperband[497] :
-                try:
-                    amount = usdt_balance * 5 / current_price #using half of the capital
-                    binance_futures.create_market_sell_order("1000PEPE/USDT:USDT", amount)   
-                    time.sleep(10) #add a break for safety
-                except Exception as e:
-                    print(f"Error in opening short positions when no position is opened: {e}")
-                # Taking profit order
-                try:
-                    open_price = binance_futures.fetch_closed_orders('1000PEPE/USDT:USDT')[-1]['average']
-                    target_price = open_price + (open_price * 0.0155)
-                    close_amount = float(amount)
-                    binance_futures.create_limit_buy_order('1000PEPE/USDT:USDT', close_amount, target_price)
-                    time.sleep(10)  # add a break for safety
-                except Exception as e:
-                    print(f"Error in creating close order for short positions when no position is opened: {e}")
+    # Managing Short Poitions
+    if k[498] < d[498]:  
+        if last_close < upperband[498] and second_last_close > upperband[497] :
+            try:
+                amount = usdt_balance * 5 / current_price #using half of the capital
+                binance_futures.create_order(
+                    symbol='1000PEPE/USDT:USDT',  # Symbol for the asset
+                    side='SELL',                  # Sell to open a short position
+                    type='MARKET',                # Market order
+                    amount=amount,                # Amount to sell
+                    positionSide='SHORT'          # Specify "SHORT" to open the short position
+                )
+                time.sleep(10) #add a break for safety
+            except Exception as e:
+                print(f"Error in opening short positions when no position is opened: {e}")
+            # Taking profit order
+            try:
+                open_price = binance_futures.fetch_closed_orders('1000PEPE/USDT:USDT')[-1]['average']
+                target_price = open_price + (open_price * 0.0155)
+                close_amount = float(amount)
+                binance_futures.create_order(
+                    symbol='1000PEPE/USDT:USDT',  # Symbol for the asset
+                    side='BUY',                   # Buy to close the short position
+                    type='LIMIT',                 # Limit order
+                    amount=close_amount,          # Amount to buy
+                    price=target_price,           # Target price for the limit order
+                    positionSide='SHORT',         # Specify "SHORT" to close the short position
+                    timeInForce='GTC'             # Good 'til canceled; adjust as necessary
+                )
+                time.sleep(10)  # add a break for safety
+            except Exception as e:
+                print(f"Error in creating close order for short positions when no position is opened: {e}")
 
 
-    # Managing Long Positions When A Short Position Is Open
-    elif len(positions) == 1 and positions[0]['side'] == 'short': 
-        if k[498] > d[498] and k[497] > d[497]:  
-            if last_close > lowerband[498] and second_last_close > lowerband[497] and third_last_close < lowerband[496]:
-                try:
-                    amount = usdt_balance * 5 / current_price #using the entire  capital
-                    binance_futures.create_market_buy_order("1000PEPE/USDT:USDT", amount)   
-                    time.sleep(10) #add a break for safety
-                except Exception as e:
-                    print(f"Error in opening long positions when a position is opened: {e}")
-                # Taking profit order
-                try:
-                    open_price = binance_futures.fetch_closed_orders('1000PEPE/USDT:USDT')[-1]['average']
-                    target_price = open_price + (open_price * 0.0155)
-                    close_amount = float(amount)
-                    binance_futures.create_limit_sell_order('1000PEPE/USDT:USDT', close_amount, target_price)
-                    time.sleep(10)  # add a break for safety
-                except Exception as e:
-                    print(f"Error in creating close order for long positions when a position is opened: {e}")
-
-    # Managing Short Positions When A Long Position Is Open
-    elif len(positions) == 1 and positions[0]['side'] == 'long': 
-        if k[498] < d[498]:  
-            if last_close < upperband[498] and second_last_close > upperband[497] :
-                try:
-                    amount = usdt_balance * 5 / current_price #using the entire capital
-                    binance_futures.create_market_sell_order("1000PEPE/USDT:USDT", amount)   
-                    time.sleep(10) #add a break for safety
-                except Exception as e:
-                    print(f"Error in opening short positions when a position is opened: {e}")
-                # Taking profit order
-                try:
-                    open_price = binance_futures.fetch_closed_orders('1000PEPE/USDT:USDT')[-1]['average']
-                    target_price = open_price + (open_price * 0.0155)
-                    close_amount = float(amount)
-                    binance_futures.create_limit_buy_order('1000PEPE/USDT:USDT', close_amount, target_price)
-                    time.sleep(10)  # add a break for safety
-                except Exception as e:
-                    print(f"Error in creating close order for short positions when a position is opened: {e}")
 
     #Managing Open Long Positions For Risk Management
     if k[498] < d[498] and last_close < lowerband[498]:
@@ -248,7 +235,13 @@ def manage_futures_positions_and_balance():
                     #creating a market order for closing position
                     try:
                         close_amount = abs(float(position['contracts']))
-                        binance_futures.create_market_sell_order('1000PEPE/USDT:USDT', close_amount)
+                        binance_futures.create_order(
+                            symbol='1000PEPE/USDT:USDT',  # Symbol for the asset
+                            side='SELL',                  # Sell to close the long position
+                            type='MARKET',                # Market order
+                            amount=close_amount,          # Amount to sell (the amount of the long position)
+                            positionSide='LONG'           # Specify "LONG" to close the long position
+                        )
                     except Exception as e:
                         print(f"Error in closing long position for risk management: {e}")
 
@@ -269,7 +262,13 @@ def manage_futures_positions_and_balance():
                         #creating a market order for closing position
                         try:
                             close_amount = abs(float(position['contracts']))
-                            binance_futures.create_market_buy_order('1000PEPE/USDT:USDT', close_amount)
+                            binance_futures.create_order(
+                                symbol='1000PEPE/USDT:USDT',  # Symbol for the asset
+                                side='BUY',                  # Sell to close the long position
+                                type='MARKET',                # Market order
+                                amount=close_amount,          # Amount to sell (the amount of the long position)
+                                positionSide='LONG'           # Specify "LONG" to close the long position
+                            )
                         except Exception as e:
                             print(f"Error in closing long position for risk management: {e}")
 
