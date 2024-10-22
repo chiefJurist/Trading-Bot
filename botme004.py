@@ -160,7 +160,7 @@ def manage_futures_positions_and_balance():
                     side="BUY",                   # Buy to open a long position
                     type="MARKET",                 # Market order
                     amount=amount,                 # Amount of asset to buy
-                    positionSide="LONG"            # Specify "LONG" since you're in Hedge Mode
+                    params={"positionSide": "LONG"} # Specify "LONG" since you're in Hedge Mode
                 )
                 time.sleep(10) #add a break for safety
             except Exception as e:
@@ -176,7 +176,7 @@ def manage_futures_positions_and_balance():
                     type='LIMIT',                 # Limit order
                     amount=close_amount,          # Amount to sell
                     price=target_price,           # Target price for the limit order
-                    positionSide='LONG',          # Specify "LONG" to close the long position
+                    params={"positionSide": "LONG"},          # Specify "LONG" to close the long position
                     timeInForce='GTC'             # Good 'til canceled; adjust as necessary
                 )
                 time.sleep(10)  # add a break for safety
@@ -193,7 +193,7 @@ def manage_futures_positions_and_balance():
                     side='SELL',                  # Sell to open a short position
                     type='MARKET',                # Market order
                     amount=amount,                # Amount to sell
-                    positionSide='SHORT'          # Specify "SHORT" to open the short position
+                    params={"positionSide": "SHORT"}          # Specify "SHORT" to open the short position
                 )
                 time.sleep(10) #add a break for safety
             except Exception as e:
@@ -209,7 +209,7 @@ def manage_futures_positions_and_balance():
                     type='LIMIT',                 # Limit order
                     amount=close_amount,          # Amount to buy
                     price=target_price,           # Target price for the limit order
-                    positionSide='SHORT',         # Specify "SHORT" to close the short position
+                    params={"positionSide": "SHORT"},         # Specify "SHORT" to close the short position
                     timeInForce='GTC'             # Good 'til canceled; adjust as necessary
                 )
                 time.sleep(10)  # add a break for safety
@@ -240,7 +240,7 @@ def manage_futures_positions_and_balance():
                             side='SELL',                  # Sell to close the long position
                             type='MARKET',                # Market order
                             amount=close_amount,          # Amount to sell (the amount of the long position)
-                            positionSide='LONG'           # Specify "LONG" to close the long position
+                            params={"positionSide": "LONG"}       # Specify "LONG" to close the long position
                         )
                     except Exception as e:
                         print(f"Error in closing long position for risk management: {e}")
@@ -266,8 +266,8 @@ def manage_futures_positions_and_balance():
                                 symbol='1000PEPE/USDT:USDT',  # Symbol for the asset
                                 side='BUY',                  # Sell to close the long position
                                 type='MARKET',                # Market order
-                                amount=close_amount,          # Amount to sell (the amount of the long position)
-                                positionSide='LONG'           # Specify "LONG" to close the long position
+                                amount=close_amount,          # Amount to sell (the amount of the short position)
+                                params={"positionSide": "SHORT"}           # Specify "LONG" to close the short position
                             )
                         except Exception as e:
                             print(f"Error in closing long position for risk management: {e}")
