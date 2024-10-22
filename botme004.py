@@ -166,7 +166,7 @@ def manage_futures_positions_and_balance():
     if k[498] > d[498] and k[497] > d[497]:  
         if last_close > lowerband[498] and second_last_close > lowerband[497] and third_last_close < lowerband[496]:
             try:
-                amount = usdt_balance * 4.9 / current_price #using half of the capital
+                amount = usdt_balance * 5 / current_price #using half of the capital
                 binance_futures.create_order(
                     symbol="1000PEPE/USDT:USDT",  # Symbol for the asset
                     side="BUY",                   # Buy to open a long position
@@ -201,7 +201,7 @@ def manage_futures_positions_and_balance():
     if k[498] < d[498]:  
         if last_close < upperband[498] and second_last_close > upperband[497] :
             try:
-                amount = usdt_balance * 4.9 / current_price #using half of the capital
+                amount = usdt_balance * 5 / current_price #using half of the capital
                 binance_futures.create_order(
                     symbol='1000PEPE/USDT:USDT',  # Symbol for the asset
                     side='SELL',                  # Sell to open a short position
@@ -215,7 +215,7 @@ def manage_futures_positions_and_balance():
             # Taking profit order
             try:
                 open_price = binance_futures.fetch_closed_orders('1000PEPE/USDT:USDT')[-1]['average']
-                target_price = open_price + (open_price * 0.0155)
+                target_price = open_price - (open_price * 0.0155)
                 close_amount = float(amount)
                 binance_futures.create_order(
                     symbol='1000PEPE/USDT:USDT',  # Symbol for the asset
