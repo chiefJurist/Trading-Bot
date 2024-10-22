@@ -82,17 +82,17 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
 usdt_balance = binance_futures.fetch_balance()['total']['USDT']
 print(usdt_balance)
 
-binance_futures.set_leverage(10, '1000PEPE/USDT:USDT')
-current_price = binance_futures.fetch_ticker('1000PEPE/USDT:USDT')['last']
+# binance_futures.set_leverage(10, '1000PEPE/USDT:USDT')
+# current_price = binance_futures.fetch_ticker('1000PEPE/USDT:USDT')['last']
 
-amount = usdt_balance * 5 / current_price #using half of the capital
-binance_futures.create_order(
-    symbol="1000PEPE/USDT:USDT",  # Symbol for the asset
-    side="BUY",                   # Buy to open a long position
-    type="MARKET",                 # Market order
-    amount=amount,                 # Amount of asset to buy
-    params={"positionSide": "LONG"} # Specify "LONG" since you're in Hedge Mode
-)
+# amount = usdt_balance * 5 / current_price #using half of the capital
+# binance_futures.create_order(
+#     symbol="1000PEPE/USDT:USDT",  # Symbol for the asset
+#     side="BUY",                   # Buy to open a long position
+#     type="MARKET",                 # Market order
+#     amount=amount,                 # Amount of asset to buy
+#     params={"positionSide": "LONG"} # Specify "LONG" since you're in Hedge Mode
+# )
 # #Checking positions and orders
 # positions = binance_futures.fetch_positions_risk()
 # closed_orders = binance_futures.fetch_closed_orders('1000PEPE/USDT:USDT')

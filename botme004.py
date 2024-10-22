@@ -59,9 +59,21 @@ def transfer_and_withdraw_profit():
                 try:
                     close_amount = abs(float(position['info']['positionAmt']))
                     if position['side'] == 'short':
-                        binance_futures.create_market_buy_order('1000PEPE/USDT:USDT', close_amount)
+                        binance_futures.create_order(
+                            symbol='1000PEPE/USDT:USDT',  # Symbol for the asset
+                            side='SELL',                  # Sell to close the long position
+                            type='MARKET',                # Market order
+                            amount=close_amount,          # Amount to sell (the amount of the long position)
+                            params={"positionSide": "LONG"}       # Specify "LONG" to close the long position
+                        )
                     elif position['side'] == 'long':
-                        binance_futures.create_market_sell_order('1000PEPE/USDT:USDT', close_amount)
+                        binance_futures.create_order(
+                            symbol='1000PEPE/USDT:USDT',  # Symbol for the asset
+                            side='BUY',                  # Sell to close the long position
+                            type='MARKET',                # Market order
+                            amount=close_amount,          # Amount to sell (the amount of the short position)
+                            params={"positionSide": "SHORT"}           # Specify "SHORT" to close the short position
+                        )
                 except Exception as e:
                     print(f"Failed to close positions to withdraw profit: {e}")
 
@@ -267,7 +279,7 @@ def manage_futures_positions_and_balance():
                                 side='BUY',                  # Sell to close the long position
                                 type='MARKET',                # Market order
                                 amount=close_amount,          # Amount to sell (the amount of the short position)
-                                params={"positionSide": "SHORT"}           # Specify "LONG" to close the short position
+                                params={"positionSide": "SHORT"}           # Specify "SHORT" to close the short position
                             )
                         except Exception as e:
                             print(f"Error in closing long position for risk management: {e}")
