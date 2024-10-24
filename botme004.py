@@ -140,7 +140,7 @@ def calculate_indicators(df, window=20, num_std_dev=0.975):
 #Manage Futures Position And Balance
 def manage_futures_positions_and_balance():
     #Setting leverage
-    binance_futures.set_leverage(20, 'BTC/USDT:USDT')
+    binance_futures.set_leverage(10, 'BTC/USDT:USDT')
 
     #Fetching USDT Balance
     usdt_balance = binance_futures.fetch_balance()['total']['USDT']
@@ -173,7 +173,7 @@ def manage_futures_positions_and_balance():
         if k[498] > d[498] and k[497] > d[497]:  
             if last_close > lowerband[498] and second_last_close > lowerband[497] and third_last_close < lowerband[496]:
                 try:
-                    amount = usdt_balance * 9.9 / current_price #using half of the capital
+                    amount = usdt_balance * 4.9 / current_price #using half of the capital
                     binance_futures.create_order(
                         symbol="BTC/USDT:USDT",  # Symbol for the asset
                         side="BUY",                   # Buy to open a long position
@@ -209,7 +209,7 @@ def manage_futures_positions_and_balance():
         if k[498] < d[498]:  
             if last_close < upperband[498] and second_last_close > upperband[497] :
                 try:
-                    amount = usdt_balance * 9.9 / current_price #using half of the capital
+                    amount = usdt_balance * 4.9 / current_price #using half of the capital
                     binance_futures.create_order(
                         symbol='BTC/USDT:USDT',  # Symbol for the asset
                         side='SELL',                  # Sell to open a short position
