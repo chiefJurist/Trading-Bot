@@ -187,7 +187,7 @@ def manage_futures_positions_and_balance():
                 # Taking profit order
                 try:
                     open_price = binance_futures.fetch_closed_orders('BTC/USDT:USDT')[-1]['average']
-                    target_price = open_price + (open_price * 0.0105)
+                    target_price = open_price + (open_price * 0.0155)
                     close_amount = float(amount)
                     binance_futures.create_order(
                         symbol='BTC/USDT:USDT',  # Symbol for the asset
@@ -223,7 +223,7 @@ def manage_futures_positions_and_balance():
                 # Taking profit order
                 try:
                     open_price = binance_futures.fetch_closed_orders('BTC/USDT:USDT')[-1]['average']
-                    target_price = open_price - (open_price * 0.0105)
+                    target_price = open_price - (open_price * 0.0155)
                     close_amount = float(amount)
                     binance_futures.create_order(
                         symbol='BTC/USDT:USDT',  # Symbol for the asset
