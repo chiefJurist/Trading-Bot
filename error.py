@@ -92,7 +92,7 @@ try:
         symbol="BTC/USDT:USDT",  # Symbol for the asset
         side="BUY",                   # Buy to open a long position
         type="MARKET",                 # Market order
-        amount=amount,                 # Amount of asset to buy
+        amount=15,                 # Amount of asset to buy
         params={"positionSide": "LONG"} # Specify "LONG" since you're in Hedge Mode
     )
     time.sleep(10) #add a break for safety
