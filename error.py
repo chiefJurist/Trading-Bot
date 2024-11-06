@@ -84,20 +84,44 @@ print(usdt_balance)
 
 binance_futures.set_leverage(10, 'BTC/USDT:USDT')
 current_price = binance_futures.fetch_ticker('BTC/USDT:USDT')['last']
+# try:
+#     amount = usdt_balance * 5 / current_price #using half of the capital
+#     binance_futures.create_order(
+#         symbol="BTC/USDT:USDT",  # Symbol for the asset
+#         side="BUY",                   # Buy to open a long position
+#         type="MARKET",                 # Market order
+#         amount=15,                 # Amount of asset to buy
+#         params={"positionSide": "LONG"} # Specify "LONG" since you're in Hedge Mode
+#     )
+#     time.sleep(10) #add a break for safety
+# except Exception as e:
+#     print(f"Error in opening long positions: {e}")
 
-amount = usdt_balance * 10 / current_price #using half of the capital
-try:
-    amount = usdt_balance * 5 / current_price #using half of the capital
-    binance_futures.create_order(
-        symbol="BTC/USDT:USDT",  # Symbol for the asset
-        side="BUY",                   # Buy to open a long position
-        type="MARKET",                 # Market order
-        amount=15,                 # Amount of asset to buy
-        params={"positionSide": "LONG"} # Specify "LONG" since you're in Hedge Mode
-    )
-    time.sleep(10) #add a break for safety
-except Exception as e:
-    print(f"Error in opening long positions: {e}")
+
+initial_amount = 15
+while initial_amount > 0:
+    try:
+        binance_futures.create_order(
+            symbol="BTC/USDT:USDT",
+            side="BUY",
+            type="MARKET",
+            amount=initial_amount,
+            params={"positionSide": "LONG"}
+        )
+        print(f"Order placed successfully with amount: {initial_amount}")
+        break  # Exit the loop if the order is successful
+    except Exception as e:
+        if "Margin is insufficient" in str(e):
+            print(f"Margin insufficient for amount: {initial_amount}. Reducing amount and retrying...")
+            initial_amount -= 1  # Reduce the amount by 1 and retry
+        else:
+            print(f"Error in opening long positions: {e}")
+            break  # Exit the loop if it's an error other than "Margin is insufficient"
+
+if initial_amount <= 0:
+    print("Order could not be placed. Amount reduced to zero.")
+
+
 # #Checking positions and orders
 # positions = binance_futures.fetch_positions_risk()
 # closed_orders = binance_futures.fetch_closed_orders('1000PEPE/USDT:USDT')
