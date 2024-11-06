@@ -82,7 +82,7 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
 usdt_balance = binance_futures.fetch_balance()['total']['USDT']
 print(usdt_balance)
 
-binance_futures.set_leverage(20, 'BTC/USDT:USDT')
+binance_futures.set_leverage(10, 'BTC/USDT:USDT')
 current_price = binance_futures.fetch_ticker('BTC/USDT:USDT')['last']
 
 amount = usdt_balance * 10 / current_price #using half of the capital
