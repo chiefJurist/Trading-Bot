@@ -86,13 +86,18 @@ binance_futures.set_leverage(10, 'BTC/USDT:USDT')
 current_price = binance_futures.fetch_ticker('BTC/USDT:USDT')['last']
 
 amount = usdt_balance * 10 / current_price #using half of the capital
-binance_futures.create_order(
-    symbol="BTC/USDT:USDT",  # Symbol for the asset
-    side="BUY",                   # Buy to open a long position
-    type="MARKET",                 # Market order
-    amount=amount,                 # Amount of asset to buy
-    params={"positionSide": "LONG"} # Specify "LONG" since you're in Hedge Mode
-)
+try:
+    amount = usdt_balance * 5 / current_price #using half of the capital
+    binance_futures.create_order(
+        symbol="BTC/USDT:USDT",  # Symbol for the asset
+        side="BUY",                   # Buy to open a long position
+        type="MARKET",                 # Market order
+        amount=amount,                 # Amount of asset to buy
+        params={"positionSide": "LONG"} # Specify "LONG" since you're in Hedge Mode
+    )
+    time.sleep(10) #add a break for safety
+except Exception as e:
+    print(f"Error in opening long positions: {e}")
 # #Checking positions and orders
 # positions = binance_futures.fetch_positions_risk()
 # closed_orders = binance_futures.fetch_closed_orders('1000PEPE/USDT:USDT')
