@@ -108,7 +108,7 @@ try:
         side="SELL",                   # Buy to open a long position
         type="MARKET",                 # Market order
         amount=5 * 10 / current_price,                 # Amount of asset to buy
-        params={"positionSide": "LONG"} # Specify "LONG" since you're in Hedge Mode
+        params={"positionSide": "SHORT"} # Specify "LONG" since you're in Hedge Mode
     )
     time.sleep(10) #add a break for safety
 except Exception as e:
