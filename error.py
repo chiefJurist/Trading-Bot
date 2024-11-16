@@ -84,20 +84,21 @@ print(usdt_balance)
 
 binance_futures.set_leverage(10, 'ETH/USDT:USDT')
 current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
-try:
-    binance_futures.create_order(
-        symbol="ETH/USDT:USDT",  # Symbol for the asset
-        side="BUY",                   # Buy to open a long position
-        type="MARKET",                 # Market order
-        amount=5 * 10 / current_price,                 # Amount of asset to buy
-        params={"positionSide": "LONG"} # Specify "LONG" since you're in Hedge Mode
-    )
-    time.sleep(10) #add a break for safety
-except Exception as e:
-    print(f"Error in opening long positions: {e}")
 
-usdt_balance = binance_futures.fetch_balance()['total']['USDT']
-print("balance2 ", usdt_balance)
+# try:
+#     binance_futures.create_order(
+#         symbol="ETH/USDT:USDT",  # Symbol for the asset
+#         side="BUY",                   # Buy to open a long position
+#         type="MARKET",                 # Market order
+#         amount=5 * 10 / current_price,                 # Amount of asset to buy
+#         params={"positionSide": "LONG"} # Specify "LONG" since you're in Hedge Mode
+#     )
+#     time.sleep(10) #add a break for safety
+# except Exception as e:
+#     print(f"Error in opening long positions: {e}")
+
+# usdt_balance = binance_futures.fetch_balance()['total']['USDT']
+# print("balance2 ", usdt_balance)
 
 
 binance_futures.set_leverage(10, 'ETH/USDT:USDT')
@@ -110,12 +111,20 @@ try:
         amount=5 * 10 / current_price,                 # Amount of asset to buy
         params={"positionSide": "SHORT"} # Specify "LONG" since you're in Hedge Mode
     )
+    usdt_balance = binance_futures.fetch_balance()['total']['USDT']
+    print("balance2 ", usdt_balance)
+
     time.sleep(10) #add a break for safety
 except Exception as e:
     print(f"Error in opening long positions: {e}")
 
 usdt_balance = binance_futures.fetch_balance()['total']['USDT']
 print("balance3 ", usdt_balance)
+
+time.sleep(10) #add a break for safety
+
+usdt_balance = binance_futures.fetch_balance()['total']['USDT']
+print("balance4 ", usdt_balance)
 
 # initial_amount = 15
 # while initial_amount > 0:
