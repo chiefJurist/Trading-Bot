@@ -85,78 +85,42 @@ print(usdt_balance)
 binance_futures.set_leverage(10, 'ETH/USDT:USDT')
 current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
 
-# try:
-#     binance_futures.create_order(
-#         symbol="ETH/USDT:USDT",  # Symbol for the asset
-#         side="BUY",                   # Buy to open a long position
-#         type="MARKET",                 # Market order
-#         amount=5 * 10 / current_price,                 # Amount of asset to buy
-#         params={"positionSide": "LONG"} # Specify "LONG" since you're in Hedge Mode
-#     )
-#     time.sleep(10) #add a break for safety
-# except Exception as e:
-#     print(f"Error in opening long positions: {e}")
-
-# usdt_balance = binance_futures.fetch_balance()['total']['USDT']
-# print("balance2 ", usdt_balance)
+#Long
+try:
+    binance_futures.create_order(
+        symbol="ETH/USDT:USDT",  # Symbol for the asset
+        side="BUY",                   # Buy to open a long position
+        type="MARKET",                 # Market order
+        amount=5 * 10 / current_price,                 # Amount of asset to buy
+        params={"positionSide": "LONG"} # Specify "LONG" since you're in Hedge Mode
+    )
+    time.sleep(10) #add a break for safety
+except Exception as e:
+    print(f"Error in opening long positions: {e}")
 
 
-binance_futures.set_leverage(10, 'ETH/USDT:USDT')
-current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
+#Short
 try:
     binance_futures.create_order(
         symbol="ETH/USDT:USDT",  # Symbol for the asset
         side="SELL",                   # Buy to open a long position
         type="MARKET",                 # Market order
         amount=5 * 10 / current_price,                 # Amount of asset to buy
-        params={"positionSide": "SHORT"} # Specify "LONG" since you're in Hedge Mode
+        params={"positionSide": "SHORT"} # Specify "SHORT" since you're in Hedge Mode
     )
-    usdt_balance = binance_futures.fetch_balance()['total']['USDT']
-    print("balance2 ", usdt_balance)
-
     time.sleep(10) #add a break for safety
 except Exception as e:
-    print(f"Error in opening long positions: {e}")
-
-usdt_balance = binance_futures.fetch_balance()['total']['USDT']
-print("balance3 ", usdt_balance)
-
-time.sleep(60) #add a break for safety
-
-usdt_balance = binance_futures.fetch_balance()['total']['USDT']
-print("balance4 ", usdt_balance)
-
-# initial_amount = 15
-# while initial_amount > 0:
-#     try:
-#         binance_futures.create_order(
-#             symbol="BTC/USDT:USDT",
-#             side="BUY",
-#             type="MARKET",
-#             amount=initial_amount,
-#             params={"positionSide": "LONG"}
-#         )
-#         print(f"Order placed successfully with amount: {initial_amount}")
-#         break  # Exit the loop if the order is successful
-#     except Exception as e:
-#         if "Margin is insufficient" in str(e):
-#             print(f"Margin insufficient for amount: {initial_amount}. Reducing amount and retrying...")
-#             initial_amount -= 1  # Reduce the amount by 1 and retry
-#         else:
-#             print(f"Error in opening long positions: {e}")
-#             break  # Exit the loop if it's an error other than "Margin is insufficient"
-
-# if initial_amount <= 0:
-#     print("Order could not be placed. Amount reduced to zero.")
+    print(f"Error in opening short positions: {e}")
 
 
-# #Checking positions and orders
-# positions = binance_futures.fetch_positions_risk()
+#Checking positions and orders
+positions = binance_futures.fetch_positions_risk()
 # closed_orders = binance_futures.fetch_closed_orders('1000PEPE/USDT:USDT')
 # open_orders = binance_futures.fetch_open_orders('1000PEPE/USDT:USDT')
 # current_price = binance_futures.fetch_ticker('1000PEPE/USDT:USDT')['last']
 
-# print("Latest Position Entry Price ", positions[-1]['entryPrice'])
+print ("open positions: ", positions)
+print("Latest Position Entry Price ", positions[-1]['entryPrice'])
 
 # for order in open_orders :
 #     binance_futures.cancel_order(order['id'], '1000PEPE/USDT:USDT')
