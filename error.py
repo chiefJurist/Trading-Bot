@@ -86,7 +86,7 @@ binance_futures.set_leverage(10, 'ETH/USDT:USDT')
 current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
 try:
     binance_futures.create_order(
-        symbol="BTC/USDT:USDT",  # Symbol for the asset
+        symbol="ETH/USDT:USDT",  # Symbol for the asset
         side="BUY",                   # Buy to open a long position
         type="MARKET",                 # Market order
         amount=2,                 # Amount of asset to buy
@@ -104,7 +104,7 @@ binance_futures.set_leverage(10, 'ETH/USDT:USDT')
 current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
 try:
     binance_futures.create_order(
-        symbol="BTC/USDT:USDT",  # Symbol for the asset
+        symbol="ETH/USDT:USDT",  # Symbol for the asset
         side="SELL",                   # Buy to open a long position
         type="MARKET",                 # Market order
         amount=2,                 # Amount of asset to buy
