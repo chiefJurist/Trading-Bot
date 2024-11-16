@@ -121,7 +121,7 @@ except Exception as e:
 usdt_balance = binance_futures.fetch_balance()['total']['USDT']
 print("balance3 ", usdt_balance)
 
-time.sleep(10) #add a break for safety
+time.sleep(60) #add a break for safety
 
 usdt_balance = binance_futures.fetch_balance()['total']['USDT']
 print("balance4 ", usdt_balance)
