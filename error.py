@@ -100,17 +100,17 @@ except Exception as e:
 
 
 #Short
-try:
-    binance_futures.create_order(
-        symbol="ETH/USDT:USDT",  # Symbol for the asset
-        side="SELL",                   # Buy to open a long position
-        type="MARKET",                 # Market order
-        amount=5 * 10 / current_price,                 # Amount of asset to buy
-        params={"positionSide": "SHORT"} # Specify "SHORT" since you're in Hedge Mode
-    )
-    time.sleep(10) #add a break for safety
-except Exception as e:
-    print(f"Error in opening short positions: {e}")
+# try:
+#     binance_futures.create_order(
+#         symbol="ETH/USDT:USDT",  # Symbol for the asset
+#         side="SELL",                   # Buy to open a long position
+#         type="MARKET",                 # Market order
+#         amount=5 * 10 / current_price,                 # Amount of asset to buy
+#         params={"positionSide": "SHORT"} # Specify "SHORT" since you're in Hedge Mode
+#     )
+#     time.sleep(10) #add a break for safety
+# except Exception as e:
+#     print(f"Error in opening short positions: {e}")
 
 
 #Checking positions and orders
@@ -120,7 +120,9 @@ positions = binance_futures.fetch_positions_risk()
 # current_price = binance_futures.fetch_ticker('1000PEPE/USDT:USDT')['last']
 
 print ("open positions: ", positions)
+print("latest open position ", positions[-1])
 print("Latest Position Entry Price ", positions[-1]['entryPrice'])
+print("Latest Position Entry Price ", positions[-1]["initialMargin"])
 
 # for order in open_orders :
 #     binance_futures.cancel_order(order['id'], '1000PEPE/USDT:USDT')
