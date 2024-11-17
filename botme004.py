@@ -58,7 +58,7 @@ def transfer_and_withdraw_profit():
             for position in positions:
                 try:
                     close_amount = abs(float(position['info']['positionAmt']))
-                    if position['side'] == 'short':
+                    if position['side'] == 'long':
                         binance_futures.create_order(
                             symbol='BTC/USDT:USDT',  # Symbol for the asset
                             side='SELL',                  # Sell to close the long position
@@ -66,7 +66,7 @@ def transfer_and_withdraw_profit():
                             amount=close_amount,          # Amount to sell (the amount of the long position)
                             params={"positionSide": "LONG"}       # Specify "LONG" to close the long position
                         )
-                    elif position['side'] == 'long':
+                    elif position['side'] == 'short':
                         binance_futures.create_order(
                             symbol='BTC/USDT:USDT',  # Symbol for the asset
                             side='BUY',                  # Sell to close the long position
@@ -385,7 +385,7 @@ def main():
     
     while True:
         try: 
-            # transfer_and_withdraw_profit()
+            transfer_and_withdraw_profit()
             manage_futures_positions_and_balance()
             time.sleep(5)  # Main loop delay
         except Exception as e:
