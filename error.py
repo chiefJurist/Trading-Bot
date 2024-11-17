@@ -119,9 +119,10 @@ positions = binance_futures.fetch_positions_risk()
 # open_orders = binance_futures.fetch_open_orders('1000PEPE/USDT:USDT')
 # current_price = binance_futures.fetch_ticker('1000PEPE/USDT:USDT')['last']
 
-print ("open positions: ", positions)
+# print ("open positions: ", positions)
 print("latest open position ", positions[-1])
 print("Latest Position Entry Price ", positions[-1]['entryPrice'])
+print("Remaining Balance ", (usdt_balance) - (positions[-1]['entryPrice']))
 print("Latest Position Entry Price ", positions[-1]["initialMargin"])
 
 # for order in open_orders :
