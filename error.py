@@ -94,7 +94,7 @@ try:
         amount=5 * 10 / current_price,                 # Amount of asset to buy
         params={"positionSide": "LONG"} # Specify "LONG" since you're in Hedge Mode
     )
-    time.sleep(10) #add a break for safety
+    time.sleep(3) #add a break for safety
 except Exception as e:
     print(f"Error in opening long positions: {e}")
 
@@ -122,7 +122,7 @@ positions = binance_futures.fetch_positions_risk()
 # print ("open positions: ", positions)
 print("latest open position ", positions[-1])
 print("Latest Position Entry Price ", positions[-1]['entryPrice'])
-print("Remaining Balance ", (usdt_balance) - (positions[-1]['entryPrice']))
+print("Remaining Balance ", (usdt_balance) - (positions[-1]['initialMargin']))
 print("Latest Position Entry Price ", positions[-1]["initialMargin"])
 
 # for order in open_orders :
