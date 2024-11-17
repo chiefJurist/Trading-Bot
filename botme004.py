@@ -246,7 +246,7 @@ def manage_futures_positions_and_balance():
 #MAIN TRADING LOGIC WHEN A POSITION IS OPENED
     if len(positions) > 0:
         #Remaining balance
-        remaining_balance = usdt_balance - (positions[-1]["initialMargin"])
+        remaining_balance = (usdt_balance) - (positions[-1]["initialMargin"])
 
         # Managing Long Positions
         if not long_position_open: #ensure no long position is opened 
