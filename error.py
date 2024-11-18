@@ -87,20 +87,27 @@ current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
 amount=5 * 10 / current_price                 # Amount of asset to buy
 
 #Long
-try:
-    binance_futures.create_order(
-        symbol="ETH/USDT:USDT",  # Symbol for the asset
-        side="BUY",                   # Buy to open a long position
-        type="MARKET",                 # Market order
-        amount=amount,
-        params={"positionSide": "LONG"} # Specify "LONG" since you're in Hedge Mode
-    )
-    print("Calculated amount to trade: ", amount * current_price)
-    print("Calculated amount to trade in eth: ", amount)
-    time.sleep(3) #add a break for safety
-except Exception as e:
-    print(f"Error in opening long positions: {e}")
+# try:
+#     binance_futures.create_order(
+#         symbol="ETH/USDT:USDT",  # Symbol for the asset
+#         side="BUY",                   # Buy to open a long position
+#         type="MARKET",                 # Market order
+#         amount=amount,
+#         params={"positionSide": "LONG"} # Specify "LONG" since you're in Hedge Mode
+#     )
+#     print("Calculated amount to trade: ", amount * current_price)
+#     print("Calculated amount to trade in eth: ", amount)
+#     time.sleep(3) #add a break for safety
+# except Exception as e:
+#     print(f"Error in opening long positions: {e}")
 
+
+# Fetch market details for ETH/USDT to get the precision
+market_info = binance_futures.market('ETH/USDT:USDT')
+
+# Get the precision for the amount (number of decimal places allowed)
+precision = market_info['precision']['amount']
+print(precision)
 
 #Short
 # try:
