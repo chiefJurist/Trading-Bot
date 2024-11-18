@@ -84,6 +84,7 @@ print(usdt_balance)
 
 binance_futures.set_leverage(10, 'ETH/USDT:USDT')
 current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
+amount=5 * 10 / current_price,                 # Amount of asset to buy
 
 #Long
 try:
@@ -91,9 +92,10 @@ try:
         symbol="ETH/USDT:USDT",  # Symbol for the asset
         side="BUY",                   # Buy to open a long position
         type="MARKET",                 # Market order
-        amount=5 * 10 / current_price,                 # Amount of asset to buy
+        amount=amount,
         params={"positionSide": "LONG"} # Specify "LONG" since you're in Hedge Mode
     )
+    print("Calculated amount to trade:", amount)
     time.sleep(3) #add a break for safety
 except Exception as e:
     print(f"Error in opening long positions: {e}")
@@ -114,16 +116,16 @@ except Exception as e:
 
 
 #Checking positions and orders
-positions = binance_futures.fetch_positions_risk()
+# positions = binance_futures.fetch_positions_risk()
 # closed_orders = binance_futures.fetch_closed_orders('1000PEPE/USDT:USDT')
 # open_orders = binance_futures.fetch_open_orders('1000PEPE/USDT:USDT')
 # current_price = binance_futures.fetch_ticker('1000PEPE/USDT:USDT')['last']
 
 # print ("open positions: ", positions)
-print("latest open position ", positions[-1])
-print("Latest Position Entry Price ", positions[-1]['entryPrice'])
-print("Remaining Balance ", (usdt_balance) - (positions[-1]['initialMargin']))
-print("Latest Position Entry Price ", positions[-1]["initialMargin"])
+# print("latest open position ", positions[-1])
+# print("Latest Position Entry Price ", positions[-1]['entryPrice'])
+# print("Remaining Balance ", (usdt_balance) - (positions[-1]['initialMargin']))
+# print("Latest Position Entry Price ", positions[-1]["initialMargin"])
 
 # for order in open_orders :
 #     binance_futures.cancel_order(order['id'], '1000PEPE/USDT:USDT')
