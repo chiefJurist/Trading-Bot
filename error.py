@@ -95,7 +95,8 @@ try:
         amount=amount,
         params={"positionSide": "LONG"} # Specify "LONG" since you're in Hedge Mode
     )
-    print("Calculated amount to trade:", amount)
+    print("Calculated amount to trade: ", amount * current_price)
+    print("Calculated amount to trade in eth: ", amount)
     time.sleep(3) #add a break for safety
 except Exception as e:
     print(f"Error in opening long positions: {e}")
