@@ -84,7 +84,7 @@ print(usdt_balance)
 
 binance_futures.set_leverage(10, 'ETH/USDT:USDT')
 current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
-amount=5 * 10 / current_price,                 # Amount of asset to buy
+amount=5 * 10 / current_price                 # Amount of asset to buy
 
 #Long
 try:
