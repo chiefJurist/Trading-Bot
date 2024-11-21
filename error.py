@@ -33,58 +33,58 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
 
-# # Function to approximate to 6 significant figures and handle NaN values
-# def significant_figures(x):
-#     if pd.isna(x) or x == 0:  # Check for NaN or zero
-#         return np.nan if pd.isna(x) else 0
-#     else:
-#         return round(x, 6 - int(math.floor(math.log10(abs(x)))) - 1)
+# Function to approximate to 6 significant figures and handle NaN values
+def significant_figures(x):
+    if pd.isna(x) or x == 0:  # Check for NaN or zero
+        return np.nan if pd.isna(x) else 0
+    else:
+        return round(x, 6 - int(math.floor(math.log10(abs(x)))) - 1)
 
-# # Function For Calculating Bollinger Bands with rounding to 6 significant figures
-# def calculate_bollinger_bands(df, window=20, num_std_dev=0.975):
-#     # Calculate the moving average (middle band) and round it to 6 significant figures
-#     middle_band_calc = df['close'].rolling(window=window, min_periods=1).mean()
-#     middleband = middle_band_calc.apply(significant_figures)
+# Function For Calculating Bollinger Bands with rounding to 6 significant figures
+def calculate_bollinger_bands(df, window=20, num_std_dev=0.975):
+    # Calculate the moving average (middle band) and round it to 6 significant figures
+    middle_band_calc = df['close'].rolling(window=window, min_periods=1).mean()
+    middleband = middle_band_calc.apply(significant_figures)
 
-#     # Calculate the standard deviation and use it to derive the upper and lower bands
-#     std_dev = df['close'].rolling(window=window, min_periods=1).std()
+    # Calculate the standard deviation and use it to derive the upper and lower bands
+    std_dev = df['close'].rolling(window=window, min_periods=1).std()
 
-#     # Calculate the upper and lower bands and round them to 6 significant figures
-#     upperband = (middleband + (std_dev * num_std_dev)).apply(significant_figures)
-#     lowerband = (middleband - (std_dev * num_std_dev)) .apply(significant_figures)
+    # Calculate the upper and lower bands and round them to 6 significant figures
+    upperband = (middleband + (std_dev * num_std_dev)).apply(significant_figures)
+    lowerband = (middleband - (std_dev * num_std_dev)) .apply(significant_figures)
 
-#     return upperband, middleband, lowerband
+    return upperband, middleband, lowerband
 
-# # Fetching OHLCV data
-# df = fetch_OHLCV('1000PEPE/USDT:USDT', '5m')
+# Fetching OHLCV data
+df = fetch_OHLCV('DOGE/USDT:USDT', '5m')
 
-# # Calculating Bollinger Bands with rounding
-# upperband, middleband, lowerband = calculate_bollinger_bands(df)
+# Calculating Bollinger Bands with rounding
+upperband, middleband, lowerband = calculate_bollinger_bands(df)
 
-# # Closing Prices of candles
-# last_close = df['close'].iloc[-2]       # Last candle close
-# second_last_close = df['close'].iloc[-3] # Second to last candle close
-# third_last_close = df['close'].iloc[-4] # third to last candle close
+# Closing Prices of candles
+last_close = df['close'].iloc[-2]       # Last candle close
+second_last_close = df['close'].iloc[-3] # Second to last candle close
+third_last_close = df['close'].iloc[-4] # third to last candle close
 
-# # Print Bollinger Band results for the last few candles
-# print('upperband[498] =', upperband.iloc[-2])
-# print('upperband[497] =', upperband.iloc[-3])
-# print('upperband[496] =', upperband.iloc[-4])
-# print('middleband[498] =', middleband.iloc[-2])
-# print('middleband[497] =', middleband.iloc[-3])
-# print('middleband[496] =', middleband.iloc[-4])
-# print('lowerband[498] =', lowerband.iloc[-2])
-# print('lowerband[497] =', lowerband.iloc[-3])
-# print('lowerband[496] =', lowerband.iloc[-4])
-# print('last_close, second_last_close, third_last_close =', last_close, second_last_close, third_last_close)
+# Print Bollinger Band results for the last few candles
+print('upperband[498] =', upperband.iloc[-2])
+print('upperband[497] =', upperband.iloc[-3])
+print('upperband[496] =', upperband.iloc[-4])
+print('middleband[498] =', middleband.iloc[-2])
+print('middleband[497] =', middleband.iloc[-3])
+print('middleband[496] =', middleband.iloc[-4])
+print('lowerband[498] =', lowerband.iloc[-2])
+print('lowerband[497] =', lowerband.iloc[-3])
+print('lowerband[496] =', lowerband.iloc[-4])
+print('last_close, second_last_close, third_last_close =', last_close, second_last_close, third_last_close)
 
-#Fetching USDT Balance
-usdt_balance = binance_futures.fetch_balance()['total']['USDT']
-print(usdt_balance)
+# #Fetching USDT Balance
+# usdt_balance = binance_futures.fetch_balance()['total']['USDT']
+# print(usdt_balance)
 
-binance_futures.set_leverage(10, 'ETH/USDT:USDT')
-current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
-amount=5 * 10 / current_price                 # Amount of asset to buy
+# binance_futures.set_leverage(10, 'ETH/USDT:USDT')
+# current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
+# amount=5 * 10 / current_price                 # Amount of asset to buy
 
 #Long
 # try:
@@ -102,12 +102,12 @@ amount=5 * 10 / current_price                 # Amount of asset to buy
 #     print(f"Error in opening long positions: {e}")
 
 
-# Fetch market details for ETH/USDT to get the precision
-market_info = binance_futures.market('ETH/USDT:USDT')
+# # Fetch market details for ETH/USDT to get the precision
+# market_info = binance_futures.market('ETH/USDT:USDT')
 
-# Get the precision for the amount (number of decimal places allowed)
-precision = market_info['precision']['amount']
-print(precision)
+# # Get the precision for the amount (number of decimal places allowed)
+# precision = market_info['precision']['amount']
+# print(precision)
 
 #Short
 # try:
