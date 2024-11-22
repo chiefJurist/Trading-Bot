@@ -3,7 +3,6 @@ import pandas as pd
 import talib as ta
 import numpy as np
 import math
-from decimal import Decimal, ROUND_HALF_UP
 import time
 import datetime
 
@@ -35,18 +34,11 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     return df
 
 # Function to approximate to 6 significant figures and handle NaN values
-# def significant_figures(x):
-#     if pd.isna(x) or x == 0:  # Check for NaN or zero
-#         return np.nan if pd.isna(x) else 0
-#     else:
-#         return round(x, 5 - int(math.floor(math.log10(abs(x)))) - 1)
 def significant_figures(x):
     if pd.isna(x) or x == 0:  # Check for NaN or zero
         return np.nan if pd.isna(x) else 0
     else:
-        d = Decimal(str(x))
-        precision = 5 - int(math.floor(math.log10(abs(x)))) - 1
-        return float(d.quantize(Decimal('1e-{0}'.format(precision)), rounding=ROUND_HALF_UP))
+        return round(x, 5 - int(math.floor(math.log10(abs(x)))) - 1)
 
 # Function For Calculating Bollinger Bands with rounding to 6 significant figures
 def calculate_bollinger_bands(df, window=20, num_std_dev=0.975):
