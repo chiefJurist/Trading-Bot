@@ -536,7 +536,7 @@ def manage_futures_positions_and_balance():
 
 
     #Managing Open Long Positions For Risk Management
-    if last_close < lowerband[498] :
+    if last_close < lowerband[498] and k[498] > d[498]:
         if positions:
             for position in positions:
                 if position['side'] == 'long':
@@ -563,7 +563,7 @@ def manage_futures_positions_and_balance():
                         print(f"Error in closing long position for risk management: {e}")
 
     #Managing Open Short Positions For Risk Management
-    if last_close > upperband[498] :
+    if last_close > upperband[498] and k[498] > d[498] :
          if positions:
             for position in positions:
                 if position['side'] == 'short':
