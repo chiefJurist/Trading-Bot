@@ -60,6 +60,7 @@ def calculate_bollinger_bands(df, window=20, num_std_dev=0.975):
     # Calculate the upper and lower bands and round them to 6 significant figures
     upperband = (middleband + (std_dev * num_std_dev)).apply(significant_figures)
     lowerband = (middleband - (std_dev * num_std_dev)) .apply(significant_figures)
+    lowerbandPlain = (middleband - (std_dev * num_std_dev))
 
     return upperband, middleband, lowerband
 
@@ -105,6 +106,18 @@ print('lowerband[490] =', lowerband.iloc[-10])
 print('lowerband[489] =', lowerband.iloc[-11])
 print('lowerband[488] =', lowerband.iloc[-12])
 print('lowerband[487] =', lowerband.iloc[-13])
+print('lowerbandPlain[498] =', lowerband.iloc[-2])
+print('lowerbandPlain[497] =', lowerband.iloc[-3])
+print('lowerbandPlain[496] =', lowerband.iloc[-4])
+print('lowerbandPlain[495] =', lowerband.iloc[-5])
+print('lowerbandPlain[494] =', lowerband.iloc[-6])
+print('lowerbandPlain[493] =', lowerband.iloc[-7])
+print('lowerbandPlain[492] =', lowerband.iloc[-8])
+print('lowerbandPlain[491] =', lowerband.iloc[-9])
+print('lowerbandPlain[490] =', lowerband.iloc[-10])
+print('lowerbandPlain[489] =', lowerband.iloc[-11])
+print('lowerbandPlain[488] =', lowerband.iloc[-12])
+print('lowerbandPlain[487] =', lowerband.iloc[-13])
 print('last_close, second_last_close, third_last_close, fourth_last_close =', last_close, second_last_close, third_last_close, fourth_last_close)
 print('last_open, second_last_open, third_last_open =', last_open, second_last_open, third_last_open)
 
