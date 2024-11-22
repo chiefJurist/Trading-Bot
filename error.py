@@ -90,6 +90,7 @@ print('lowerband[497] =', lowerband.iloc[-3])
 print('lowerband[496] =', lowerband.iloc[-4])
 print('lowerband[495] =', lowerband.iloc[-5])
 print('last_close, second_last_close, third_last_close, fourth_last_close =', last_close, second_last_close, third_last_close, fourth_last_close)
+print('last_open, second_last_open, third_last_open =', last_open, second_last_open, third_last_open)
 
 # #Fetching USDT Balance
 # usdt_balance = binance_futures.fetch_balance()['total']['USDT']
