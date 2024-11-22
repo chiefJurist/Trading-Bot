@@ -65,18 +65,31 @@ upperband, middleband, lowerband = calculate_bollinger_bands(df)
 last_close = df['close'].iloc[-2]       # Last candle close
 second_last_close = df['close'].iloc[-3] # Second to last candle close
 third_last_close = df['close'].iloc[-4] # third to last candle close
+fourth_last_close = df['close'].iloc[-5] # third to last candle close
+last_open = df['open'].iloc[-2]       # Last candle open
+second_last_open = df['open'].iloc[-3] # Second to last candle open
+third_last_open = df['open'].iloc[-4] # third to last candle open
+
+if (last_close - lowerband[498]) <= 0.0003 : #ensuring we are not too late 
+    print(last_close - lowerband[498], 'It is not late')
+else:
+    print(last_close - lowerband[498], 'It is late')
+
 
 # Print Bollinger Band results for the last few candles
 print('upperband[498] =', upperband.iloc[-2])
 print('upperband[497] =', upperband.iloc[-3])
 print('upperband[496] =', upperband.iloc[-4])
+print('upperband[495] =', upperband.iloc[-5])
 print('middleband[498] =', middleband.iloc[-2])
 print('middleband[497] =', middleband.iloc[-3])
 print('middleband[496] =', middleband.iloc[-4])
+print('middleband[495] =', middleband.iloc[-5])
 print('lowerband[498] =', lowerband.iloc[-2])
 print('lowerband[497] =', lowerband.iloc[-3])
 print('lowerband[496] =', lowerband.iloc[-4])
-print('last_close, second_last_close, third_last_close =', last_close, second_last_close, third_last_close)
+print('lowerband[495] =', lowerband.iloc[-5])
+print('last_close, second_last_close, third_last_close, fourth_last_close =', last_close, second_last_close, third_last_close, fourth_last_close)
 
 # #Fetching USDT Balance
 # usdt_balance = binance_futures.fetch_balance()['total']['USDT']
