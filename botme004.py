@@ -192,7 +192,7 @@ def manage_futures_positions_and_balance():
                 # Taking profit order
                 try:
                     open_price = binance_futures.fetch_closed_orders('DOGE/USDT:USDT')[-1]['average']
-                    target_price = open_price + (open_price * 0.0155)
+                    target_price = open_price + (open_price * 0.0205)
                     close_amount = float(amount)
                     binance_futures.create_order(
                         symbol='DOGE/USDT:USDT',  # Symbol for the asset
@@ -227,7 +227,7 @@ def manage_futures_positions_and_balance():
                         # Taking profit order
                         try:
                             open_price = binance_futures.fetch_closed_orders('DOGE/USDT:USDT')[-1]['average']
-                            target_price = open_price + (open_price * 0.0155)
+                            target_price = open_price + (open_price * 0.0205)
                             close_amount = float(amount)
                             binance_futures.create_order(
                                 symbol='DOGE/USDT:USDT',  # Symbol for the asset
@@ -262,7 +262,7 @@ def manage_futures_positions_and_balance():
                         # Taking profit order
                         try:
                             open_price = binance_futures.fetch_closed_orders('DOGE/USDT:USDT')[-1]['average']
-                            target_price = open_price + (open_price * 0.0155)
+                            target_price = open_price + (open_price * 0.0205)
                             close_amount = float(amount)
                             binance_futures.create_order(
                                 symbol='DOGE/USDT:USDT',  # Symbol for the asset
@@ -297,7 +297,7 @@ def manage_futures_positions_and_balance():
                 # Taking profit order
                 try:
                     open_price = binance_futures.fetch_closed_orders('DOGE/USDT:USDT')[-1]['average']
-                    target_price = open_price - (open_price * 0.0155)
+                    target_price = open_price - (open_price * 0.0205)
                     close_amount = float(amount)
                     binance_futures.create_order(
                         symbol='DOGE/USDT:USDT',      # Symbol for the asset
@@ -332,7 +332,7 @@ def manage_futures_positions_and_balance():
                         # Taking profit order
                         try:
                             open_price = binance_futures.fetch_closed_orders('DOGE/USDT:USDT')[-1]['average']
-                            target_price = open_price - (open_price * 0.0155)
+                            target_price = open_price - (open_price * 0.0205)
                             close_amount = float(amount)
                             binance_futures.create_order(
                                 symbol='DOGE/USDT:USDT',      # Symbol for the asset
@@ -374,7 +374,7 @@ def manage_futures_positions_and_balance():
                 # Taking profit order
                 try:
                     open_price = binance_futures.fetch_closed_orders('DOGE/USDT:USDT')[-1]['average']
-                    target_price = open_price + (open_price * 0.0155)
+                    target_price = open_price + (open_price * 0.0205)
                     close_amount = float(amount)
                     binance_futures.create_order(
                         symbol='DOGE/USDT:USDT',  # Symbol for the asset
@@ -409,7 +409,7 @@ def manage_futures_positions_and_balance():
                         # Taking profit order
                         try:
                             open_price = binance_futures.fetch_closed_orders('DOGE/USDT:USDT')[-1]['average']
-                            target_price = open_price + (open_price * 0.0155)
+                            target_price = open_price + (open_price * 0.0205)
                             close_amount = float(amount)
                             binance_futures.create_order(
                                 symbol='DOGE/USDT:USDT',  # Symbol for the asset
@@ -444,7 +444,7 @@ def manage_futures_positions_and_balance():
                         # Taking profit order
                         try:
                             open_price = binance_futures.fetch_closed_orders('DOGE/USDT:USDT')[-1]['average']
-                            target_price = open_price + (open_price * 0.0155)
+                            target_price = open_price + (open_price * 0.0205)
                             close_amount = float(amount)
                             binance_futures.create_order(
                                 symbol='DOGE/USDT:USDT',  # Symbol for the asset
@@ -479,7 +479,7 @@ def manage_futures_positions_and_balance():
                 # Taking profit order
                 try:
                     open_price = binance_futures.fetch_closed_orders('DOGE/USDT:USDT')[-1]['average']
-                    target_price = open_price - (open_price * 0.0155)
+                    target_price = open_price - (open_price * 0.0205)
                     close_amount = float(amount)
                     binance_futures.create_order(
                         symbol='DOGE/USDT:USDT',  # Symbol for the asset
@@ -514,7 +514,7 @@ def manage_futures_positions_and_balance():
                         # Taking profit order
                         try:
                             open_price = binance_futures.fetch_closed_orders('DOGE/USDT:USDT')[-1]['average']
-                            target_price = open_price - (open_price * 0.0155)
+                            target_price = open_price - (open_price * 0.0205)
                             close_amount = float(amount)
                             binance_futures.create_order(
                                 symbol='DOGE/USDT:USDT',  # Symbol for the asset
@@ -536,7 +536,7 @@ def manage_futures_positions_and_balance():
 
 
     #Managing Open Long Positions For Risk Management
-    if k[498] < d[498] :
+    if last_close < lowerband[498] :
         if positions:
             for position in positions:
                 if position['side'] == 'long':
@@ -563,7 +563,7 @@ def manage_futures_positions_and_balance():
                         print(f"Error in closing long position for risk management: {e}")
 
     #Managing Open Short Positions For Risk Management
-    if k[498] > d[498] :
+    if last_close > upperband[498] :
          if positions:
             for position in positions:
                 if position['side'] == 'short':
