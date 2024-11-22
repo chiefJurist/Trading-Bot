@@ -38,7 +38,7 @@ def significant_figures(x):
     if pd.isna(x) or x == 0:  # Check for NaN or zero
         return np.nan if pd.isna(x) else 0
     else:
-        return round(x, 6 - int(math.floor(math.log10(abs(x)))) - 1)
+        return round(x, 5 - int(math.floor(math.log10(abs(x)))) - 1)
 
 # Function For Calculating Bollinger Bands with rounding to 6 significant figures
 def calculate_bollinger_bands(df, window=20, num_std_dev=0.975):
