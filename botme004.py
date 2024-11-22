@@ -370,7 +370,7 @@ def manage_futures_positions_and_balance():
                     )
                     time.sleep(10) #add a break for safety
                 except Exception as e:
-                    print(f"Error in opening long positions when no position is opened : {e}")
+                    print(f"Error in opening long positions when a position is opened : {e}")
                 # Taking profit order
                 try:
                     open_price = binance_futures.fetch_closed_orders('DOGE/USDT:USDT')[-1]['average']
@@ -389,7 +389,7 @@ def manage_futures_positions_and_balance():
                     )
                     time.sleep(10)  # add a break for safety
                 except Exception as e:
-                    print(f"Error in creating close order long positions when no position is opened : {e}")
+                    print(f"Error in creating close order long positions when a position is opened : {e}")
             #Two candles already above lower band before we had a golden cross on stoch
             elif k[498] > d[498] and k[497] < d[497] and last_close > lowerband[498] and second_last_close > lowerband[497] and third_last_close < lowerband[496] : 
                 if last_close > last_open and second_last_close > second_last_open : #ensuring they are bullish candles
@@ -405,7 +405,7 @@ def manage_futures_positions_and_balance():
                             )
                             time.sleep(10) #add a break for safety
                         except Exception as e:
-                            print(f"Error in opening long positions when no position is opened : {e}")
+                            print(f"Error in opening long positions when a position is opened : {e}")
                         # Taking profit order
                         try:
                             open_price = binance_futures.fetch_closed_orders('DOGE/USDT:USDT')[-1]['average']
@@ -424,7 +424,7 @@ def manage_futures_positions_and_balance():
                             )
                             time.sleep(10)  # add a break for safety
                         except Exception as e:
-                            print(f"Error in creating close order long positions when no position is opened : {e}")
+                            print(f"Error in creating close order long positions when a position is opened : {e}")
             #Three candles already above lower band before we had a golden cross on stoch
             elif k[498] > d[498] and k[497] < d[497] and last_close > lowerband[498] and second_last_close > lowerband[497] and third_last_close > lowerband[496] and fourth_last_close < lowerband[495] : 
                 if last_close > last_open and second_last_close > second_last_open and third_last_close > third_last_open: #ensuring they are bullish candles
@@ -440,7 +440,7 @@ def manage_futures_positions_and_balance():
                             )
                             time.sleep(10) #add a break for safety
                         except Exception as e:
-                            print(f"Error in opening long positions when no position is opened : {e}")
+                            print(f"Error in opening long positions when a position is opened : {e}")
                         # Taking profit order
                         try:
                             open_price = binance_futures.fetch_closed_orders('DOGE/USDT:USDT')[-1]['average']
@@ -459,7 +459,7 @@ def manage_futures_positions_and_balance():
                             )
                             time.sleep(10)  # add a break for safety
                         except Exception as e:
-                            print(f"Error in creating close order long positions when no position is opened : {e}")
+                            print(f"Error in creating close order long positions when a position is opened : {e}")
 
         # MANAGING SHORT POSITIONS
         if not short_position_open: #ensure no short position is opened 
@@ -475,7 +475,7 @@ def manage_futures_positions_and_balance():
                     )
                     time.sleep(10) #add a break for safety
                 except Exception as e:
-                    print(f"Error in opening short positions : {e}")
+                    print(f"Error in opening short positions when a position is open: {e}")
                 # Taking profit order
                 try:
                     open_price = binance_futures.fetch_closed_orders('DOGE/USDT:USDT')[-1]['average']
@@ -494,7 +494,7 @@ def manage_futures_positions_and_balance():
                     )
                     time.sleep(10)  # add a break for safety
                 except Exception as e:
-                   print(f"Error in creating close order for short positions: {e}")
+                   print(f"Error in creating close order for short positions when a position is open: {e}")
             #Two candles already below upper band before we had a golden cross on stoch
             elif k[498] < d[498] and k[497] > d[497] and last_close < upperband[498] and second_last_close < upperband[497] and third_last_close > upperband[496] : 
                 if last_close < last_open and second_last_close < second_last_open : #ensuring they are bullish candles
@@ -510,7 +510,7 @@ def manage_futures_positions_and_balance():
                             )
                             time.sleep(10) #add a break for safety
                         except Exception as e:
-                            print(f"Error in opening short positions : {e}")
+                            print(f"Error in opening short positions when a position is open : {e}")
                         # Taking profit order
                         try:
                             open_price = binance_futures.fetch_closed_orders('DOGE/USDT:USDT')[-1]['average']
@@ -529,7 +529,7 @@ def manage_futures_positions_and_balance():
                             )
                             time.sleep(10)  # add a break for safety
                         except Exception as e:
-                            print(f"Error in creating close order for short positions: {e}")
+                            print(f"Error in creating close order for short positions when a position is open: {e}")
             
 
 
