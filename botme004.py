@@ -132,8 +132,8 @@ def calculate_indicators(df, window=20, num_std_dev=0.975):
     # Calculate the standard deviation and use it to derive the upper and lower bands
     std_dev = df['close'].rolling(window=window, min_periods=1).std()
     # Calculate the upper and lower bands and round them to 6 significant figures
-    upperband = (middleband + (std_dev * num_std_dev)).apply(significant_figures)
-    lowerband = (middleband - (std_dev * num_std_dev)) .apply(significant_figures)
+    upperband = (middle_band_calc + (std_dev * num_std_dev)).apply(significant_figures)
+    lowerband = (middle_band_calc - (std_dev * num_std_dev)) .apply(significant_figures)
     
     return k, d, upperband, middleband, lowerband
 

@@ -70,10 +70,10 @@ last_open = df['open'].iloc[-2]       # Last candle open
 second_last_open = df['open'].iloc[-3] # Second to last candle open
 third_last_open = df['open'].iloc[-4] # third to last candle open
 
-if (last_close - lowerband[498]) <= 0.0003 : #ensuring we are not too late 
-    print(last_close - lowerband[498], 'It is not late')
+if (last_close - lowerband[498]) <= 0.0003 and last_close < middleband[498]: #ensuring we are not too late 
+    print(last_close - lowerband[498], 'It is not late to long')
 else:
-    print(last_close - lowerband[498], 'It is late')
+    print(last_close - lowerband[498], 'It is late to long')
 
 
 # Print Bollinger Band results for the last few candles
@@ -89,16 +89,6 @@ print('lowerband[498] =', lowerband.iloc[-2])
 print('lowerband[497] =', lowerband.iloc[-3])
 print('lowerband[496] =', lowerband.iloc[-4])
 print('lowerband[495] =', lowerband.iloc[-5])
-print('lowerband[494] =', lowerband.iloc[-6])
-print('lowerband[493] =', lowerband.iloc[-7])
-print('lowerband[492] =', lowerband.iloc[-8])
-print('lowerband[491] =', lowerband.iloc[-9])
-print('lowerband[490] =', lowerband.iloc[-10])
-print('lowerband[489] =', lowerband.iloc[-11])
-print('lowerband[488] =', lowerband.iloc[-12])
-print('lowerband[487] =', lowerband.iloc[-13])
-print('lowerband[486] =', lowerband.iloc[-14])
-print('lowerband[485] =', lowerband.iloc[-15])
 print('last_close, second_last_close, third_last_close, fourth_last_close =', last_close, second_last_close, third_last_close, fourth_last_close)
 print('last_open, second_last_open, third_last_open =', last_open, second_last_open, third_last_open)
 
