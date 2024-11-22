@@ -113,7 +113,7 @@ def significant_figures(x):
     if pd.isna(x) or x == 0:  # Check for NaN or zero
         return np.nan if pd.isna(x) else 0
     else:
-        return round(x, 6 - int(math.floor(math.log10(abs(x)))) - 1)
+        return round(x, 5 - int(math.floor(math.log10(abs(x)))) - 1)
     
 #Function For Calculating Indicators
 def calculate_indicators(df, window=20, num_std_dev=0.975):
@@ -209,9 +209,9 @@ def manage_futures_positions_and_balance():
                 except Exception as e:
                     print(f"Error in creating close order for long positions when no position is opened : {e}")      
             #Two candles already above lower band before we had a golden cross on stoch
-            elif k[498] > d[498] and last_close > lowerband[498] and second_last_close > lowerband[497] and third_last_close < lowerband[496] : 
+            elif k[498] > d[498] and k[497] < d[497] and last_close > lowerband[498] and second_last_close > lowerband[497] and third_last_close < lowerband[496] : 
                 if last_close > last_open and second_last_close > second_last_open : #ensuring they are bullish candles
-                    if (last_close - lowerband[498]) <= 0.0003 : #ensuring we are not too late 
+                    if (last_close - lowerband[498]) <= 0.00099 and last_close < middleband[498] : #ensuring we are not too late 
                         try:
                             amount = usdt_balance * 5 / current_price #using half of the capital
                             binance_futures.create_order(
@@ -244,9 +244,9 @@ def manage_futures_positions_and_balance():
                         except Exception as e:
                             print(f"Error in creating close order for long positions when no position is opened : {e}")
             #Three candles already above lower band before we had a golden cross on stoch
-            elif k[498] > d[498] and last_close > lowerband[498] and second_last_close > lowerband[497] and third_last_close > lowerband[496] and fourth_last_close < lowerband[495] : 
+            elif k[498] > d[498] and k[497] < d[497] and last_close > lowerband[498] and second_last_close > lowerband[497] and third_last_close > lowerband[496] and fourth_last_close < lowerband[495] : 
                 if last_close > last_open and second_last_close > second_last_open and third_last_close > third_last_open: #ensuring they are bullish candles
-                    if (last_close - lowerband[498]) <= 0.0003 : #ensuring we are not too late 
+                    if (last_close - lowerband[498]) <= 0.00099 and last_close < middleband[498] : #ensuring we are not too late 
                         try:
                             amount = usdt_balance * 5 / current_price #using half of the capital
                             binance_futures.create_order(
@@ -314,9 +314,9 @@ def manage_futures_positions_and_balance():
                 except Exception as e:
                     print(f"Error in creating close order for short positions when no position is opened : {e}")
             #Two candles already below upper band before we had a golden cross on stoch
-            elif k[498] < d[498] and last_close < upperband[498] and second_last_close < upperband[497] and third_last_close > upperband[496] : 
+            elif k[498] < d[498] and k[497] > d[497] and last_close < upperband[498] and second_last_close < upperband[497] and third_last_close > upperband[496] : 
                 if last_close < last_open and second_last_close < second_last_open : #ensuring they are bullish candles
-                    if (upperband[498] - last_close) <= 0.0003 : #ensuring we are not too late
+                    if (upperband[498] - last_close) <= 0.00099 and last_close > middleband[498] : #ensuring we are not too late
                         try:
                             amount = usdt_balance * 5 / current_price #using half of the capital
                             binance_futures.create_order(
@@ -391,9 +391,9 @@ def manage_futures_positions_and_balance():
                 except Exception as e:
                     print(f"Error in creating close order long positions when no position is opened : {e}")
             #Two candles already above lower band before we had a golden cross on stoch
-            elif k[498] > d[498] and last_close > lowerband[498] and second_last_close > lowerband[497] and third_last_close < lowerband[496] : 
+            elif k[498] > d[498] and k[497] < d[497] and last_close > lowerband[498] and second_last_close > lowerband[497] and third_last_close < lowerband[496] : 
                 if last_close > last_open and second_last_close > second_last_open : #ensuring they are bullish candles
-                    if (last_close - lowerband[498]) <= 0.0003 : #ensuring we are not too late 
+                    if (last_close - lowerband[498]) <= 0.00099 and last_close < middleband[498] : #ensuring we are not too late 
                         try:
                             amount = remaining_balance * 10 / current_price #using the remaining capital
                             binance_futures.create_order(
@@ -426,9 +426,9 @@ def manage_futures_positions_and_balance():
                         except Exception as e:
                             print(f"Error in creating close order long positions when no position is opened : {e}")
             #Three candles already above lower band before we had a golden cross on stoch
-            elif k[498] > d[498] and last_close > lowerband[498] and second_last_close > lowerband[497] and third_last_close > lowerband[496] and fourth_last_close < lowerband[495] : 
+            elif k[498] > d[498] and k[497] < d[497] and last_close > lowerband[498] and second_last_close > lowerband[497] and third_last_close > lowerband[496] and fourth_last_close < lowerband[495] : 
                 if last_close > last_open and second_last_close > second_last_open and third_last_close > third_last_open: #ensuring they are bullish candles
-                    if (last_close - lowerband[498]) <= 0.0003 : #ensuring we are not too late 
+                    if (last_close - lowerband[498]) <= 0.00099 and last_close < middleband[498] : #ensuring we are not too late 
                         try:
                             amount = remaining_balance * 10 / current_price #using the remaining capital
                             binance_futures.create_order(
@@ -496,9 +496,9 @@ def manage_futures_positions_and_balance():
                 except Exception as e:
                    print(f"Error in creating close order for short positions: {e}")
             #Two candles already below upper band before we had a golden cross on stoch
-            elif k[498] < d[498] and last_close < upperband[498] and second_last_close < upperband[497] and third_last_close > upperband[496] : 
+            elif k[498] < d[498] and k[497] > d[497] and last_close < upperband[498] and second_last_close < upperband[497] and third_last_close > upperband[496] : 
                 if last_close < last_open and second_last_close < second_last_open : #ensuring they are bullish candles
-                    if (upperband[498] - last_close) <= 0.0003 : #ensuring we are not too late
+                    if (upperband[498] - last_close) <= 0.00099 and last_close > middleband[498] : #ensuring we are not too late
                         try:
                             amount = remaining_balance * 10 / current_price #using the remainining capital
                             binance_futures.create_order(
