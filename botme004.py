@@ -146,7 +146,7 @@ def manage_futures_positions_and_balance():
     usdt_balance = binance_futures.fetch_balance()['total']['USDT']
 
     #Fetching OHLCV
-    df = fetch_OHLCV('DOGE/USDT:USDT', '5m')
+    df = fetch_OHLCV('DOGE/USDT:USDT', '1m')
 
     #Calculating indicators
     k, d, upperband, middleband, lowerband = calculate_indicators(df)
@@ -205,7 +205,7 @@ def manage_futures_positions_and_balance():
                             "timeInForce": "GTC"     # Good 'til canceled; adjust as necessary
                         }
                     )
-                    time.sleep(310)  # add a break for safety
+                    time.sleep(65)  # add a break for safety
                 except Exception as e:
                     print(f"Error in creating close order for long positions when no position is opened : {e}")      
             #Two candles already above lower band before we had a golden cross on stoch
@@ -240,7 +240,7 @@ def manage_futures_positions_and_balance():
                                     "timeInForce": "GTC"     # Good 'til canceled; adjust as necessary
                                 }
                             )
-                            time.sleep(310)  # add a break for safety
+                            time.sleep(65)  # add a break for safety
                         except Exception as e:
                             print(f"Error in creating close order for long positions when no position is opened : {e}")
             #Three candles already above lower band before we had a golden cross on stoch
@@ -275,7 +275,7 @@ def manage_futures_positions_and_balance():
                                     "timeInForce": "GTC"     # Good 'til canceled; adjust as necessary
                                 }
                             )
-                            time.sleep(310)  # add a break for safety
+                            time.sleep(65)  # add a break for safety
                         except Exception as e:
                             print(f"Error in creating close order for long positions when no position is opened : {e}")
                 
@@ -310,7 +310,7 @@ def manage_futures_positions_and_balance():
                             "timeInForce": "GTC"      # Good 'til canceled; adjust as necessary
                         }
                     )
-                    time.sleep(310)  # add a break for safety
+                    time.sleep(65)  # add a break for safety
                 except Exception as e:
                     print(f"Error in creating close order for short positions when no position is opened : {e}")
             #Two candles already below upper band before we had a golden cross on stoch
@@ -345,7 +345,7 @@ def manage_futures_positions_and_balance():
                                     "timeInForce": "GTC"      # Good 'til canceled; adjust as necessary
                                 }
                             )
-                            time.sleep(310)  # add a break for safety
+                            time.sleep(65)  # add a break for safety
                         except Exception as e:
                             print(f"Error in creating close order for short positions when no position is opened : {e}")
 
@@ -387,7 +387,7 @@ def manage_futures_positions_and_balance():
                             "timeInForce": "GTC"     # Good 'til canceled; adjust as necessary
                         }
                     )
-                    time.sleep(310)  # add a break for safety
+                    time.sleep(65)  # add a break for safety
                 except Exception as e:
                     print(f"Error in creating close order long positions when a position is opened : {e}")
             #Two candles already above lower band before we had a golden cross on stoch
@@ -422,7 +422,7 @@ def manage_futures_positions_and_balance():
                                     "timeInForce": "GTC"     # Good 'til canceled; adjust as necessary
                                 }
                             )
-                            time.sleep(310)  # add a break for safety
+                            time.sleep(65)  # add a break for safety
                         except Exception as e:
                             print(f"Error in creating close order long positions when a position is opened : {e}")
             #Three candles already above lower band before we had a golden cross on stoch
@@ -457,7 +457,7 @@ def manage_futures_positions_and_balance():
                                     "timeInForce": "GTC"     # Good 'til canceled; adjust as necessary
                                 }
                             )
-                            time.sleep(310)  # add a break for safety
+                            time.sleep(65)  # add a break for safety
                         except Exception as e:
                             print(f"Error in creating close order long positions when a position is opened : {e}")
 
@@ -492,7 +492,7 @@ def manage_futures_positions_and_balance():
                             "timeInForce": "GTC"     # Good 'til canceled; adjust as necessary
                         }
                     )
-                    time.sleep(310)  # add a break for safety
+                    time.sleep(65)  # add a break for safety
                 except Exception as e:
                    print(f"Error in creating close order for short positions when a position is open: {e}")
             #Two candles already below upper band before we had a golden cross on stoch
@@ -527,7 +527,7 @@ def manage_futures_positions_and_balance():
                                     "timeInForce": "GTC"     # Good 'til canceled; adjust as necessary
                                 }
                             )
-                            time.sleep(310)  # add a break for safety
+                            time.sleep(65)  # add a break for safety
                         except Exception as e:
                             print(f"Error in creating close order for short positions when a position is open: {e}")
             
