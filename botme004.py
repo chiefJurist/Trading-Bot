@@ -144,6 +144,7 @@ def manage_futures_positions_and_balance():
 
     #Fetching USDT Balance
     usdt_balance = binance_futures.fetch_balance()['total']['USDT']
+    free_usdt = binance_futures.fetch_balance()['free']['USDT']
 
     #Fetching OHLCV
     df = fetch_OHLCV('DOGE/USDT:USDT', '1m')
@@ -353,14 +354,11 @@ def manage_futures_positions_and_balance():
 
 #MAIN TRADING LOGIC WHEN A POSITION IS OPENED
     if len(positions) > 0:
-        #Remaining balance
-        remaining_balance = (usdt_balance) - (positions[-1]["initialMargin"])
-
         # MANAGING LONG POSITIONS
         if not long_position_open: #ensure no long position is opened 
             if k[498] > d[498] and last_close > lowerband[498] and second_last_close < lowerband[497] : #normal trade logic
                 try:
-                    amount = remaining_balance * 10 / current_price #using the remaining capital
+                    amount = free_usdt * 10 / current_price #using the remaining capital
                     binance_futures.create_order(
                         symbol="DOGE/USDT:USDT",  # Symbol for the asset
                         side="BUY",                   # Buy to open a long position
@@ -395,7 +393,7 @@ def manage_futures_positions_and_balance():
                 if last_close > last_open and second_last_close > second_last_open : #ensuring they are bullish candles
                     if (last_close - lowerband[498]) <= 0.00099 and last_close < middleband[498] : #ensuring we are not too late 
                         try:
-                            amount = remaining_balance * 10 / current_price #using the remaining capital
+                            amount = free_usdt * 10 / current_price #using the remaining capital
                             binance_futures.create_order(
                                 symbol="DOGE/USDT:USDT",  # Symbol for the asset
                                 side="BUY",                   # Buy to open a long position
@@ -430,7 +428,7 @@ def manage_futures_positions_and_balance():
                 if last_close > last_open and second_last_close > second_last_open and third_last_close > third_last_open: #ensuring they are bullish candles
                     if (last_close - lowerband[498]) <= 0.00099 and last_close < middleband[498] : #ensuring we are not too late 
                         try:
-                            amount = remaining_balance * 10 / current_price #using the remaining capital
+                            amount = free_usdt * 10 / current_price #using the remaining capital
                             binance_futures.create_order(
                                 symbol="DOGE/USDT:USDT",  # Symbol for the asset
                                 side="BUY",                   # Buy to open a long position
@@ -465,7 +463,7 @@ def manage_futures_positions_and_balance():
         if not short_position_open: #ensure no short position is opened 
             if k[498] < d[498] and last_close < upperband[498] and second_last_close > upperband[497] :  #normal trading logic
                 try:
-                    amount = remaining_balance * 10 / current_price #using the remainining capital
+                    amount = free_usdt * 10 / current_price #using the remainining capital
                     binance_futures.create_order(
                         symbol='DOGE/USDT:USDT',  # Symbol for the asset
                         side='SELL',                  # Sell to open a short position
@@ -500,7 +498,7 @@ def manage_futures_positions_and_balance():
                 if last_close < last_open and second_last_close < second_last_open : #ensuring they are bullish candles
                     if (upperband[498] - last_close) <= 0.00099 and last_close > middleband[498] : #ensuring we are not too late
                         try:
-                            amount = remaining_balance * 10 / current_price #using the remainining capital
+                            amount = free_usdt * 10 / current_price #using the remainining capital
                             binance_futures.create_order(
                                 symbol='DOGE/USDT:USDT',  # Symbol for the asset
                                 side='SELL',                  # Sell to open a short position
