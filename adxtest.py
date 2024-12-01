@@ -42,6 +42,9 @@ df['adx'] = ta.ADX(df['high'], df['low'], df['close'], timeperiod=adx_period)
 # Combine close price and ADX in the output
 result = df[['timestamp', 'close', 'adx']]
 
+# Set pandas option to display all rows
+pd.set_option('display.max_rows', None)
+
 # Output the result
 print("Close Prices and ADX Values:")
 print(result)
