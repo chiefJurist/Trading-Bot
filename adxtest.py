@@ -44,4 +44,4 @@ result = df[['timestamp', 'close', 'adx']]
 
 # Output the result
 print("Close Prices and ADX Values:")
-print(result.tail())
+print(result)
