@@ -32,7 +32,7 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
 
 # Fetching OHLCV data
 symbol = 'ETH/USDT:USDT'
-timeframe = '5m'
+timeframe = '1m'
 df = fetch_OHLCV(symbol, timeframe, limit=500)
 
 # Calculate ADX using TA-Lib
