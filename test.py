@@ -54,12 +54,12 @@ def calculate_stoch(df):
 def calculate_bollinger(df, window, num_std_dev):
     # Calculate the moving average (middle band) and round it to 7 significant figures
     middle_band_calc = df['close'].rolling(window=window, min_periods=1).mean()
-    middleband = middle_band_calc#.apply(significant_figures)
+    middleband = middle_band_calc.apply(significant_figures)
     # Calculate the standard deviation and use it to derive the upper and lower bands
     std_dev = df['close'].rolling(window=window, min_periods=1).std()
     # Calculate the upper and lower bands and round them to 6 significant figures
-    upperband = (middle_band_calc + (std_dev * num_std_dev))#.apply(significant_figures)
-    lowerband = (middle_band_calc - (std_dev * num_std_dev))#.apply(significant_figures)
+    upperband = (middle_band_calc + (std_dev * num_std_dev)).apply(significant_figures)
+    lowerband = (middleband - (std_dev * num_std_dev)).apply(significant_figures)
     
     return upperband, middleband, lowerband
 
