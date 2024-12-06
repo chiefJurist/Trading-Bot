@@ -159,11 +159,11 @@ def manage_futures_positions_and_balance():
     upperband, middleband, lowerband = calculate_bollinger(df)
     big_upperband, big_middleband, big_lowerband = calculate_bollinger(big_df)
 
-    #Closing Prices of candles
-    last_close = df['close'].iloc[-2]               # Last candle close
-    second_last_close = df['close'].iloc[-3]        # Last candle close
-    big_last_high = big_df['high'].iloc[-2]       # Last candle close
-    big_last_low = big_df['low'].iloc[-2]         # Last candle open
+    #Points in prices of candles
+    last_close = df['close'].iloc[-2]               # Last candle close for 1m
+    second_last_close = df['close'].iloc[-3]        # Second to the last candle close for 1m
+    big_last_high = big_df['high'].iloc[-2]       # Last candle high for 5m
+    big_last_low = big_df['low'].iloc[-2]         # Last candle low for 5m
 
     #Checking positions and orders
     positions = binance_futures.fetch_positions_risk()
@@ -230,7 +230,7 @@ def manage_futures_positions_and_balance():
         # MANAGING SHORT POSITIONS
         if not short_position_open: #ensure no short position is opened 
             if k[498] < d[498] and last_close < upperband[498] and second_last_close > upperband[497] and k[498] < d[498]:  #normal trading logic
-                if (big_upperband[498] - big_upperband) <= 5 : #proceeding if we are at a bottom on a larger scale
+                if (big_upperband[498] - big_last_high) <= 5 : #proceeding if we are at a top on a larger scale
                     try:
                         amount = usdt_balance * 50 / current_price #using half of the capital
                         binance_futures.create_order(

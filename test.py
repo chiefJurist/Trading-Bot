@@ -73,7 +73,62 @@ big_k, big_d = calculate_stoch(big_df)
 upperband, middleband, lowerband = calculate_bollinger(df)
 big_upperband, big_middleband, big_lowerband = calculate_bollinger(big_df)
 
-print('5m upperband, middleband and lower band: ', big_upperband, big_middleband, big_lowerband)
-print("5m Stochastic Oscillator: ", big_k, big_d)
-print('1m upperband, middleband and lower band: ', upperband, middleband, lowerband)
-print("1m Stochastic Oscillator: ", k, d)
+
+#Prices at points of candles in 1m chart
+last_open = df['open'].iloc[-2]             # Last candle open for 1m
+last_high = df['high'].iloc[-2]             # Last candle high for 1m
+last_low = df['low'].iloc[-2]               # Last candle low for 1m
+last_close = df['close'].iloc[-2]           # Last candle close for 1m
+second_last_open = df['open'].iloc[-3]      # Second to the last candle open for 1m
+second_last_high = df['high'].iloc[-3]      # Second to the last candle high for 1m
+second_last_low = df['low'].iloc[-3]        # Second to the last candle low for 1m
+second_last_close = df['close'].iloc[-3]    # Second to the last candle close for 1m
+
+#Prices at points of candles in 5m chart
+big_last_open = big_df['open'].iloc[-2]             # Last candle open for 5m
+big_last_high = big_df['high'].iloc[-2]             # Last candle high for 5m
+big_last_low = big_df['low'].iloc[-2]               # Last candle low for 5m
+big_last_close = big_df['close'].iloc[-2]           # Last candle close for 5m
+second_big_last_open = big_df['open'].iloc[-3]      # Second to the last candle open for 5m
+second_big_last_high = big_df['high'].iloc[-3]      # Second to the last candle high for 5m
+second_big_last_low = big_df['low'].iloc[-3]        # Second to the last candle low for 5m
+second_big_last_close = big_df['close'].iloc[-3]    # Second to the last candle close for 5m
+third_big_last_open = big_df['open'].iloc[-4]       # Third to the last candle open for 5m
+third_big_last_high = big_df['high'].iloc[-4]       # Third to the last candle high for 5m
+third_big_last_low = big_df['low'].iloc[-4]         # Third to the last candle low for 5m
+third_big_last_close = big_df['close'].iloc[-4]     # Third to the last candle close for 5m
+fourth_big_last_open = big_df['open'].iloc[-5]      # Fourth to the last candle open for 5m
+fourth_big_last_high = big_df['high'].iloc[-5]      # Fourth to the last candle high for 5m
+fourth_big_last_low = big_df['low'].iloc[-5]        # Fourth to the last candle low for 5m
+fourth_big_last_close = big_df['close'].iloc[-5]    # Fourth to the last candle close for 5m
+fifth_big_last_open = big_df['open'].iloc[-6]       # Fifth to the last candle open for 5m
+fifth_big_last_high = big_df['high'].iloc[-6]       # Fifth to the last candle high for 5m
+fifth_big_last_low = big_df['low'].iloc[-6]         # Fifth to the last candle low for 5m
+fifth_big_last_close = big_df['close'].iloc[-6]     # Fifth to the last candle close for 5m
+
+
+# Print Candle points for 1m chart
+print("1m CHART")
+print('bollinger[498] for 1m chart = ', upperband[498], middleband[498], lowerband[498])
+print('bollinger[497] for 1m chart = ', upperband[497], middleband[497], lowerband[497])
+print('stochastic[498] for 1m chart = ', k[498], d[498])
+print('stochastic[497] for 1m chart = ', k[497], d[497])
+print('ohlcv[498] for 1m chart = ', last_open, last_high, last_low, last_close)
+print('ohlcv[497] for 1m chart = ', second_last_open, second_last_high, second_last_low, second_last_close)
+
+print("5m CHART")
+print('bollinger[498] for 5m chart = ', big_upperband[498], big_middleband[498], big_lowerband[498])
+print('bollinger[497] for 5m chart = ', big_upperband[497], big_middleband[497], big_lowerband[497])
+print('bollinger[496] for 5m chart = ', big_upperband[496], big_middleband[496], big_lowerband[496])
+print('bollinger[495] for 5m chart = ', big_upperband[495], big_middleband[495], big_lowerband[495])
+print('bollinger[494] for 5m chart = ', big_upperband[494], big_middleband[494], big_lowerband[494])
+print('stochastic[498] for 5m chart = ', big_k[498], big_d[498])
+print('stochastic[497] for 5m chart = ', big_k[497], big_d[497])
+print('stochastic[496] for 5m chart = ', big_k[496], big_d[496])
+print('stochastic[495] for 5m chart = ', big_k[495], big_d[495])
+print('stochastic[494] for 5m chart = ', big_k[494], big_d[494])
+print('ohlcv[498] for 5m chart = ', big_last_open, big_last_high, big_last_low, big_last_close)
+print('ohlcv[497] for 5m chart = ', second_big_last_open, second_big_last_high, second_big_last_low, second_big_last_close)
+print('ohlcv[496] for 5m chart = ', third_big_last_open, third_big_last_high, third_big_last_low, third_big_last_close)
+print('ohlcv[495] for 5m chart = ', fourth_big_last_open, fourth_big_last_high, fourth_big_last_low, fourth_big_last_close)
+print('ohlcv[494] for 5m chart = ', fifth_big_last_open, fifth_big_last_high, fifth_big_last_low, fifth_big_last_close)
