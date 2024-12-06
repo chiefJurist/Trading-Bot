@@ -51,7 +51,7 @@ def calculate_stoch(df):
     return k, d
 
 #Function For Calculating Bollinger Bands
-def calculate_bollinger(df, window=20, num_std_dev=0.975):
+def calculate_bollinger(df, window, num_std_dev):
     # Calculate the moving average (middle band) and round it to 6 significant figures
     middle_band_calc = df['close'].rolling(window=window, min_periods=1).mean()
     middleband = middle_band_calc.apply(significant_figures)
@@ -70,8 +70,8 @@ big_df = fetch_OHLCV('ETH/USDT:USDT', '5m')
 #Calculating indicators
 k, d = calculate_stoch(df)
 big_k, big_d = calculate_stoch(big_df)
-upperband, middleband, lowerband = calculate_bollinger(df)
-big_upperband, big_middleband, big_lowerband = calculate_bollinger(big_df)
+upperband, middleband, lowerband = calculate_bollinger(df, 20, 0.975)
+big_upperband, big_middleband, big_lowerband = calculate_bollinger(big_df, 20, 1.95)
 
 
 #Prices at points of candles in 1m chart
