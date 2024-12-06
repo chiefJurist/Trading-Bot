@@ -59,7 +59,7 @@ def calculate_bollinger(df, window, num_std_dev):
     std_dev = df['close'].rolling(window=window, min_periods=1).std()
     # Calculate the upper and lower bands and round them to 6 significant figures
     upperband = (middle_band_calc + (std_dev * num_std_dev)).apply(significant_figures)
-    lowerband = (middleband - (std_dev * num_std_dev)).apply(significant_figures)
+    lowerband = (middle_band_calc - (std_dev * num_std_dev)).apply(significant_figures)
     
     return upperband, middleband, lowerband
 
