@@ -115,7 +115,7 @@ print('stochastic[498] for 1m chart = ', k[498], d[498])
 print('stochastic[497] for 1m chart = ', k[497], d[497])
 print('ohlcv[498] for 1m chart = ', last_open, last_high, last_low, last_close)
 print('ohlcv[497] for 1m chart = ', second_last_open, second_last_high, second_last_low, second_last_close)
-
+print('')
 print("5m CHART")
 print('bollinger[498] for 5m chart = ', big_upperband[498], big_middleband[498], big_lowerband[498])
 print('bollinger[497] for 5m chart = ', big_upperband[497], big_middleband[497], big_lowerband[497])
