@@ -71,7 +71,7 @@ big_df = fetch_OHLCV('ETH/USDT:USDT', '5m')
 k, d = calculate_stoch(df)
 big_k, big_d = calculate_stoch(big_df)
 upperband, middleband, lowerband = calculate_bollinger(df, 20, 0.975)
-big_upperband, big_middleband, big_lowerband = calculate_bollinger(big_df, 20, 1.949)
+big_upperband, big_middleband, big_lowerband = calculate_bollinger(big_df, 20, 1.95)
 
 
 #Prices at points of candles in 1m chart
