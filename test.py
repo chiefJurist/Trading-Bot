@@ -48,12 +48,12 @@ def significant_figures_four(x):
 def calculate_stoch(df):
     #Stochastic Oscillator
     rsi = ta.RSI(df['close'].values, timeperiod=14)
-    k, d = ta.STOCH(rsi, rsi, rsi, 
+    k, d = (ta.STOCH(rsi, rsi, rsi, 
                     fastk_period=14, 
                     slowk_period=3, 
                     slowk_matype=0, 
                     slowd_period=3, 
-                    slowd_matype=0).apply(significant_figures_four)
+                    slowd_matype=0)).apply(significant_figures_four)
     return k, d
 
 #Function For Calculating Bollinger Bands
