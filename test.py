@@ -31,12 +31,18 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
 
-# Function to approximate to 6 significant figures and handle NaN values
-def significant_figures(x):
+# Functions to approximate  significant figures and handle NaN values
+def significant_figures_seven(x):
     if pd.isna(x) or x == 0:  # Check for NaN or zero
         return np.nan if pd.isna(x) else 0
     else:
         return round(x, 6 - int(math.floor(math.log10(abs(x)))) - 1)
+    
+def significant_figures_four(x):
+    if pd.isna(x) or x == 0:  # Check for NaN or zero
+        return np.nan if pd.isna(x) else 0
+    else:
+        return round(x, 3 - int(math.floor(math.log10(abs(x)))) - 1)
 
 #Function For Calculating STOCHF
 def calculate_stoch(df):
@@ -47,19 +53,19 @@ def calculate_stoch(df):
                     slowk_period=3, 
                     slowk_matype=0, 
                     slowd_period=3, 
-                    slowd_matype=0)
+                    slowd_matype=0).apply(significant_figures_four)
     return k, d
 
 #Function For Calculating Bollinger Bands
 def calculate_bollinger(df, window, num_std_dev):
     # Calculate the moving average (middle band) and round it to 7 significant figures
     middle_band_calc = df['close'].rolling(window=window, min_periods=1).mean()
-    middleband = middle_band_calc.apply(significant_figures)
+    middleband = middle_band_calc.apply(significant_figures_seven)
     # Calculate the standard deviation and use it to derive the upper and lower bands
     std_dev = df['close'].rolling(window=window, min_periods=1).std()
     # Calculate the upper and lower bands and round them to 6 significant figures
-    upperband = (middle_band_calc + (std_dev * num_std_dev)).apply(significant_figures)
-    lowerband = (middle_band_calc - (std_dev * num_std_dev)).apply(significant_figures)
+    upperband = (middle_band_calc + (std_dev * num_std_dev)).apply(significant_figures_seven)
+    lowerband = (middle_band_calc - (std_dev * num_std_dev)).apply(significant_figures_seven)
     
     return upperband, middleband, lowerband
 
