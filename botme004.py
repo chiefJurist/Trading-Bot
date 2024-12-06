@@ -109,12 +109,19 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     return df
 
 # Function to approximate to 6 significant figures and handle NaN values
-def significant_figures(x):
+def significant_figures_six(x):
     if pd.isna(x) or x == 0:  # Check for NaN or zero
         return np.nan if pd.isna(x) else 0
     else:
-        return round(x, 5 - int(math.floor(math.log10(abs(x)))) - 1)
+        return round(x, 6 - int(math.floor(math.log10(abs(x)))) - 1)
     
+# Function to approximate to 4 significant figures and handle NaN values
+def significant_figures_four(x):
+    if pd.isna(x) or x == 0:  # Check for NaN or zero
+        return np.nan if pd.isna(x) else 0
+    else:
+        return round(x, 4 - int(math.floor(math.log10(abs(x)))) - 1)
+
 #Function For Calculating STOCHF
 def calculate_stoch(df):
     #Stochastic Oscillator
@@ -125,18 +132,20 @@ def calculate_stoch(df):
                     slowk_matype=0, 
                     slowd_period=3, 
                     slowd_matype=0)
+    k = pd.Series(k).apply(significant_figures_four)
+    d = pd.Series(d).apply(significant_figures_four)
     return k, d
     
 #Function For Calculating Bollinger Bands
 def calculate_bollinger(df, window=20, num_std_dev=0.975):
     # Calculate the moving average (middle band) and round it to 6 significant figures
     middle_band_calc = df['close'].rolling(window=window, min_periods=1).mean()
-    middleband = middle_band_calc.apply(significant_figures)
+    middleband = middle_band_calc.apply(significant_figures_six)
     # Calculate the standard deviation and use it to derive the upper and lower bands
     std_dev = df['close'].rolling(window=window, min_periods=1).std()
     # Calculate the upper and lower bands and round them to 6 significant figures
-    upperband = (middle_band_calc + (std_dev * num_std_dev)).apply(significant_figures)
-    lowerband = (middle_band_calc - (std_dev * num_std_dev)) .apply(significant_figures)
+    upperband = (middle_band_calc + (std_dev * num_std_dev)).apply(significant_figures_six)
+    lowerband = (middle_band_calc - (std_dev * num_std_dev)) .apply(significant_figures_six)
     
     return upperband, middleband, lowerband
 
