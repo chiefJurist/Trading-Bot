@@ -146,7 +146,7 @@ big_df = fetch_OHLCV('ETH/USDT:USDT', '5m')
 
 
 #Setting leverage
-binance_futures.set_leverage(5, 'ETH/USDT:USDT')
+binance_futures.set_leverage(10, 'ETH/USDT:USDT')
 
 #Fetching USDT Balance
 usdt_balance = binance_futures.fetch_balance()['total']['USDT']
@@ -154,7 +154,7 @@ usdt_balance = binance_futures.fetch_balance()['total']['USDT']
 current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last'] #fetching the current price
 
 try:
-    amount = usdt_balance * 2.5 / current_price #using half the capital
+    amount = usdt_balance * 5 / current_price #using half the capital
     binance_futures.create_order(
         symbol="ETH/USDT:USDT",  # Symbol for the asset
         side="BUY",                     # Buy to open a long position
@@ -164,7 +164,7 @@ try:
     )
     print("long position created successfully")
 except Exception as e:
-    print(f"Error in opening long positions when no position is opened : {e}")
+    print(f"Error in opening long positions : {e}")
 # Closing the position
 try:
     open_price = binance_futures.fetch_closed_orders('ETH/USDT:USDT')[-1]['average']
@@ -197,15 +197,17 @@ try:
     )
     print("stop-loss order for long position created successfully")
 except Exception as e:
-    print(f"Error in creating close order for long positions when no position is opened : {e}")
+    print(f"Error in creating close order for long positions : {e}")
 
 
 #Fetching USDT Balance
 free_usdt = binance_futures.fetch_balance()['free']['USDT']
 
+current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last'] #fetching the current price
+
 #Short position
 try:
-    amount = free_usdt * 5 / current_price #using half of the capital
+    amount = free_usdt * 10 / current_price #using half of the capital
     binance_futures.create_order(
         symbol='ETH/USDT:USDT',  # Symbol for the asset
         side='SELL',                        # Sell to open a short position
@@ -215,7 +217,7 @@ try:
     )
     print("short position created successfully")
 except Exception as e:
-    print(f"Error in opening short positions when no position is opened : {e}")
+    print(f"Error in opening short positions : {e}")
 # Closing the position
 try:
     open_price = binance_futures.fetch_closed_orders('ETH/USDT:USDT')[-1]['average']
@@ -248,4 +250,4 @@ try:
     )
     print("stop-loss order for short position created successfully")
 except Exception as e:
-    print(f"Error in creating close order for short positions when no position is opened : {e}")
+    print(f"Error in creating close order for short positions : {e}")
