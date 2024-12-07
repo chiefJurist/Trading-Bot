@@ -146,7 +146,7 @@ big_df = fetch_OHLCV('ETH/USDT:USDT', '5m')
 
 
 #Setting leverage
-binance_futures.set_leverage(10, 'ETH/USDT:USDT')
+binance_futures.set_leverage(5, 'ETH/USDT:USDT')
 
 #Fetching USDT Balance
 usdt_balance = binance_futures.fetch_balance()['total']['USDT']
@@ -154,7 +154,7 @@ usdt_balance = binance_futures.fetch_balance()['total']['USDT']
 current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last'] #fetching the current price
 
 try:
-    amount = usdt_balance * 5 / current_price #using half the capital
+    amount = usdt_balance * 2.5 / current_price #using half the capital
     binance_futures.create_order(
         symbol="ETH/USDT:USDT",  # Symbol for the asset
         side="BUY",                     # Buy to open a long position
@@ -207,7 +207,7 @@ current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last'] #fetching 
 
 #Short position
 try:
-    amount = free_usdt * 10 / current_price #using half of the capital
+    amount = free_usdt * 5 / current_price #using half of the capital
     binance_futures.create_order(
         symbol='ETH/USDT:USDT',  # Symbol for the asset
         side='SELL',                        # Sell to open a short position
