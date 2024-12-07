@@ -140,3 +140,6 @@ print('ohlcv[497] for 5m chart = ', second_big_last_open, ",", second_big_last_h
 print('ohlcv[496] for 5m chart = ', third_big_last_open, ",", third_big_last_high, ",", third_big_last_low, ",", third_big_last_close)
 print('ohlcv[495] for 5m chart = ', fourth_big_last_open, ",", fourth_big_last_high, ",", fourth_big_last_low, ",", fourth_big_last_close)
 print('ohlcv[494] for 5m chart = ', fifth_big_last_open, ",", fifth_big_last_high, ",", fifth_big_last_low, ",", fifth_big_last_close)
+print("Bollinger[498] diff for 5m =", big_upperband[498] - big_lowerband[498])
+print("Bollinger[498] lowerband and candle diff for 5m =", big_last_low - big_lowerband[498])
+print("Bollinger[498] upperband and candle diff for 5m =", big_upperband[498] - big_last_high)
