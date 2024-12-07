@@ -281,7 +281,7 @@ def manage_futures_positions_and_balance():
                                 "stopPrice": stop_loss_price,  # Stop price for the order
                             }
                         )
-                        time.sleep(310)  # add a break for safety
+                        time.sleep(10)  # add a break for safety
                     except Exception as e:
                         print(f"Error in creating close order for short positions when no position is opened : {e}")
             
