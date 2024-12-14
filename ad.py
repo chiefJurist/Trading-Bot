@@ -54,18 +54,26 @@ def calculate_chaikin_ad(df):
 
     return result
 
-# Example usage
-if __name__ == "__main__":
-    symbol = 'ETH/USDT'  # Example trading pair
-    timeframe = '5m'  # Example timeframe
-    limit = 500  # Number of candles to fetch
 
-    # Fetch OHLCV data
-    ohlcv_data = fetch_OHLCV(symbol, timeframe, limit)
+symbol = 'ETH/USDT'  # Example trading pair
+timeframe = '1m'  # Example timeframe
+timeframe2 = '5m'  # Example timeframe 2
+limit = 500  # Number of candles to fetch
 
-    # Calculate Chaikin A/D Line
-    chaikin_ad_result = calculate_chaikin_ad(ohlcv_data)
+# Fetch OHLCV data
+ohlcv_data = fetch_OHLCV(symbol, timeframe, limit)
+ohlcv_data2 = fetch_OHLCV(symbol, timeframe2, limit)
 
-    # Print the result
-    for entry in chaikin_ad_result:
-        print(entry)
+# Calculate Chaikin A/D Line
+chaikin_ad_result = calculate_chaikin_ad(ohlcv_data)
+chaikin_ad_result2 = calculate_chaikin_ad(ohlcv_data2)
+
+
+# Print the result
+print("1 MINUTE CHART")
+for entry in chaikin_ad_result:
+    print(entry)
+print("")
+print("5 MINUTES CHART")
+for entry in chaikin_ad_result2:
+    print(entry)
