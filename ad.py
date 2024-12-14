@@ -43,12 +43,7 @@ def calculate_chaikin_ad(df):
 
     # Combine with timestamp and close price in the output
     result = [
-        {
-            'index': idx,
-            'timestamp': row['timestamp'],
-            'close': row['close'],
-            'ad_line': ad
-        }
+        [idx, row['timestamp'], {'close': row['close'], 'ad_line': ad}]
         for idx, (row, ad) in enumerate(zip(df.to_dict('records'), ad_line))
     ]
 
