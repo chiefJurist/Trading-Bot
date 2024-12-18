@@ -30,3 +30,44 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
+
+
+# Function to calculate Average True Range (ATR)
+def calculate_atr(df, period=14):
+    # Ensure high, low, and close columns are present
+    if not all(col in df.columns for col in ['high', 'low', 'close']):
+        raise ValueError("Missing required columns in DataFrame")
+    
+    # Calculate the ATR using TA-Lib
+    atr = ta.ATR(df['high'], df['low'], df['close'], timeperiod=period)
+    
+    # Combine with timestamp and close price in the output
+    result = [
+        [idx, row['timestamp'], {'close': row['close'], 'atr': atr_value}]
+        for idx, (row, atr_value) in enumerate(zip(df.to_dict('records'), atr))
+    ]
+    
+    return result
+
+
+symbol = 'ETH/USDT'  # Example trading pair
+timeframe = '1m'  # Example timeframe
+timeframe2 = '5m'  # Example timeframe 2
+limit = 500  # Number of candles to fetch
+
+# Fetch OHLCV data
+ohlcv_data = fetch_OHLCV(symbol, timeframe, limit)
+ohlcv_data2 = fetch_OHLCV(symbol, timeframe2, limit)
+
+# Calculate ATR
+atr_result = calculate_atr(ohlcv_data)
+atr_result2 = calculate_atr(ohlcv_data2)
+
+# Print the result
+print("1 MINUTE CHART - Average True Range (ATR)")
+for entry in atr_result:
+    print(entry)
+print("")
+print("5 MINUTES CHART - Average True Range (ATR)")
+for entry in atr_result2:
+    print(entry)

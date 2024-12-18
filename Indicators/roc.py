@@ -30,3 +30,42 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
+
+# Function to calculate ROC (Rate of Change)
+def calculate_roc(df, timeperiod=10):
+    # Ensure close column is present
+    if 'close' not in df.columns:
+        raise ValueError("Missing required columns in DataFrame")
+
+    # Calculate ROC using TA-Lib
+    roc_values = ta.ROC(df['close'], timeperiod=timeperiod)
+
+    # Combine with timestamp, close price, and ROC value in the output
+    result = [
+        [idx, row['timestamp'], {'close': row['close'], 'roc': roc}]
+        for idx, (row, roc) in enumerate(zip(df.to_dict('records'), roc_values))
+    ]
+    
+    return result
+
+symbol = 'ETH/USDT'  # Example trading pair
+timeframe = '1m'  # Example timeframe
+timeframe2 = '5m'  # Example timeframe 2
+limit = 500  # Number of candles to fetch
+
+# Fetch OHLCV data
+ohlcv_data = fetch_OHLCV(symbol, timeframe, limit)
+ohlcv_data2 = fetch_OHLCV(symbol, timeframe2, limit)
+
+# Calculate ROC (Rate of Change)
+roc_result = calculate_roc(ohlcv_data)
+roc_result2 = calculate_roc(ohlcv_data2)
+
+# Print the result
+print("1 MINUTE CHART - ROC")
+for entry in roc_result:
+    print(entry)
+print("")
+print("5 MINUTES CHART - ROC")
+for entry in roc_result2:
+    print(entry)

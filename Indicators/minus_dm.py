@@ -30,3 +30,42 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
+
+# Function to calculate the MINUS_DM (Minus Directional Movement)
+def calculate_minus_dm(df, timeperiod=14):
+    # Ensure 'high' and 'low' columns are present
+    if not all(col in df.columns for col in ['high', 'low']):
+        raise ValueError("Missing required columns in DataFrame")
+
+    # Calculate MINUS_DM using TA-Lib
+    minus_dm_values = ta.MINUS_DM(df['high'], df['low'], timeperiod=timeperiod)
+
+    # Combine with timestamp, close price, and minus DM value in the output
+    result = [
+        [idx, row['timestamp'], {'close': row['close'], 'minus_dm': minus_dm}]
+        for idx, (row, minus_dm) in enumerate(zip(df.to_dict('records'), minus_dm_values))
+    ]
+    
+    return result
+
+symbol = 'ETH/USDT'  # Example trading pair
+timeframe = '1m'  # Example timeframe
+timeframe2 = '5m'  # Example timeframe 2
+limit = 500  # Number of candles to fetch
+
+# Fetch OHLCV data
+ohlcv_data = fetch_OHLCV(symbol, timeframe, limit)
+ohlcv_data2 = fetch_OHLCV(symbol, timeframe2, limit)
+
+# Calculate MINUS_DM (Minus Directional Movement)
+minus_dm_result = calculate_minus_dm(ohlcv_data)
+minus_dm_result2 = calculate_minus_dm(ohlcv_data2)
+
+# Print the result
+print("1 MINUTE CHART - MINUS_DM")
+for entry in minus_dm_result:
+    print(entry)
+print("")
+print("5 MINUTES CHART - MINUS_DM")
+for entry in minus_dm_result2:
+    print(entry)

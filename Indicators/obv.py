@@ -30,3 +30,42 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
+
+# Function to calculate OBV (On-Balance Volume) indicator
+def calculate_obv(df):
+    # Ensure 'close' and 'volume' columns are present
+    if not all(col in df.columns for col in ['close', 'volume']):
+        raise ValueError("Missing required columns in DataFrame")
+
+    # Calculate OBV using TA-Lib
+    obv_values = ta.OBV(df['close'], df['volume'])
+
+    # Combine with timestamp, close price, and OBV value in the output
+    result = [
+        [idx, row['timestamp'], {'close': row['close'], 'obv': obv}]
+        for idx, (row, obv) in enumerate(zip(df.to_dict('records'), obv_values))
+    ]
+    
+    return result
+
+symbol = 'ETH/USDT'  # Example trading pair
+timeframe = '1m'  # Example timeframe
+timeframe2 = '5m'  # Example timeframe 2
+limit = 500  # Number of candles to fetch
+
+# Fetch OHLCV data
+ohlcv_data = fetch_OHLCV(symbol, timeframe, limit)
+ohlcv_data2 = fetch_OHLCV(symbol, timeframe2, limit)
+
+# Calculate OBV (On-Balance Volume)
+obv_result = calculate_obv(ohlcv_data)
+obv_result2 = calculate_obv(ohlcv_data2)
+
+# Print the result
+print("1 MINUTE CHART - OBV")
+for entry in obv_result:
+    print(entry)
+print("")
+print("5 MINUTES CHART - OBV")
+for entry in obv_result2:
+    print(entry)

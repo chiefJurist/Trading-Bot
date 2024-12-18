@@ -30,3 +30,42 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
+
+# Function to calculate SUM indicator
+def calculate_sum(df, timeperiod=14):
+    # Ensure the 'close' column is present
+    if 'close' not in df.columns:
+        raise ValueError("Missing 'close' column in DataFrame")
+
+    # Calculate SUM using TA-Lib
+    sum_values = ta.SUM(df['close'], timeperiod=timeperiod)
+
+    # Combine with timestamp, close price, and sum value in the output
+    result = [
+        [idx, row['timestamp'], {'close': row['close'], 'sum': sum_value}]
+        for idx, (row, sum_value) in enumerate(zip(df.to_dict('records'), sum_values))
+    ]
+    
+    return result
+
+symbol = 'ETH/USDT'  # Example trading pair
+timeframe = '1m'  # Example timeframe
+timeframe2 = '5m'  # Example timeframe 2
+limit = 500  # Number of candles to fetch
+
+# Fetch OHLCV data
+ohlcv_data = fetch_OHLCV(symbol, timeframe, limit)
+ohlcv_data2 = fetch_OHLCV(symbol, timeframe2, limit)
+
+# Calculate SUM indicator
+sum_result = calculate_sum(ohlcv_data)
+sum_result2 = calculate_sum(ohlcv_data2)
+
+# Print the result
+print("1 MINUTE CHART - SUM")
+for entry in sum_result:
+    print(entry)
+print("")
+print("5 MINUTES CHART - SUM")
+for entry in sum_result2:
+    print(entry)

@@ -30,3 +30,42 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
+
+# Function to calculate STOCHF (Stochastic Fast)
+def calculate_stochf(df, fastk_period=14, fastd_period=3):
+    # Ensure high, low, and close columns are present
+    if not all(col in df.columns for col in ['high', 'low', 'close']):
+        raise ValueError("Missing required columns in DataFrame")
+
+    # Calculate Stochastic Fast using TA-Lib
+    fastk, fastd = ta.STOCHF(df['high'], df['low'], df['close'], fastk_period=fastk_period, fastd_period=fastd_period)
+
+    # Combine with timestamp, close price, and Stochastic Fast values in the output
+    result = [
+        [idx, row['timestamp'], {'close': row['close'], 'stochf_fastk': k, 'stochf_fastd': d}]
+        for idx, (row, k, d) in enumerate(zip(df.to_dict('records'), fastk, fastd))
+    ]
+    
+    return result
+
+symbol = 'ETH/USDT'  # Example trading pair
+timeframe = '1m'  # Example timeframe
+timeframe2 = '5m'  # Example timeframe 2
+limit = 500  # Number of candles to fetch
+
+# Fetch OHLCV data
+ohlcv_data = fetch_OHLCV(symbol, timeframe, limit)
+ohlcv_data2 = fetch_OHLCV(symbol, timeframe2, limit)
+
+# Calculate STOCHF (Stochastic Fast)
+stochf_result = calculate_stochf(ohlcv_data)
+stochf_result2 = calculate_stochf(ohlcv_data2)
+
+# Print the result
+print("1 MINUTE CHART - STOCHF")
+for entry in stochf_result:
+    print(entry)
+print("")
+print("5 MINUTES CHART - STOCHF")
+for entry in stochf_result2:
+    print(entry)

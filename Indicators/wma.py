@@ -30,3 +30,42 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
+
+# Function to calculate WMA (Weighted Moving Average)
+def calculate_wma(df, period=14):
+    # Ensure the close column is present
+    if 'close' not in df.columns:
+        raise ValueError("Missing required column 'close' in DataFrame")
+
+    # Calculate WMA using TA-Lib
+    wma_values = ta.WMA(df['close'], timeperiod=period)
+
+    # Combine with timestamp, close price, and WMA values in the output
+    result = [
+        [idx, row['timestamp'], {'close': row['close'], 'wma': wma}]
+        for idx, (row, wma) in enumerate(zip(df.to_dict('records'), wma_values))
+    ]
+    
+    return result
+
+symbol = 'ETH/USDT'  # Example trading pair
+timeframe = '1m'  # Example timeframe
+timeframe2 = '5m'  # Example timeframe 2
+limit = 500  # Number of candles to fetch
+
+# Fetch OHLCV data
+ohlcv_data = fetch_OHLCV(symbol, timeframe, limit)
+ohlcv_data2 = fetch_OHLCV(symbol, timeframe2, limit)
+
+# Calculate WMA (Weighted Moving Average)
+wma_result = calculate_wma(ohlcv_data)
+wma_result2 = calculate_wma(ohlcv_data2)
+
+# Print the result
+print("1 MINUTE CHART - WMA")
+for entry in wma_result:
+    print(entry)
+print("")
+print("5 MINUTES CHART - WMA")
+for entry in wma_result2:
+    print(entry)

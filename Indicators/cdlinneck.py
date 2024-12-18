@@ -30,3 +30,42 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
+
+# Function to calculate CDLINNECK (In-Neck candlestick pattern)
+def calculate_cdlinneck(df):
+    # Ensure open, high, low, and close columns are present
+    if not all(col in df.columns for col in ['open', 'high', 'low', 'close']):
+        raise ValueError("Missing required columns in DataFrame")
+    
+    # Calculate the CDLINNECK pattern using TA-Lib
+    cdlinneck = ta.CDLINNECK(df['open'], df['high'], df['low'], df['close'])
+    
+    # Combine with timestamp and close price in the output
+    result = [
+        [idx, row['timestamp'], {'close': row['close'], 'cdlinneck': pattern}]
+        for idx, (row, pattern) in enumerate(zip(df.to_dict('records'), cdlinneck))
+    ]
+    
+    return result
+
+symbol = 'ETH/USDT'  # Example trading pair
+timeframe = '1m'  # Example timeframe
+timeframe2 = '5m'  # Example timeframe 2
+limit = 500  # Number of candles to fetch
+
+# Fetch OHLCV data
+ohlcv_data = fetch_OHLCV(symbol, timeframe, limit)
+ohlcv_data2 = fetch_OHLCV(symbol, timeframe2, limit)
+
+# Calculate CDLINNECK (In-Neck candlestick pattern)
+cdlinneck_result = calculate_cdlinneck(ohlcv_data)
+cdlinneck_result2 = calculate_cdlinneck(ohlcv_data2)
+
+# Print the result
+print("1 MINUTE CHART - CDLINNECK (In-Neck)")
+for entry in cdlinneck_result:
+    print(entry)
+print("")
+print("5 MINUTES CHART - CDLINNECK (In-Neck)")
+for entry in cdlinneck_result2:
+    print(entry)

@@ -30,3 +30,42 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
+
+# Function to calculate MAX (Maximum Price over a given period)
+def calculate_max(df, period=14):
+    # Ensure close column is present
+    if 'close' not in df.columns:
+        raise ValueError("Missing required columns in DataFrame")
+    
+    # Calculate MAX using TA-Lib
+    max_values = ta.MAX(df['close'], timeperiod=period)
+    
+    # Combine with timestamp, close price, and MAX value in the output
+    result = [
+        [idx, row['timestamp'], {'close': row['close'], 'max': max_val}]
+        for idx, (row, max_val) in enumerate(zip(df.to_dict('records'), max_values))
+    ]
+    
+    return result
+
+symbol = 'ETH/USDT'  # Example trading pair
+timeframe = '1m'  # Example timeframe
+timeframe2 = '5m'  # Example timeframe 2
+limit = 500  # Number of candles to fetch
+
+# Fetch OHLCV data
+ohlcv_data = fetch_OHLCV(symbol, timeframe, limit)
+ohlcv_data2 = fetch_OHLCV(symbol, timeframe2, limit)
+
+# Calculate MAX (Maximum Price over a given period)
+max_result = calculate_max(ohlcv_data)
+max_result2 = calculate_max(ohlcv_data2)
+
+# Print the result
+print("1 MINUTE CHART - MAX (Maximum Price)")
+for entry in max_result:
+    print(entry)
+print("")
+print("5 MINUTES CHART - MAX (Maximum Price)")
+for entry in max_result2:
+    print(entry)

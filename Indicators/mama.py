@@ -30,3 +30,42 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
+
+# Function to calculate MAMA (Modified Average of Oscillator)
+def calculate_mama(df, fastlimit=0.5, slowlimit=0.05):
+    # Ensure close column is present
+    if 'close' not in df.columns:
+        raise ValueError("Missing required columns in DataFrame")
+    
+    # Calculate MAMA using TA-Lib
+    mama, fama = ta.MAMA(df['close'], fastlimit=fastlimit, slowlimit=slowlimit)
+    
+    # Combine with timestamp, close price, MAMA, and FAMA in the output
+    result = [
+        [idx, row['timestamp'], {'close': row['close'], 'mama': m, 'fama': f}]
+        for idx, (row, m, f) in enumerate(zip(df.to_dict('records'), mama, fama))
+    ]
+    
+    return result
+
+symbol = 'ETH/USDT'  # Example trading pair
+timeframe = '1m'  # Example timeframe
+timeframe2 = '5m'  # Example timeframe 2
+limit = 500  # Number of candles to fetch
+
+# Fetch OHLCV data
+ohlcv_data = fetch_OHLCV(symbol, timeframe, limit)
+ohlcv_data2 = fetch_OHLCV(symbol, timeframe2, limit)
+
+# Calculate MAMA (Modified Average of Oscillator)
+mama_result = calculate_mama(ohlcv_data)
+mama_result2 = calculate_mama(ohlcv_data2)
+
+# Print the result
+print("1 MINUTE CHART - MAMA (Modified Average of Oscillator)")
+for entry in mama_result:
+    print(entry)
+print("")
+print("5 MINUTES CHART - MAMA (Modified Average of Oscillator)")
+for entry in mama_result2:
+    print(entry)

@@ -30,3 +30,42 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
+
+# Function to calculate SMA (Simple Moving Average)
+def calculate_sma(df, timeperiod=14):
+    # Ensure close column is present
+    if 'close' not in df.columns:
+        raise ValueError("Missing required 'close' column in DataFrame")
+
+    # Calculate SMA using TA-Lib
+    sma_values = ta.SMA(df['close'], timeperiod=timeperiod)
+
+    # Combine with timestamp, close price, and SMA value in the output
+    result = [
+        [idx, row['timestamp'], {'close': row['close'], 'sma': sma}]
+        for idx, (row, sma) in enumerate(zip(df.to_dict('records'), sma_values))
+    ]
+    
+    return result
+
+symbol = 'ETH/USDT'  # Example trading pair
+timeframe = '1m'  # Example timeframe
+timeframe2 = '5m'  # Example timeframe 2
+limit = 500  # Number of candles to fetch
+
+# Fetch OHLCV data
+ohlcv_data = fetch_OHLCV(symbol, timeframe, limit)
+ohlcv_data2 = fetch_OHLCV(symbol, timeframe2, limit)
+
+# Calculate SMA (Simple Moving Average)
+sma_result = calculate_sma(ohlcv_data)
+sma_result2 = calculate_sma(ohlcv_data2)
+
+# Print the result
+print("1 MINUTE CHART - SMA")
+for entry in sma_result:
+    print(entry)
+print("")
+print("5 MINUTES CHART - SMA")
+for entry in sma_result2:
+    print(entry)

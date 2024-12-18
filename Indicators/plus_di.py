@@ -30,3 +30,42 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
+
+# Function to calculate +DI (Positive Directional Indicator)
+def calculate_plus_di(df, period=14):
+    # Ensure high, low, and close columns are present
+    if not all(col in df.columns for col in ['high', 'low', 'close']):
+        raise ValueError("Missing required columns in DataFrame")
+
+    # Calculate +DI using TA-Lib
+    plus_di_values = ta.PLUS_DI(df['high'], df['low'], df['close'], timeperiod=period)
+
+    # Combine with timestamp, close price, and +DI value in the output
+    result = [
+        [idx, row['timestamp'], {'close': row['close'], '+di': plus_di}]
+        for idx, (row, plus_di) in enumerate(zip(df.to_dict('records'), plus_di_values))
+    ]
+    
+    return result
+
+symbol = 'ETH/USDT'  # Example trading pair
+timeframe = '1m'  # Example timeframe
+timeframe2 = '5m'  # Example timeframe 2
+limit = 500  # Number of candles to fetch
+
+# Fetch OHLCV data
+ohlcv_data = fetch_OHLCV(symbol, timeframe, limit)
+ohlcv_data2 = fetch_OHLCV(symbol, timeframe2, limit)
+
+# Calculate +DI (Positive Directional Indicator)
+plus_di_result = calculate_plus_di(ohlcv_data)
+plus_di_result2 = calculate_plus_di(ohlcv_data2)
+
+# Print the result
+print("1 MINUTE CHART - +DI")
+for entry in plus_di_result:
+    print(entry)
+print("")
+print("5 MINUTES CHART - +DI")
+for entry in plus_di_result2:
+    print(entry)

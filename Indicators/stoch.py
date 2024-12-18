@@ -30,3 +30,42 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
+
+# Function to calculate STOCH (Stochastic Oscillator)
+def calculate_stoch(df, fastk_period=14, slowk_period=3, slowd_period=3):
+    # Ensure high, low, and close columns are present
+    if not all(col in df.columns for col in ['high', 'low', 'close']):
+        raise ValueError("Missing required columns in DataFrame")
+
+    # Calculate Stochastic Oscillator using TA-Lib
+    slowk, slowd = ta.STOCH(df['high'], df['low'], df['close'], fastk_period=fastk_period, slowk_period=slowk_period, slowd_period=slowd_period)
+
+    # Combine with timestamp, close price, and Stochastic values in the output
+    result = [
+        [idx, row['timestamp'], {'close': row['close'], 'stoch_slowk': k, 'stoch_slowd': d}]
+        for idx, (row, k, d) in enumerate(zip(df.to_dict('records'), slowk, slowd))
+    ]
+    
+    return result
+
+symbol = 'ETH/USDT'  # Example trading pair
+timeframe = '1m'  # Example timeframe
+timeframe2 = '5m'  # Example timeframe 2
+limit = 500  # Number of candles to fetch
+
+# Fetch OHLCV data
+ohlcv_data = fetch_OHLCV(symbol, timeframe, limit)
+ohlcv_data2 = fetch_OHLCV(symbol, timeframe2, limit)
+
+# Calculate STOCH (Stochastic Oscillator)
+stoch_result = calculate_stoch(ohlcv_data)
+stoch_result2 = calculate_stoch(ohlcv_data2)
+
+# Print the result
+print("1 MINUTE CHART - STOCH")
+for entry in stoch_result:
+    print(entry)
+print("")
+print("5 MINUTES CHART - STOCH")
+for entry in stoch_result2:
+    print(entry)

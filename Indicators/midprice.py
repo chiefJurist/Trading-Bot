@@ -30,3 +30,42 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
+
+# Function to calculate Midprice (MIDPRICE) indicator
+def calculate_midprice(df):
+    # Ensure high and low columns are present
+    if not all(col in df.columns for col in ['high', 'low']):
+        raise ValueError("Missing required columns in DataFrame")
+
+    # Calculate Midprice using TA-Lib
+    midprice_values = ta.MIDPRICE(df['high'], df['low'], timeperiod=1)
+
+    # Combine with timestamp, close price, and midprice value in the output
+    result = [
+        [idx, row['timestamp'], {'close': row['close'], 'midprice': midprice}]
+        for idx, (row, midprice) in enumerate(zip(df.to_dict('records'), midprice_values))
+    ]
+    
+    return result
+
+symbol = 'ETH/USDT'  # Example trading pair
+timeframe = '1m'  # Example timeframe
+timeframe2 = '5m'  # Example timeframe 2
+limit = 500  # Number of candles to fetch
+
+# Fetch OHLCV data
+ohlcv_data = fetch_OHLCV(symbol, timeframe, limit)
+ohlcv_data2 = fetch_OHLCV(symbol, timeframe2, limit)
+
+# Calculate Midprice (MIDPRICE)
+midprice_result = calculate_midprice(ohlcv_data)
+midprice_result2 = calculate_midprice(ohlcv_data2)
+
+# Print the result
+print("1 MINUTE CHART - MIDPRICE")
+for entry in midprice_result:
+    print(entry)
+print("")
+print("5 MINUTES CHART - MIDPRICE")
+for entry in midprice_result2:
+    print(entry)

@@ -30,3 +30,42 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
+
+# Function to calculate KAMA (Kaufman Adaptive Moving Average)
+def calculate_kama(df, period=30, fast_period=2, slow_period=30):
+    # Ensure close column is present
+    if 'close' not in df.columns:
+        raise ValueError("Missing required columns in DataFrame")
+    
+    # Calculate KAMA (Kaufman Adaptive Moving Average) using TA-Lib
+    kama_values = ta.KAMA(df['close'], timeperiod=period, fastlimit=fast_period, slowlimit=slow_period)
+    
+    # Combine with timestamp and close price in the output
+    result = [
+        [idx, row['timestamp'], {'close': row['close'], 'kama': kama}]
+        for idx, (row, kama) in enumerate(zip(df.to_dict('records'), kama_values))
+    ]
+    
+    return result
+
+symbol = 'ETH/USDT'  # Example trading pair
+timeframe = '1m'  # Example timeframe
+timeframe2 = '5m'  # Example timeframe 2
+limit = 500  # Number of candles to fetch
+
+# Fetch OHLCV data
+ohlcv_data = fetch_OHLCV(symbol, timeframe, limit)
+ohlcv_data2 = fetch_OHLCV(symbol, timeframe2, limit)
+
+# Calculate KAMA (Kaufman Adaptive Moving Average)
+kama_result = calculate_kama(ohlcv_data)
+kama_result2 = calculate_kama(ohlcv_data2)
+
+# Print the result
+print("1 MINUTE CHART - KAMA (Kaufman Adaptive Moving Average)")
+for entry in kama_result:
+    print(entry)
+print("")
+print("5 MINUTES CHART - KAMA (Kaufman Adaptive Moving Average)")
+for entry in kama_result2:
+    print(entry)

@@ -30,3 +30,49 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
+
+# Function for fetching OHLCV data
+def fetch_OHLCV(symbol, timeframe, limit=500):
+    bars = binance_futures.fetch_ohlcv(symbol, timeframe, limit=limit)
+    df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+    df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+    return df
+
+# Function to calculate CDLBREAKAWAY (Breakaway candlestick pattern)
+def calculate_cdlbreakaway(df):
+    # Ensure open, high, low, and close columns are present
+    if not all(col in df.columns for col in ['open', 'high', 'low', 'close']):
+        raise ValueError("Missing required columns in DataFrame")
+    
+    # Calculate the CDLBREAKAWAY pattern using TA-Lib
+    cdlbreakaway = ta.CDLBREAKAWAY(df['open'], df['high'], df['low'], df['close'])
+    
+    # Combine with timestamp and close price in the output
+    result = [
+        [idx, row['timestamp'], {'close': row['close'], 'cdlbreakaway': pattern}]
+        for idx, (row, pattern) in enumerate(zip(df.to_dict('records'), cdlbreakaway))
+    ]
+    
+    return result
+
+symbol = 'ETH/USDT'  # Example trading pair
+timeframe = '1m'  # Example timeframe
+timeframe2 = '5m'  # Example timeframe 2
+limit = 500  # Number of candles to fetch
+
+# Fetch OHLCV data
+ohlcv_data = fetch_OHLCV(symbol, timeframe, limit)
+ohlcv_data2 = fetch_OHLCV(symbol, timeframe2, limit)
+
+# Calculate CDLBREAKAWAY (Breakaway candlestick pattern)
+cdlbreakaway_result = calculate_cdlbreakaway(ohlcv_data)
+cdlbreakaway_result2 = calculate_cdlbreakaway(ohlcv_data2)
+
+# Print the result
+print("1 MINUTE CHART - CDLBREAKAWAY (Breakaway)")
+for entry in cdlbreakaway_result:
+    print(entry)
+print("")
+print("5 MINUTES CHART - CDLBREAKAWAY (Breakaway)")
+for entry in cdlbreakaway_result2:
+    print(entry)

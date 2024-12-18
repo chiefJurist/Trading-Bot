@@ -30,3 +30,42 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
+
+# Function to calculate HT_PHASOR (Hilbert Transform - Phasor)
+def calculate_ht_phasor(df):
+    # Ensure close column is present
+    if 'close' not in df.columns:
+        raise ValueError("Missing required columns in DataFrame")
+    
+    # Calculate the HT_PHASOR (Hilbert Transform - Phasor) using TA-Lib
+    phasor_values = ta.HT_PHASOR(df['close'])
+    
+    # Combine with timestamp and close price in the output
+    result = [
+        [idx, row['timestamp'], {'close': row['close'], 'ht_phasor_in_phase': phasor[0], 'ht_phasor_quadrature_phase': phasor[1]}]
+        for idx, (row, phasor) in enumerate(zip(df.to_dict('records'), phasor_values))
+    ]
+    
+    return result
+
+symbol = 'ETH/USDT'  # Example trading pair
+timeframe = '1m'  # Example timeframe
+timeframe2 = '5m'  # Example timeframe 2
+limit = 500  # Number of candles to fetch
+
+# Fetch OHLCV data
+ohlcv_data = fetch_OHLCV(symbol, timeframe, limit)
+ohlcv_data2 = fetch_OHLCV(symbol, timeframe2, limit)
+
+# Calculate HT_PHASOR (Hilbert Transform - Phasor)
+ht_phasor_result = calculate_ht_phasor(ohlcv_data)
+ht_phasor_result2 = calculate_ht_phasor(ohlcv_data2)
+
+# Print the result
+print("1 MINUTE CHART - HT_PHASOR (Hilbert Transform - Phasor)")
+for entry in ht_phasor_result:
+    print(entry)
+print("")
+print("5 MINUTES CHART - HT_PHASOR (Hilbert Transform - Phasor)")
+for entry in ht_phasor_result2:
+    print(entry)

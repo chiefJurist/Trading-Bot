@@ -31,19 +31,19 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
 
-# Function to calculate MININDEX
+# Function to calculate the MININDEX (Index of Minimum) indicator
 def calculate_minindex(df, timeperiod=14):
     # Ensure 'low' column is present
     if 'low' not in df.columns:
         raise ValueError("Missing 'low' column in DataFrame")
 
-    # Calculate the index of the minimum value within the rolling period
-    min_indices = df['low'].rolling(window=timeperiod).apply(lambda x: x.idxmin(), raw=False)
+    # Calculate MININDEX using TA-Lib
+    minindex_values = ta.MININDEX(df['low'], timeperiod=timeperiod)
 
-    # Combine with timestamp, close price, and min index in the output
+    # Combine with timestamp, close price, and minindex value in the output
     result = [
-        [idx, row['timestamp'], {'close': row['close'], 'min_index': min_index}]
-        for idx, (row, min_index) in enumerate(zip(df.to_dict('records'), min_indices))
+        [idx, row['timestamp'], {'close': row['close'], 'minindex': minindex}]
+        for idx, (row, minindex) in enumerate(zip(df.to_dict('records'), minindex_values))
     ]
     
     return result
@@ -57,7 +57,7 @@ limit = 500  # Number of candles to fetch
 ohlcv_data = fetch_OHLCV(symbol, timeframe, limit)
 ohlcv_data2 = fetch_OHLCV(symbol, timeframe2, limit)
 
-# Calculate MININDEX
+# Calculate MININDEX (Index of Minimum) indicator
 minindex_result = calculate_minindex(ohlcv_data)
 minindex_result2 = calculate_minindex(ohlcv_data2)
 

@@ -30,3 +30,42 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
+
+# Function to calculate CDLLONGLINE (Long Line candlestick pattern)
+def calculate_cdllongline(df):
+    # Ensure open, high, low, and close columns are present
+    if not all(col in df.columns for col in ['open', 'high', 'low', 'close']):
+        raise ValueError("Missing required columns in DataFrame")
+    
+    # Calculate the CDLLONGLINE pattern using TA-Lib
+    cdllongline = ta.CDLLONGLINE(df['open'], df['high'], df['low'], df['close'])
+    
+    # Combine with timestamp and close price in the output
+    result = [
+        [idx, row['timestamp'], {'close': row['close'], 'cdllongline': pattern}]
+        for idx, (row, pattern) in enumerate(zip(df.to_dict('records'), cdllongline))
+    ]
+    
+    return result
+
+symbol = 'ETH/USDT'  # Example trading pair
+timeframe = '1m'  # Example timeframe
+timeframe2 = '5m'  # Example timeframe 2
+limit = 500  # Number of candles to fetch
+
+# Fetch OHLCV data
+ohlcv_data = fetch_OHLCV(symbol, timeframe, limit)
+ohlcv_data2 = fetch_OHLCV(symbol, timeframe2, limit)
+
+# Calculate CDLLONGLINE (Long Line candlestick pattern)
+cdllongline_result = calculate_cdllongline(ohlcv_data)
+cdllongline_result2 = calculate_cdllongline(ohlcv_data2)
+
+# Print the result
+print("1 MINUTE CHART - CDLLONGLINE (Long Line)")
+for entry in cdllongline_result:
+    print(entry)
+print("")
+print("5 MINUTES CHART - CDLLONGLINE (Long Line)")
+for entry in cdllongline_result2:
+    print(entry)

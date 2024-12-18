@@ -30,3 +30,42 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
+
+# Function to calculate TRIMA (Triangular Moving Average)
+def calculate_trima(df, timeperiod=30):
+    # Ensure the 'close' column is present
+    if 'close' not in df.columns:
+        raise ValueError("Missing 'close' column in DataFrame")
+
+    # Calculate Triangular Moving Average using TA-Lib
+    trima_values = ta.TRIMA(df['close'], timeperiod=timeperiod)
+
+    # Combine with timestamp, close price, and TRIMA value in the output
+    result = [
+        [idx, row['timestamp'], {'close': row['close'], 'trima': tr}]
+        for idx, (row, tr) in enumerate(zip(df.to_dict('records'), trima_values))
+    ]
+    
+    return result
+
+symbol = 'ETH/USDT'  # Example trading pair
+timeframe = '1m'  # Example timeframe
+timeframe2 = '5m'  # Example timeframe 2
+limit = 500  # Number of candles to fetch
+
+# Fetch OHLCV data
+ohlcv_data = fetch_OHLCV(symbol, timeframe, limit)
+ohlcv_data2 = fetch_OHLCV(symbol, timeframe2, limit)
+
+# Calculate TRIMA indicator
+trima_result = calculate_trima(ohlcv_data)
+trima_result2 = calculate_trima(ohlcv_data2)
+
+# Print the result
+print("1 MINUTE CHART - TRIMA")
+for entry in trima_result:
+    print(entry)
+print("")
+print("5 MINUTES CHART - TRIMA")
+for entry in trima_result2:
+    print(entry)

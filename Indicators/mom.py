@@ -30,3 +30,42 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
+
+# Function to calculate MOM (Momentum) indicator
+def calculate_mom(df, timeperiod=14):
+    # Ensure the 'close' column is present
+    if 'close' not in df.columns:
+        raise ValueError("Missing required 'close' column in DataFrame")
+
+    # Calculate MOM using TA-Lib
+    mom_values = ta.MOM(df['close'], timeperiod=timeperiod)
+
+    # Combine with timestamp, close price, and momentum value in the output
+    result = [
+        [idx, row['timestamp'], {'close': row['close'], 'mom': mom}]
+        for idx, (row, mom) in enumerate(zip(df.to_dict('records'), mom_values))
+    ]
+    
+    return result
+
+symbol = 'ETH/USDT'  # Example trading pair
+timeframe = '1m'  # Example timeframe
+timeframe2 = '5m'  # Example timeframe 2
+limit = 500  # Number of candles to fetch
+
+# Fetch OHLCV data
+ohlcv_data = fetch_OHLCV(symbol, timeframe, limit)
+ohlcv_data2 = fetch_OHLCV(symbol, timeframe2, limit)
+
+# Calculate MOM (Momentum)
+mom_result = calculate_mom(ohlcv_data)
+mom_result2 = calculate_mom(ohlcv_data2)
+
+# Print the result
+print("1 MINUTE CHART - MOM")
+for entry in mom_result:
+    print(entry)
+print("")
+print("5 MINUTES CHART - MOM")
+for entry in mom_result2:
+    print(entry)

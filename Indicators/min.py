@@ -31,14 +31,14 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
 
-# Function to calculate the MIN (Minimum) indicator using the min function
+# Function to calculate the MIN (Minimum) indicator
 def calculate_min(df, timeperiod=14):
     # Ensure 'low' column is present
     if 'low' not in df.columns:
         raise ValueError("Missing 'low' column in DataFrame")
 
-    # Calculate MIN using the built-in Python min function
-    min_values = df['low'].rolling(window=timeperiod).min()
+    # Calculate MIN using TA-Lib
+    min_values = ta.MIN(df['low'], timeperiod=timeperiod)
 
     # Combine with timestamp, close price, and min value in the output
     result = [

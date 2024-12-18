@@ -30,3 +30,42 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
+
+# Function to calculate TYPPRICE (Typical Price)
+def calculate_typprice(df):
+    # Ensure high, low, and close columns are present
+    if not all(col in df.columns for col in ['high', 'low', 'close']):
+        raise ValueError("Missing required columns in DataFrame")
+
+    # Calculate Typical Price using the formula
+    df['typprice'] = (df['high'] + df['low'] + df['close']) / 3
+
+    # Combine with timestamp and typical price in the output
+    result = [
+        [idx, row['timestamp'], {'close': row['close'], 'typprice': row['typprice']}]
+        for idx, row in enumerate(df.to_dict('records'))
+    ]
+    
+    return result
+
+symbol = 'ETH/USDT'  # Example trading pair
+timeframe = '1m'  # Example timeframe
+timeframe2 = '5m'  # Example timeframe 2
+limit = 500  # Number of candles to fetch
+
+# Fetch OHLCV data
+ohlcv_data = fetch_OHLCV(symbol, timeframe, limit)
+ohlcv_data2 = fetch_OHLCV(symbol, timeframe2, limit)
+
+# Calculate TYPPRICE (Typical Price)
+typprice_result = calculate_typprice(ohlcv_data)
+typprice_result2 = calculate_typprice(ohlcv_data2)
+
+# Print the result
+print("1 MINUTE CHART - TYPPRICE")
+for entry in typprice_result:
+    print(entry)
+print("")
+print("5 MINUTES CHART - TYPPRICE")
+for entry in typprice_result2:
+    print(entry)
