@@ -30,3 +30,42 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
+
+# Function to calculate the MIN (Minimum) indicator using the min function
+def calculate_min(df, timeperiod=14):
+    # Ensure 'low' column is present
+    if 'low' not in df.columns:
+        raise ValueError("Missing 'low' column in DataFrame")
+
+    # Calculate MIN using the built-in Python min function
+    min_values = df['low'].rolling(window=timeperiod).min()
+
+    # Combine with timestamp, close price, and min value in the output
+    result = [
+        [idx, row['timestamp'], {'close': row['close'], 'min': min_value}]
+        for idx, (row, min_value) in enumerate(zip(df.to_dict('records'), min_values))
+    ]
+    
+    return result
+
+symbol = 'ETH/USDT'  # Example trading pair
+timeframe = '1m'  # Example timeframe
+timeframe2 = '5m'  # Example timeframe 2
+limit = 500  # Number of candles to fetch
+
+# Fetch OHLCV data
+ohlcv_data = fetch_OHLCV(symbol, timeframe, limit)
+ohlcv_data2 = fetch_OHLCV(symbol, timeframe2, limit)
+
+# Calculate MIN (Minimum) indicator
+min_result = calculate_min(ohlcv_data)
+min_result2 = calculate_min(ohlcv_data2)
+
+# Print the result
+print("1 MINUTE CHART - MIN")
+for entry in min_result:
+    print(entry)
+print("")
+print("5 MINUTES CHART - MIN")
+for entry in min_result2:
+    print(entry)

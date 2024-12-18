@@ -30,3 +30,42 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
+
+# Function to calculate MININDEX
+def calculate_minindex(df, timeperiod=14):
+    # Ensure 'low' column is present
+    if 'low' not in df.columns:
+        raise ValueError("Missing 'low' column in DataFrame")
+
+    # Calculate the index of the minimum value within the rolling period
+    min_indices = df['low'].rolling(window=timeperiod).apply(lambda x: x.idxmin(), raw=False)
+
+    # Combine with timestamp, close price, and min index in the output
+    result = [
+        [idx, row['timestamp'], {'close': row['close'], 'min_index': min_index}]
+        for idx, (row, min_index) in enumerate(zip(df.to_dict('records'), min_indices))
+    ]
+    
+    return result
+
+symbol = 'ETH/USDT'  # Example trading pair
+timeframe = '1m'  # Example timeframe
+timeframe2 = '5m'  # Example timeframe 2
+limit = 500  # Number of candles to fetch
+
+# Fetch OHLCV data
+ohlcv_data = fetch_OHLCV(symbol, timeframe, limit)
+ohlcv_data2 = fetch_OHLCV(symbol, timeframe2, limit)
+
+# Calculate MININDEX
+minindex_result = calculate_minindex(ohlcv_data)
+minindex_result2 = calculate_minindex(ohlcv_data2)
+
+# Print the result
+print("1 MINUTE CHART - MININDEX")
+for entry in minindex_result:
+    print(entry)
+print("")
+print("5 MINUTES CHART - MININDEX")
+for entry in minindex_result2:
+    print(entry)
