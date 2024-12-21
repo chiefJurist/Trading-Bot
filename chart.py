@@ -33,60 +33,49 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
 
-# Function to approximate to 6 significant figures and handle NaN values
+# Function to round to 6 significant figures
 def significant_figures_six(x):
     if pd.isna(x) or x == 0:  # Check for NaN or zero
         return np.nan if pd.isna(x) else 0
     else:
         return round(x, 6 - int(math.floor(math.log10(abs(x)))) - 1)
-    
-# Function to approximate to 4 significant figures and handle NaN values
-def significant_figures_four(x):
-    if pd.isna(x) or x == 0:  # Check for NaN or zero
-        return np.nan if pd.isna(x) else 0
-    else:
-        return round(x, 4 - int(math.floor(math.log10(abs(x)))) - 1)
 
-#Function For Calculating STOCHF
+# Function for calculating StochF
 def calculate_stoch(df):
-    #Stochastic Oscillator
     rsi = ta.RSI(df['close'].values, timeperiod=14)
-    k, d = ta.STOCH(rsi, rsi, rsi, 
-                    fastk_period=14, 
-                    slowk_period=3, 
-                    slowk_matype=0, 
-                    slowd_period=3, 
+    k, d = ta.STOCH(rsi, rsi, rsi,
+                    fastk_period=14,
+                    slowk_period=3,
+                    slowk_matype=0,
+                    slowd_period=3,
                     slowd_matype=0)
-    k = pd.Series(k).apply(significant_figures_four)
-    d = pd.Series(d).apply(significant_figures_four)
-    return k, d
-    
-#Function For Calculating Bollinger Bands
+    return pd.Series(k), pd.Series(d)
+
+# Function for calculating Bollinger Bands
 def calculate_bollinger(df, window=20, num_std_dev=0.975):
-    # Calculate the moving average (middle band) and round it to 6 significant figures
-    middle_band_calc = df['close'].rolling(window=window, min_periods=1).mean()
-    middleband = middle_band_calc.apply(significant_figures_six)
-    # Calculate the standard deviation and use it to derive the upper and lower bands
+    middleband = df['close'].rolling(window=window, min_periods=1).mean()
     std_dev = df['close'].rolling(window=window, min_periods=1).std()
-    # Calculate the upper and lower bands and round them to 6 significant figures
-    upperband = (middle_band_calc + (std_dev * num_std_dev)).apply(significant_figures_six)
-    lowerband = (middle_band_calc - (std_dev * num_std_dev)) .apply(significant_figures_six)
-    
+    upperband = middleband + (std_dev * num_std_dev)
+    lowerband = middleband - (std_dev * num_std_dev)
     return upperband, middleband, lowerband
 
-#Fetching ohlcv
+# Fetch OHLCV
 df = fetch_OHLCV('ETH/USDT:USDT', '1m')
 
 # Calculate StochF and Bollinger Bands
-k, d = calculate_stoch(df)
-df['stoch_k'] = k
-df['stoch_d'] = d
-upperband, middleband, lowerband = calculate_bollinger(df)
-df['upperband'] = upperband
-df['middleband'] = middleband
-df['lowerband'] = lowerband
+df['stoch_k'], df['stoch_d'] = calculate_stoch(df)
+df['upperband'], df['middleband'], df['lowerband'] = calculate_bollinger(df)
 
-#Create candlestick chart
+# Drop rows with NaN values for plotting
+df.dropna(subset=['upperband', 'middleband', 'lowerband', 'stoch_k', 'stoch_d'], inplace=True)
+
+# Debug print
+print(df.head())
+
+# Limit rows for performance
+df = df.iloc[-500:]
+
+# Create candlestick chart
 candlestick = go.Candlestick(
     x=df['timestamp'],
     open=df['open'],
@@ -149,9 +138,6 @@ fig.update_layout(
     template='plotly_dark',
     hovermode='x unified'
 )
-
-print(df.head())
-
 
 # Show the chart
 pyo.plot(fig, filename='candlestick_chart.html')
