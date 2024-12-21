@@ -5,6 +5,7 @@ import time
 import math
 import numpy as np
 import plotly.graph_objects as go
+import plotly.offline as pyo
 
 # The User's API keys and addresses
 SPOT_API_KEY = 'lwObDP3Fcjia0OxQfombVxtG032NZWuFE4ctgKZPxBJYzblviFUd3ONUFAuOwcJq'
@@ -150,4 +151,4 @@ fig.update_layout(
 )
 
 # Show the chart
-fig.show()
+pyo.plot(fig, filename='candlestick_chart.html')
