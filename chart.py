@@ -107,13 +107,13 @@ upper_band_trace = go.Scatter(
 middle_band_trace = go.Scatter(
     x=df['timestamp'],
     y=df['middleband'],
-    line=dict(color='lightpurple', width=1),
+    line=dict(color='violet', width=1),
     name='Middle Band'
 )
 lower_band_trace = go.Scatter(
     x=df['timestamp'],
     y=df['lowerband'],
-    line=dict(color='darkpurple', width=1),
+    line=dict(color='purple', width=1),
     name='Lower Band'
 )
 
@@ -127,7 +127,7 @@ stoch_k_trace = go.Scatter(
 stoch_d_trace = go.Scatter(
     x=df['timestamp'],
     y=df['stoch_d'],
-    line=dict(color='lightpurple', width=1),
+    line=dict(color='violet', width=1),
     name='Stoch D'
 )
 
