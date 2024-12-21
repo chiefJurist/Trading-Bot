@@ -1,4 +1,4 @@
-import plotly.graph_objects as go
+import matplotlib.pyplot as plt
 
 # Sample data
 data = {
@@ -6,16 +6,23 @@ data = {
     'y': [100, 200, 150],
 }
 
-# Create a simple line chart
-fig = go.Figure(data=go.Scatter(x=data['x'], y=data['y'], mode='lines+markers', name='Test Line'))
+# Convert x to a more readable format (optional)
+# If you want to handle time, you can use `matplotlib.dates` or just keep them as strings for simplicity
 
-# Update layout for better visuals
-fig.update_layout(
-    title='Simple Line Chart',
-    xaxis_title='Time',
-    yaxis_title='Value',
-    template='plotly_dark'
-)
+# Create a figure and axis
+fig, ax = plt.subplots()
+
+# Plot the data
+ax.plot(data['x'], data['y'], marker='o', linestyle='-', color='b', label='Test Line')
+
+# Set titles and labels
+ax.set_title('Simple Line Chart')
+ax.set_xlabel('Time')
+ax.set_ylabel('Value')
+
+# Rotate the x-axis labels for better readability (if needed)
+plt.xticks(rotation=45)
 
 # Display the chart
-fig.show()
+plt.tight_layout()  # Adjust layout to prevent clipping of labels
+plt.show()
