@@ -150,5 +150,8 @@ fig.update_layout(
     hovermode='x unified'
 )
 
+print(df.head())
+
+
 # Show the chart
 pyo.plot(fig, filename='candlestick_chart.html')
