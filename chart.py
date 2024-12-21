@@ -30,7 +30,7 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     bars = binance_futures.fetch_ohlcv(symbol, timeframe, limit=limit)
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
-    return 
+    return df
 
 # Function to approximate to 6 significant figures and handle NaN values
 def significant_figures_six(x):
