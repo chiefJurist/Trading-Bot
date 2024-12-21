@@ -19,8 +19,3 @@ fig.update_layout(
 
 # Display the chart
 fig.show()
-
-# Save to HTML
-import plotly.io as pio
-pio.write_html(fig, file='simple_chart.html', auto_open=False)
-print("HTML file saved as 'simple_chart.html'")
