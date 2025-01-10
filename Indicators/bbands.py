@@ -30,3 +30,49 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
+
+# Function to calculate Bollinger Bands
+def calculate_bollinger_bands(df, timeperiod=20, nbdevup=1, nbdevdn=1):
+    # Ensure open, high, low, and close columns are present
+    if not all(col in df.columns for col in ['open', 'high', 'low', 'close']):
+        raise ValueError("Missing required columns in DataFrame")
+    
+    # Calculate Bollinger Bands using TA-Lib
+    upperband, middleband, lowerband = ta.BBANDS(
+        df['close'], timeperiod=timeperiod, nbdevup=nbdevup, nbdevdn=nbdevdn, matype=0
+    )
+    
+    # Combine with timestamp and close price in the output
+    result = [
+        [idx, row['timestamp'], {
+            'close': row['close'], 
+            'upperband': ub, 
+            'middleband': mb, 
+            'lowerband': lb
+        }]
+        for idx, (row, ub, mb, lb) in enumerate(zip(df.to_dict('records'), upperband, middleband, lowerband))
+    ]
+    
+    return result
+
+symbol = 'ETH/USDT'  # Example trading pair
+timeframe = '1m'  # Example timeframe
+timeframe2 = '5m'  # Example timeframe 2
+limit = 500  # Number of candles to fetch
+
+# Fetch OHLCV data
+ohlcv_data = fetch_OHLCV(symbol, timeframe, limit)
+ohlcv_data2 = fetch_OHLCV(symbol, timeframe2, limit)
+
+# Calculate Bollinger Bands
+bollinger_result = calculate_bollinger_bands(ohlcv_data)
+bollinger_result2 = calculate_bollinger_bands(ohlcv_data2)
+
+# Print the result
+print("1 MINUTE CHART - Bollinger Bands")
+for entry in bollinger_result:
+    print(entry)
+print("")
+print("5 MINUTES CHART - Bollinger Bands")
+for entry in bollinger_result2:
+    print(entry)
