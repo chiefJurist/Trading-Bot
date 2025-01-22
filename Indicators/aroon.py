@@ -75,8 +75,8 @@ timeframe2 = '5m'  # Example timeframe 2
 limit = 500  # Number of candles to fetch
 
 # Fetch OHLCV data
-ohlcv_data = fetch_OHLCV(symbol, timeframe, limit)
-ohlcv_data2 = fetch_OHLCV(symbol, timeframe2, limit)
+ohlcv_data = fetch_OHLCV(symbol, timeframe, limit = 3000)
+ohlcv_data2 = fetch_OHLCV(symbol, timeframe2, limit = 500)
 
 # Calculate Aroon Indicator
 aroon_result = calculate_aroon(ohlcv_data)
