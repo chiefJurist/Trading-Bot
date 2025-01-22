@@ -25,7 +25,7 @@ binance_futures = ccxt.binanceusdm({
 })
 
 #Function For Fetching OHLCV
-def fetch_OHLCV(symbol, timeframe, limit=2000, batch_size=1000):
+def fetch_OHLCV(symbol, timeframe, limit=3000, batch_size=1500):
     # Binance maximum batch size is typically 1500, but use smaller for safety
     all_data = []
     since = None  # Start from the most recent data
