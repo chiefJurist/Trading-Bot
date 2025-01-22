@@ -25,7 +25,7 @@ binance_futures = ccxt.binanceusdm({
 })
 
 # Function For Fetching OHLCV with support for up to 3000 candles for the 1-minute timeframe
-def fetch_OHLCV(symbol, timeframe, limit=500):
+def fetch_OHLCV(symbol, timeframe, limit=3000):
     max_limit = 1500  # Binance's maximum limit per fetch
     all_data = []
 
