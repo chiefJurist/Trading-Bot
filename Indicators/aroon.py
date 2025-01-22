@@ -25,40 +25,13 @@ binance_futures = ccxt.binanceusdm({
 })
 
 #Function For Fetching OHLCV
-def fetch_OHLCV(symbol, timeframe, limit=3000, batch_size=1500):
-    all_data = []
-    since = None  # Start from the most recent available data
-    
-    # Continue fetching data until we have enough data
-    while len(all_data) < limit:
-        fetch_limit = min(batch_size, limit - len(all_data))  # Fetch remaining data
-        bars = binance_futures.fetch_ohlcv(symbol, timeframe, limit=fetch_limit, since=since)
-        
-        if len(bars) == 0:
-            break  # Exit if no data is returned
-        
-        all_data.extend(bars)
-        
-        # Update 'since' to the timestamp of the last fetched candle (1 ms after)
-        since = bars[-1][0] + 1  # Start next fetch 1ms after the last timestamp
-        
-        # Exit if fewer than 'batch_size' bars are returned (this means we've reached the end of available data)
-        if len(bars) < batch_size:
-            break
-    
-    # Convert to DataFrame and clean data
-    df = pd.DataFrame(all_data, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+def fetch_OHLCV(symbol, timeframe, limit=500):
+    if timeframe == '1m':  # Override limit for 1-minute timeframe
+        limit = 1500
+    bars = binance_futures.fetch_ohlcv(symbol, timeframe, limit=limit)
+    df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
-    return df.drop_duplicates(subset=['timestamp'], keep='last')
-
-# Example usage
-symbol = 'ETH/USDT'
-timeframe = '1m'
-limit = 3000  # Number of candles to fetch
-
-ohlcv_data = fetch_OHLCV(symbol, timeframe, limit=limit)
-print(ohlcv_data)
-
+    return df
 
 # Function to calculate Aroon Indicator
 def calculate_aroon(df, period=14):
@@ -84,8 +57,8 @@ timeframe2 = '5m'  # Example timeframe 2
 limit = 500  # Number of candles to fetch
 
 # Fetch OHLCV data
-ohlcv_data = fetch_OHLCV(symbol, timeframe, limit = 3000)
-ohlcv_data2 = fetch_OHLCV(symbol, timeframe2, limit = 500)
+ohlcv_data = fetch_OHLCV(symbol, timeframe, limit)
+ohlcv_data2 = fetch_OHLCV(symbol, timeframe2, limit)
 
 # Calculate Aroon Indicator
 aroon_result = calculate_aroon(ohlcv_data)
