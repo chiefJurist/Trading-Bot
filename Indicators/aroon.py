@@ -26,27 +26,25 @@ binance_futures = ccxt.binanceusdm({
 
 #Function For Fetching OHLCV
 def fetch_OHLCV(symbol, timeframe, limit=3000, batch_size=1500):
-    # Binance maximum batch size is typically 1500, but use smaller for safety
     all_data = []
-    since = None  # Start from the most recent data
+    since = None  # Start from the most recent available data
     
     while len(all_data) < limit:
-        fetch_limit = min(batch_size, limit - len(all_data))  # Adjust batch size for remaining data
+        fetch_limit = min(batch_size, limit - len(all_data))
         bars = binance_futures.fetch_ohlcv(symbol, timeframe, limit=fetch_limit, since=since)
         
-        if not bars:
-            break  # Exit if no more data is returned
+        if not bars or len(bars) == 0:
+            break  # Stop if no data is returned
         
         all_data.extend(bars)
         
-        # Calculate the next since parameter based on the oldest timestamp
-        oldest_timestamp = bars[-1][0]
-        since = oldest_timestamp + 1  # Start from the next millisecond
+        # Update 'since' to be one millisecond after the last fetched timestamp
+        since = bars[-1][0] + 1
         
         if len(bars) < batch_size:
-            break  # Stop if fewer than batch_size bars were returned
-    
-    # Convert to DataFrame
+            break  # Stop fetching if fewer than batch_size bars are returned
+
+    # Convert to DataFrame and remove any duplicates
     df = pd.DataFrame(all_data, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df.drop_duplicates(subset=['timestamp'], keep='last')
