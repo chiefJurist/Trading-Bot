@@ -24,26 +24,12 @@ binance_futures = ccxt.binanceusdm({
     'secret': FUTURES_SECRET_KEY,
 })
 
-# Function For Fetching OHLCV with support for up to 3000 candles for the 1-minute timeframe
-def fetch_OHLCV(symbol, timeframe, limit=3000):
-    max_limit = 1500  # Binance's maximum limit per fetch
-    all_data = []
-
-    if timeframe == '1m' and limit > max_limit:
-        remaining = limit
-        since = None  # Fetch from the latest data point first
-        while remaining > 0:
-            batch_limit = min(max_limit, remaining)
-            batch_data = binance_futures.fetch_ohlcv(symbol, timeframe, limit=batch_limit, since=since)
-            if not batch_data:
-                break  # No more data available
-            all_data = batch_data + all_data  # Add new batch to the start (reverse order)
-            since = batch_data[0][0] - (60 * 1000)  # Move since backward by 1 minute
-            remaining -= len(batch_data)
-    else:
-        all_data = binance_futures.fetch_ohlcv(symbol, timeframe, limit=limit)
-    
-    df = pd.DataFrame(all_data, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+#Function For Fetching OHLCV
+def fetch_OHLCV(symbol, timeframe, limit=500):
+    if timeframe == '1m':  # Override limit for 1-minute timeframe
+        limit = 1500
+    bars = binance_futures.fetch_ohlcv(symbol, timeframe, limit=limit)
+    df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
 
