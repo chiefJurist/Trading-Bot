@@ -51,11 +51,10 @@ def calculate_willr(df, period=14):
 symbol = 'ETH/USDT'  # Example trading pair
 timeframe = '1m'  # Example timeframe
 timeframe2 = '5m'  # Example timeframe 2
-limit = 500  # Number of candles to fetch
 
 # Fetch OHLCV data
-ohlcv_data = fetch_OHLCV(symbol, timeframe, limit)
-ohlcv_data2 = fetch_OHLCV(symbol, timeframe2, limit)
+ohlcv_data = fetch_OHLCV(symbol, timeframe)
+ohlcv_data2 = fetch_OHLCV(symbol, timeframe2)
 
 # Calculate WILLR (Williams %R)
 willr_result = calculate_willr(ohlcv_data)

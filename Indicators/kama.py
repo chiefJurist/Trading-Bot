@@ -51,11 +51,10 @@ def calculate_kama(df, period=30, fast_period=2, slow_period=30):
 symbol = 'ETH/USDT'  # Example trading pair
 timeframe = '1m'  # Example timeframe
 timeframe2 = '5m'  # Example timeframe 2
-limit = 500  # Number of candles to fetch
 
 # Fetch OHLCV data
-ohlcv_data = fetch_OHLCV(symbol, timeframe, limit)
-ohlcv_data2 = fetch_OHLCV(symbol, timeframe2, limit)
+ohlcv_data = fetch_OHLCV(symbol, timeframe)
+ohlcv_data2 = fetch_OHLCV(symbol, timeframe2)
 
 # Calculate KAMA (Kaufman Adaptive Moving Average)
 kama_result = calculate_kama(ohlcv_data)

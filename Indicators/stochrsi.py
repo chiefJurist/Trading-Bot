@@ -51,11 +51,10 @@ def calculate_stochrsi(df, rsi_period=14, stoch_period=14, smooth_k=3, smooth_d=
 symbol = 'ETH/USDT'  # Example trading pair
 timeframe = '1m'  # Example timeframe
 timeframe2 = '5m'  # Example timeframe 2
-limit = 500  # Number of candles to fetch
 
 # Fetch OHLCV data
-ohlcv_data = fetch_OHLCV(symbol, timeframe, limit)
-ohlcv_data2 = fetch_OHLCV(symbol, timeframe2, limit)
+ohlcv_data = fetch_OHLCV(symbol, timeframe)
+ohlcv_data2 = fetch_OHLCV(symbol, timeframe2)
 
 # Calculate STOCHRSI (Stochastic RSI)
 stochrsi_result = calculate_stochrsi(ohlcv_data)
