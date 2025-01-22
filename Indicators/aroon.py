@@ -29,25 +29,36 @@ def fetch_OHLCV(symbol, timeframe, limit=3000, batch_size=1500):
     all_data = []
     since = None  # Start from the most recent available data
     
+    # Continue fetching data until we have enough data
     while len(all_data) < limit:
-        fetch_limit = min(batch_size, limit - len(all_data))
+        fetch_limit = min(batch_size, limit - len(all_data))  # Fetch remaining data
         bars = binance_futures.fetch_ohlcv(symbol, timeframe, limit=fetch_limit, since=since)
         
-        if not bars or len(bars) == 0:
-            break  # Stop if no data is returned
+        if len(bars) == 0:
+            break  # Exit if no data is returned
         
         all_data.extend(bars)
         
-        # Update 'since' to be one millisecond after the last fetched timestamp
-        since = bars[-1][0] + 1
+        # Update 'since' to the timestamp of the last fetched candle (1 ms after)
+        since = bars[-1][0] + 1  # Start next fetch 1ms after the last timestamp
         
+        # Exit if fewer than 'batch_size' bars are returned (this means we've reached the end of available data)
         if len(bars) < batch_size:
-            break  # Stop fetching if fewer than batch_size bars are returned
-
-    # Convert to DataFrame and remove any duplicates
+            break
+    
+    # Convert to DataFrame and clean data
     df = pd.DataFrame(all_data, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df.drop_duplicates(subset=['timestamp'], keep='last')
+
+# Example usage
+symbol = 'ETH/USDT'
+timeframe = '1m'
+limit = 3000  # Number of candles to fetch
+
+ohlcv_data = fetch_OHLCV(symbol, timeframe, limit=limit)
+print(ohlcv_data)
+
 
 # Function to calculate Aroon Indicator
 def calculate_aroon(df, period=14):
