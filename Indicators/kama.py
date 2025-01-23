@@ -42,7 +42,7 @@ def calculate_kama(df, period=30):
     
     # Combine with timestamp and close price in the output
     result = [
-        [idx, row['timestamp'], {'close': row['close'], 'kama': kama}]
+        [idx, row['timestamp'], {'high': row['high'], 'low': row['low'], 'kama': kama}]
         for idx, (row, kama) in enumerate(zip(df.to_dict('records'), kama_values))
     ]
     
