@@ -32,13 +32,13 @@ def fetch_OHLCV(symbol, timeframe, limit=1500):
     return df
 
 # Function to calculate KAMA (Kaufman Adaptive Moving Average)
-def calculate_kama(df, period=30, fast_period=2, slow_period=30):
+def calculate_kama(df, period=30):
     # Ensure close column is present
     if 'close' not in df.columns:
         raise ValueError("Missing required columns in DataFrame")
     
     # Calculate KAMA (Kaufman Adaptive Moving Average) using TA-Lib
-    kama_values = ta.KAMA(df['close'], timeperiod=period, fastlimit=fast_period, slowlimit=slow_period)
+    kama_values = ta.KAMA(df['close'], timeperiod=period)
     
     # Combine with timestamp and close price in the output
     result = [
