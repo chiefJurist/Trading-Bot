@@ -279,13 +279,32 @@ ohlcv_data2 = fetch_OHLCV(symbol, timeframe2)
 ohlcv_data['upperband'], ohlcv_data['middleband'], ohlcv_data['lowerband'] = calculate_bollinger_bands(ohlcv_data['close'])
 ohlcv_data2['upperband'], ohlcv_data2['middleband'], ohlcv_data2['lowerband'] = calculate_bollinger_bands(ohlcv_data2['close'])
 
-# Select and reorder columns for printing
-columns = ['upperband', 'middleband', 'lowerband', 'open', 'high', 'low', 'close', 'volume']
+# Format and print the data for the 1m chart
+print("1m Chart Data:")
+for index, row in ohlcv_data.iterrows():
+    print({
+        "Index": index,
+        "UpperBand": row['upperband'],
+        "MiddleBand": row['middleband'],
+        "LowerBand": row['lowerband'],
+        "Open": row['open'],
+        "High": row['high'],
+        "Low": row['low'],
+        "Close": row['close'],
+        "Volume": row['volume']
+    })
 
-# Print the 5m chart data with index and header beside it
-print("5m Chart Data:")
-print(ohlcv_data2[columns].to_string(index=True))
-
-# Print the 1m chart data with index and header beside it
-print("\n1m Chart Data:")
-print(ohlcv_data[columns].to_string(index=True))
+# Format and print the data for the 5m chart
+print("\n5m Chart Data:")
+for index, row in ohlcv_data2.iterrows():
+    print({
+        "Index": index,
+        "UpperBand": row['upperband'],
+        "MiddleBand": row['middleband'],
+        "LowerBand": row['lowerband'],
+        "Open": row['open'],
+        "High": row['high'],
+        "Low": row['low'],
+        "Close": row['close'],
+        "Volume": row['volume']
+    })
