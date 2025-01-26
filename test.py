@@ -282,10 +282,10 @@ ohlcv_data2['upperband'], ohlcv_data2['middleband'], ohlcv_data2['lowerband'] = 
 # Select and reorder columns for printing
 columns = ['upperband', 'middleband', 'lowerband', 'open', 'high', 'low', 'close', 'volume']
 
-# Print the 5m chart data
+# Print the 5m chart data with index and header beside it
 print("5m Chart Data:")
-print(ohlcv_data2[columns].to_string(index=False))
+print(ohlcv_data2[columns].to_string(index=True))
 
-# Print the 1m chart data
+# Print the 1m chart data with index and header beside it
 print("\n1m Chart Data:")
-print(ohlcv_data[columns].to_string(index=False))
+print(ohlcv_data[columns].to_string(index=True))
