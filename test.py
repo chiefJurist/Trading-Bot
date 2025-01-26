@@ -283,9 +283,6 @@ ohlcv_data2['upperband'], ohlcv_data2['middleband'], ohlcv_data2['lowerband'] = 
 def format_bollinger_bands(df):
     result = [
         [idx, row['timestamp'], {
-            'open': row['open'],
-            'high': row['high'],
-            'low': row['low'],
             'close': row['close'],
             'volume': row['volume'],
             'upperband': row['upperband'],
