@@ -279,4 +279,13 @@ ohlcv_data2 = fetch_OHLCV(symbol, timeframe2)
 ohlcv_data['upperband'], ohlcv_data['middleband'], ohlcv_data['lowerband'] = calculate_bollinger_bands(ohlcv_data['close'])
 ohlcv_data2['upperband'], ohlcv_data2['middleband'], ohlcv_data2['lowerband'] = calculate_bollinger_bands(ohlcv_data2['close'])
 
-print(ohlcv_data['upperband'])
+# Select and reorder columns for printing
+columns = ['upperband', 'middleband', 'lowerband', 'open', 'high', 'low', 'close', 'volume']
+
+# Print the 5m chart data
+print("5m Chart Data:")
+print(ohlcv_data2[columns].to_string(index=False))
+
+# Print the 1m chart data
+print("\n1m Chart Data:")
+print(ohlcv_data[columns].to_string(index=False))
