@@ -279,32 +279,43 @@ ohlcv_data2 = fetch_OHLCV(symbol, timeframe2)
 ohlcv_data['upperband'], ohlcv_data['middleband'], ohlcv_data['lowerband'] = calculate_bollinger_bands(ohlcv_data['close'])
 ohlcv_data2['upperband'], ohlcv_data2['middleband'], ohlcv_data2['lowerband'] = calculate_bollinger_bands(ohlcv_data2['close'])
 
-# Format and print the data for the 1m chart
-print("1m Chart Data:")
-for index, row in ohlcv_data.iterrows():
-    print({
-        "Index": index,
-        "UpperBand": row['upperband'],
-        "MiddleBand": row['middleband'],
-        "LowerBand": row['lowerband'],
-        "Open": row['open'],
-        "High": row['high'],
-        "Low": row['low'],
-        "Close": row['close'],
-        "Volume": row['volume']
-    })
+# Prepare and format the 1m chart data
+formatted_1m = [
+    {
+        "index": idx,
+        "upperband": row["upperband"],
+        "middleband": row["middleband"],
+        "lowerband": row["lowerband"],
+        "open": row["open"],
+        "high": row["high"],
+        "low": row["low"],
+        "close": row["close"],
+        "volume": row["volume"],
+    }
+    for idx, row in ohlcv_data.iterrows()
+]
 
-# Format and print the data for the 5m chart
+# Prepare and format the 5m chart data
+formatted_5m = [
+    {
+        "index": idx,
+        "upperband": row["upperband"],
+        "middleband": row["middleband"],
+        "lowerband": row["lowerband"],
+        "open": row["open"],
+        "high": row["high"],
+        "low": row["low"],
+        "close": row["close"],
+        "volume": row["volume"],
+    }
+    for idx, row in ohlcv_data2.iterrows()
+]
+
+# Print the results
+print("1m Chart Data:")
+for entry in formatted_1m:
+    print(entry)
+
 print("\n5m Chart Data:")
-for index, row in ohlcv_data2.iterrows():
-    print({
-        "Index": index,
-        "UpperBand": row['upperband'],
-        "MiddleBand": row['middleband'],
-        "LowerBand": row['lowerband'],
-        "Open": row['open'],
-        "High": row['high'],
-        "Low": row['low'],
-        "Close": row['close'],
-        "Volume": row['volume']
-    })
+for entry in formatted_5m:
+    print(entry)
