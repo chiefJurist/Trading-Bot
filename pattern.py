@@ -114,6 +114,13 @@ for i in range(2, len(ohlcv_data)):
             # '5m third to last ub': third_last_big_upperband
         })
 
-# Print all detected patterns
-for match in pattern_matches:
-    print(match)
+# Print all detected patterns in the desired format
+formatted_pattern_matches = [
+    [idx, match['timestamp'], {'type': match['type'], 'close': match['close'], 'upperband': match['upperband'], 'volume': match['volume']}]
+    for idx, match in enumerate(pattern_matches)
+]
+
+# Print the results
+print("PATTERN MATCHES (1 MINUTE CHART)")
+for entry in formatted_pattern_matches:
+    print(entry)
