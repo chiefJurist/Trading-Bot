@@ -65,10 +65,10 @@ for i in range(2, len(ohlcv_data)):
 
     # Find the corresponding 5-minute candles
     current_timestamp = ohlcv_data['timestamp'].iloc[i - 1]
-    five_minute_candles = ohlcv_data2[ohlcv_data2['timestamp'] <= current_timestamp].iloc[-3:]
+    five_minute_candles = ohlcv_data2[ohlcv_data2['timestamp'] < current_timestamp].iloc[-3:]
 
-    if len(five_minute_candles) < 3:
-        continue
+    # if len(five_minute_candles) < 3:
+    #     continue
 
     # Extract 5-minute candle details
     last_big_close = five_minute_candles['close'].iloc[-1]
