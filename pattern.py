@@ -57,6 +57,7 @@ pattern_matches = []
 for i in range(2, len(ohlcv_data)):
     # Get the current and previous candles for the 1-minute chart
     last_close = ohlcv_data['close'].iloc[i - 1]
+    last_volume = ohlcv_data['volume'].iloc[i - 1]
     second_last_close = ohlcv_data['close'].iloc[i - 2]
     last_upperband = ohlcv_data['upperband'].iloc[i - 1]
     last_lowerband = ohlcv_data['lowerband'].iloc[i - 1]
@@ -92,7 +93,7 @@ for i in range(2, len(ohlcv_data)):
             'type': 'Bullish',
             'close': last_close,
             'upperband': last_upperband,
-            'lowerband': last_lowerband,
+            'volume': last_volume,
             # '5m last upperband': last_big_upperband,
             # '5m second to last ub': second_last_big_upperband,
             # '5m third to last ub': third_last_big_upperband
@@ -107,7 +108,7 @@ for i in range(2, len(ohlcv_data)):
             'type': 'Bearish',
             'close': last_close,
             'upperband': last_upperband,
-            'lowerband': last_lowerband,
+            'volume': last_volume,
             # '5m last upperband': last_big_upperband,
             # '5m second to last ub': second_last_big_upperband,
             # '5m third to last ub': third_last_big_upperband
