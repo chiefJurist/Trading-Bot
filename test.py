@@ -279,28 +279,32 @@ ohlcv_data2 = fetch_OHLCV(symbol, timeframe2)
 ohlcv_data['upperband'], ohlcv_data['middleband'], ohlcv_data['lowerband'] = calculate_bollinger_bands(ohlcv_data['close'])
 ohlcv_data2['upperband'], ohlcv_data2['middleband'], ohlcv_data2['lowerband'] = calculate_bollinger_bands(ohlcv_data2['close'])
 
-# Function to format and output Bollinger Bands with OHLCV data
-def format_bollinger_bands(df):
-    result = [
-        [idx, row['timestamp'], {
-            'close': row['close'],
-            'volume': row['volume'],
-            'upperband': row['upperband'],
-            'middleband': row['middleband'],
-            'lowerband': row['lowerband']
-        }]
-        for idx, row in df.iterrows()
-    ]
-    return result
+# # Function to format and output Bollinger Bands with OHLCV data
+# def format_bollinger_bands(df):
+#     result = [
+#         [idx, row['timestamp'], {
+#             'close': row['close'],
+#             'volume': row['volume'],
+#             'upperband': row['upperband'],
+#             'middleband': row['middleband'],
+#             'lowerband': row['lowerband']
+#         }]
+#         for idx, row in df.iterrows()
+#     ]
+#     return result
 
-# Format and print the 1m chart data
-bollinger_result_1m = format_bollinger_bands(ohlcv_data)
-print("1 MINUTE CHART")
-for entry in bollinger_result_1m:
-    print(entry)
+# # Format and print the 1m chart data
+# bollinger_result_1m = format_bollinger_bands(ohlcv_data)
+# print("1 MINUTE CHART")
+# for entry in bollinger_result_1m:
+#     print(entry)
 
-# Format and print the 5m chart data
-bollinger_result_5m = format_bollinger_bands(ohlcv_data2)
-print("\n5 MINUTE CHART")
-for entry in bollinger_result_5m:
-    print(entry)
+# # Format and print the 5m chart data
+# bollinger_result_5m = format_bollinger_bands(ohlcv_data2)
+# print("\n5 MINUTE CHART")
+# for entry in bollinger_result_5m:
+#     print(entry)
+
+for i in range(2, len(ohlcv_data)):
+    # Get the current and previous candles for the 1-minute chart
+    print(last_close = ohlcv_data['close'].iloc[i])
