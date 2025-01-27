@@ -66,13 +66,10 @@ for i in range(2, len(ohlcv_data)):
     # Find the corresponding 5-minute candles
     current_timestamp = ohlcv_data['timestamp'].iloc[i - 1]
 
-    # Inside the loop
-    filtered_data = ohlcv_data2.loc[
-        (ohlcv_data2['timestamp'] < current_timestamp) & 
-        ((current_timestamp - ohlcv_data2['timestamp']) < pd.Timedelta(minutes=10))
-    ]
+    # Filter the data for the last 10 minutes
+    filtered_data = ohlcv_data2.loc[(ohlcv_data2['timestamp'] < current_timestamp) & ((current_timestamp - ohlcv_data2['timestamp']) < pd.Timedelta(minutes=10))]
 
-    if len(filtered_data) >= 2:  
+    if len(filtered_data) >= 3:  
         # Extract 5-minute candle details
         last_big_close = ohlcv_data2.loc[(ohlcv_data2['timestamp'] < current_timestamp) & ((current_timestamp - ohlcv_data2['timestamp']) < pd.Timedelta(minutes=10)), 'close'].iloc[-1]
         last_big_open = ohlcv_data2.loc[(ohlcv_data2['timestamp'] < current_timestamp) & ((current_timestamp - ohlcv_data2['timestamp']) < pd.Timedelta(minutes=10)), 'open'].iloc[-1]
