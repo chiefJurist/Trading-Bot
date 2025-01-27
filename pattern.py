@@ -56,15 +56,15 @@ pattern_matches = []
 # Loop through all 1-minute candles (starting from the 3rd candle to avoid out-of-bound errors)
 for i in range(2, len(ohlcv_data)):
     # Get the current and previous candles for the 1-minute chart
-    last_close = ohlcv_data['close'].iloc[i]
-    second_last_close = ohlcv_data['close'].iloc[i - 1]
-    last_upperband = ohlcv_data['upperband'].iloc[i]
-    last_lowerband = ohlcv_data['lowerband'].iloc[i]
-    second_last_upperband = ohlcv_data['upperband'].iloc[i - 1]
-    second_last_lowerband = ohlcv_data['lowerband'].iloc[i - 1]
+    last_close = ohlcv_data['close'].iloc[i - 1]
+    second_last_close = ohlcv_data['close'].iloc[i - 2]
+    last_upperband = ohlcv_data['upperband'].iloc[i - 1]
+    last_lowerband = ohlcv_data['lowerband'].iloc[i - 1]
+    second_last_upperband = ohlcv_data['upperband'].iloc[i - 2]
+    second_last_lowerband = ohlcv_data['lowerband'].iloc[i - 2]
 
     # Find the corresponding 5-minute candles
-    current_timestamp = ohlcv_data['timestamp'].iloc[i]
+    current_timestamp = ohlcv_data['timestamp'].iloc[i - 1]
     five_minute_candles = ohlcv_data2[ohlcv_data2['timestamp'] <= current_timestamp].iloc[-3:]
 
     if len(five_minute_candles) < 3:
