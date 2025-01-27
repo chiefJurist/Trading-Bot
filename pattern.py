@@ -65,26 +65,26 @@ for i in range(2, len(ohlcv_data)):
 
     # Find the corresponding 5-minute candles
     current_timestamp = ohlcv_data['timestamp'].iloc[i - 1]
-    five_minute_candles = ohlcv_data2[ohlcv_data2['timestamp'] < current_timestamp].iloc[-3:]
+    #five_minute_candles = ohlcv_data2[ohlcv_data2['timestamp'] < current_timestamp].iloc[-3:]
 
     # if len(five_minute_candles) < 3:
     #     continue
 
     # Extract 5-minute candle details
-    last_big_close = five_minute_candles['close'].iloc[-1]
-    last_big_open = five_minute_candles['open'].iloc[-1]
-    last_big_upperband = five_minute_candles['upperband'].iloc[-1]
-    last_big_lowerband = five_minute_candles['lowerband'].iloc[-1]
+    last_big_close = ohlcv_data2.loc[ohlcv_data2['timestamp'] < current_timestamp, 'close'].iloc[-1]
+    last_big_open = ohlcv_data2.loc[ohlcv_data2['timestamp'] < current_timestamp, 'open'].iloc[-1]
+    last_big_upperband = ohlcv_data2.loc[ohlcv_data2['timestamp'] < current_timestamp, 'upperband'].iloc[-1]
+    last_big_lowerband = ohlcv_data2.loc[ohlcv_data2['timestamp'] < current_timestamp, 'lowerband'].iloc[-1]
 
-    second_last_big_close = five_minute_candles['close'].iloc[-2]
-    second_last_big_open = five_minute_candles['open'].iloc[-2]
-    second_last_big_upperband = five_minute_candles['upperband'].iloc[-2]
-    second_last_big_lowerband = five_minute_candles['lowerband'].iloc[-2]
+    second_last_big_close = ohlcv_data2.loc[ohlcv_data2['timestamp'] < current_timestamp, 'close'].iloc[-2]
+    second_last_big_open = ohlcv_data2.loc[ohlcv_data2['timestamp'] < current_timestamp, 'open'].iloc[-2]
+    second_last_big_upperband = ohlcv_data2.loc[ohlcv_data2['timestamp'] < current_timestamp, 'upperband'].iloc[-2]
+    second_last_big_lowerband = ohlcv_data2.loc[ohlcv_data2['timestamp'] < current_timestamp, 'lowerband'].iloc[-2]
 
-    third_last_big_close = five_minute_candles['close'].iloc[-3]
-    third_last_big_open = five_minute_candles['open'].iloc[-3]
-    third_last_big_upperband = five_minute_candles['upperband'].iloc[-3]
-    third_last_big_lowerband = five_minute_candles['lowerband'].iloc[-3]
+    third_last_big_close = ohlcv_data2.loc[ohlcv_data2['timestamp'] < current_timestamp, 'close'].iloc[-3]
+    third_last_big_open = ohlcv_data2.loc[ohlcv_data2['timestamp'] < current_timestamp, 'open'].iloc[-3]
+    third_last_big_upperband = ohlcv_data2.loc[ohlcv_data2['timestamp'] < current_timestamp, 'upperband'].iloc[-3]
+    third_last_big_lowerband = ohlcv_data2.loc[ohlcv_data2['timestamp'] < current_timestamp, 'lowerband'].iloc[-3]
 
     # Check for bullish pattern
     if (
@@ -95,8 +95,10 @@ for i in range(2, len(ohlcv_data)):
             'type': 'Bullish',
             'close': last_close,
             'upperband': last_upperband,
-            'middleband': ohlcv_data['middleband'].iloc[i],
-            'lowerband': last_lowerband
+            'lowerband': last_lowerband,
+            '5m last upperband': last_big_upperband,
+            '5m second to last ub': second_last_big_upperband,
+            '5m third to last ub': third_last_big_upperband
         })
 
     # Check for bearish pattern
@@ -108,8 +110,10 @@ for i in range(2, len(ohlcv_data)):
             'type': 'Bearish',
             'close': last_close,
             'upperband': last_upperband,
-            'middleband': ohlcv_data['middleband'].iloc[i],
-            'lowerband': last_lowerband
+            'lowerband': last_lowerband,
+            '5m last upperband': last_big_upperband,
+            '5m second to last ub': second_last_big_upperband,
+            '5m third to last ub': third_last_big_upperband
         })
 
 # Print all detected patterns
