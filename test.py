@@ -307,4 +307,4 @@ ohlcv_data2['upperband'], ohlcv_data2['middleband'], ohlcv_data2['lowerband'] = 
 
 for i in range(2, len(ohlcv_data)):
     # Get the current and previous candles for the 1-minute chart
-    print(last_close = ohlcv_data['close'].iloc[i])
+    print(ohlcv_data['close'].iloc[i])
