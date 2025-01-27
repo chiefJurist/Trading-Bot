@@ -50,6 +50,10 @@ ohlcv_data2 = fetch_OHLCV(symbol, timeframe2)
 ohlcv_data['upperband'], ohlcv_data['middleband'], ohlcv_data['lowerband'] = calculate_bollinger_bands(ohlcv_data['close'])
 ohlcv_data2['upperband'], ohlcv_data2['middleband'], ohlcv_data2['lowerband'] = calculate_bollinger_bands(ohlcv_data2['close'])
 
+# Function to floor the timestamp to the nearest 5-minute interval
+def floor_to_previous_5min(timestamp):
+    return timestamp - pd.Timedelta(minutes=timestamp.minute % 5, seconds=timestamp.second, microseconds=timestamp.microsecond)
+
 # Initialize results dictionary
 pattern_matches = []
 
@@ -63,28 +67,25 @@ for i in range(2, len(ohlcv_data)):
     second_last_upperband = ohlcv_data['upperband'].iloc[i - 2]
     second_last_lowerband = ohlcv_data['lowerband'].iloc[i - 2]
 
-    # Find the corresponding 5-minute candles
+    # Get the current timestamp and floor it to the previous 5-minute interval
     current_timestamp = ohlcv_data['timestamp'].iloc[i - 1]
-    #five_minute_candles = ohlcv_data2[ohlcv_data2['timestamp'] < current_timestamp].iloc[-3:]
+    previous_5min_close = floor_to_previous_5min(current_timestamp)
 
-    # if len(five_minute_candles) < 3:
-    #     continue
+    # Extract 5-minute candle details based on the floored timestamp
+    last_big_close = ohlcv_data2.loc[ohlcv_data2['timestamp'] == previous_5min_close, 'close'].iloc[0]
+    last_big_open = ohlcv_data2.loc[ohlcv_data2['timestamp'] == previous_5min_close, 'open'].iloc[0]
+    last_big_upperband = ohlcv_data2.loc[ohlcv_data2['timestamp'] == previous_5min_close, 'upperband'].iloc[0]
+    last_big_lowerband = ohlcv_data2.loc[ohlcv_data2['timestamp'] == previous_5min_close, 'lowerband'].iloc[0]
 
-    # Extract 5-minute candle details
-    last_big_close = ohlcv_data2.loc[ohlcv_data2['timestamp'] < current_timestamp, 'close'].iloc[-1]
-    last_big_open = ohlcv_data2.loc[ohlcv_data2['timestamp'] < current_timestamp, 'open'].iloc[-1]
-    last_big_upperband = ohlcv_data2.loc[ohlcv_data2['timestamp'] < current_timestamp, 'upperband'].iloc[-1]
-    last_big_lowerband = ohlcv_data2.loc[ohlcv_data2['timestamp'] < current_timestamp, 'lowerband'].iloc[-1]
+    second_last_big_close = ohlcv_data2.loc[ohlcv_data2['timestamp'] < previous_5min_close, 'close'].iloc[-1]
+    second_last_big_open = ohlcv_data2.loc[ohlcv_data2['timestamp'] < previous_5min_close, 'open'].iloc[-1]
+    second_last_big_upperband = ohlcv_data2.loc[ohlcv_data2['timestamp'] < previous_5min_close, 'upperband'].iloc[-1]
+    second_last_big_lowerband = ohlcv_data2.loc[ohlcv_data2['timestamp'] < previous_5min_close, 'lowerband'].iloc[-1]
 
-    second_last_big_close = ohlcv_data2.loc[ohlcv_data2['timestamp'] < current_timestamp, 'close'].iloc[-2]
-    second_last_big_open = ohlcv_data2.loc[ohlcv_data2['timestamp'] < current_timestamp, 'open'].iloc[-2]
-    second_last_big_upperband = ohlcv_data2.loc[ohlcv_data2['timestamp'] < current_timestamp, 'upperband'].iloc[-2]
-    second_last_big_lowerband = ohlcv_data2.loc[ohlcv_data2['timestamp'] < current_timestamp, 'lowerband'].iloc[-2]
-
-    third_last_big_close = ohlcv_data2.loc[ohlcv_data2['timestamp'] < current_timestamp, 'close'].iloc[-3]
-    third_last_big_open = ohlcv_data2.loc[ohlcv_data2['timestamp'] < current_timestamp, 'open'].iloc[-3]
-    third_last_big_upperband = ohlcv_data2.loc[ohlcv_data2['timestamp'] < current_timestamp, 'upperband'].iloc[-3]
-    third_last_big_lowerband = ohlcv_data2.loc[ohlcv_data2['timestamp'] < current_timestamp, 'lowerband'].iloc[-3]
+    third_last_big_close = ohlcv_data2.loc[ohlcv_data2['timestamp'] < previous_5min_close, 'close'].iloc[-2]
+    third_last_big_open = ohlcv_data2.loc[ohlcv_data2['timestamp'] < previous_5min_close, 'open'].iloc[-2]
+    third_last_big_upperband = ohlcv_data2.loc[ohlcv_data2['timestamp'] < previous_5min_close, 'upperband'].iloc[-2]
+    third_last_big_lowerband = ohlcv_data2.loc[ohlcv_data2['timestamp'] < previous_5min_close, 'lowerband'].iloc[-2]
 
     # Check for bullish pattern
     if (
