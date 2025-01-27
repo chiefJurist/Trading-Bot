@@ -66,27 +66,30 @@ for i in range(2, len(ohlcv_data)):
     # Find the corresponding 5-minute candles
     current_timestamp = ohlcv_data['timestamp'].iloc[i - 1]
 
-    #filter the data
-    filtered_data = ohlcv_data2.loc[(ohlcv_data2['timestamp'] < current_timestamp) & ((current_timestamp - ohlcv_data2['timestamp']) < pd.Timedelta(minutes=10))]
+    # Inside the loop
+    filtered_data = ohlcv_data2.loc[
+        (ohlcv_data2['timestamp'] < current_timestamp) & 
+        ((current_timestamp - ohlcv_data2['timestamp']) < pd.Timedelta(minutes=10))
+    ]
 
-    if len(filtered_data) < 3:
-        continue
-    
-    # Extract 5-minute candle details
-    last_big_close = ohlcv_data2.loc[(ohlcv_data2['timestamp'] < current_timestamp) & ((current_timestamp - ohlcv_data2['timestamp']) < pd.Timedelta(minutes=10)), 'close'].iloc[-1]
-    last_big_open = ohlcv_data2.loc[(ohlcv_data2['timestamp'] < current_timestamp) & ((current_timestamp - ohlcv_data2['timestamp']) < pd.Timedelta(minutes=10)), 'open'].iloc[-1]
-    last_big_upperband = ohlcv_data2.loc[(ohlcv_data2['timestamp'] < current_timestamp) & ((current_timestamp - ohlcv_data2['timestamp']) < pd.Timedelta(minutes=10)), 'upperband'].iloc[-1]
-    last_big_lowerband = ohlcv_data2.loc[(ohlcv_data2['timestamp'] < current_timestamp) & ((current_timestamp - ohlcv_data2['timestamp']) < pd.Timedelta(minutes=10)), 'lowerband'].iloc[-1]
+    if len(filtered_data) >= 2:  
+        # Extract 5-minute candle details
+        last_big_close = ohlcv_data2.loc[(ohlcv_data2['timestamp'] < current_timestamp) & ((current_timestamp - ohlcv_data2['timestamp']) < pd.Timedelta(minutes=10)), 'close'].iloc[-1]
+        last_big_open = ohlcv_data2.loc[(ohlcv_data2['timestamp'] < current_timestamp) & ((current_timestamp - ohlcv_data2['timestamp']) < pd.Timedelta(minutes=10)), 'open'].iloc[-1]
+        last_big_upperband = ohlcv_data2.loc[(ohlcv_data2['timestamp'] < current_timestamp) & ((current_timestamp - ohlcv_data2['timestamp']) < pd.Timedelta(minutes=10)), 'upperband'].iloc[-1]
+        last_big_lowerband = ohlcv_data2.loc[(ohlcv_data2['timestamp'] < current_timestamp) & ((current_timestamp - ohlcv_data2['timestamp']) < pd.Timedelta(minutes=10)), 'lowerband'].iloc[-1]
 
-    second_last_big_close = ohlcv_data2.loc[(ohlcv_data2['timestamp'] < current_timestamp) & ((current_timestamp - ohlcv_data2['timestamp']) < pd.Timedelta(minutes=10)), 'close'].iloc[-2]
-    second_last_big_open = ohlcv_data2.loc[(ohlcv_data2['timestamp'] < current_timestamp) & ((current_timestamp - ohlcv_data2['timestamp']) < pd.Timedelta(minutes=10)), 'open'].iloc[-2]
-    second_last_big_upperband = ohlcv_data2.loc[(ohlcv_data2['timestamp'] < current_timestamp) & ((current_timestamp - ohlcv_data2['timestamp']) < pd.Timedelta(minutes=10)), 'upperband'].iloc[-2]
-    second_last_big_lowerband = ohlcv_data2.loc[(ohlcv_data2['timestamp'] < current_timestamp) & ((current_timestamp - ohlcv_data2['timestamp']) < pd.Timedelta(minutes=10)), 'lowerband'].iloc[-2]
+        second_last_big_close = ohlcv_data2.loc[(ohlcv_data2['timestamp'] < current_timestamp) & ((current_timestamp - ohlcv_data2['timestamp']) < pd.Timedelta(minutes=10)), 'close'].iloc[-2]
+        second_last_big_open = ohlcv_data2.loc[(ohlcv_data2['timestamp'] < current_timestamp) & ((current_timestamp - ohlcv_data2['timestamp']) < pd.Timedelta(minutes=10)), 'open'].iloc[-2]
+        second_last_big_upperband = ohlcv_data2.loc[(ohlcv_data2['timestamp'] < current_timestamp) & ((current_timestamp - ohlcv_data2['timestamp']) < pd.Timedelta(minutes=10)), 'upperband'].iloc[-2]
+        second_last_big_lowerband = ohlcv_data2.loc[(ohlcv_data2['timestamp'] < current_timestamp) & ((current_timestamp - ohlcv_data2['timestamp']) < pd.Timedelta(minutes=10)), 'lowerband'].iloc[-2]
 
-    third_last_big_close = ohlcv_data2.loc[(ohlcv_data2['timestamp'] < current_timestamp) & ((current_timestamp - ohlcv_data2['timestamp']) < pd.Timedelta(minutes=10)), 'close'].iloc[-3]
-    third_last_big_open = ohlcv_data2.loc[(ohlcv_data2['timestamp'] < current_timestamp) & ((current_timestamp - ohlcv_data2['timestamp']) < pd.Timedelta(minutes=10)), 'open'].iloc[-3]
-    third_last_big_upperband = ohlcv_data2.loc[(ohlcv_data2['timestamp'] < current_timestamp) & ((current_timestamp - ohlcv_data2['timestamp']) < pd.Timedelta(minutes=10)), 'upperband'].iloc[-3]
-    third_last_big_lowerband = ohlcv_data2.loc[(ohlcv_data2['timestamp'] < current_timestamp) & ((current_timestamp - ohlcv_data2['timestamp']) < pd.Timedelta(minutes=10)), 'lowerband'].iloc[-3]
+        third_last_big_close = ohlcv_data2.loc[(ohlcv_data2['timestamp'] < current_timestamp) & ((current_timestamp - ohlcv_data2['timestamp']) < pd.Timedelta(minutes=10)), 'close'].iloc[-3]
+        third_last_big_open = ohlcv_data2.loc[(ohlcv_data2['timestamp'] < current_timestamp) & ((current_timestamp - ohlcv_data2['timestamp']) < pd.Timedelta(minutes=10)), 'open'].iloc[-3]
+        third_last_big_upperband = ohlcv_data2.loc[(ohlcv_data2['timestamp'] < current_timestamp) & ((current_timestamp - ohlcv_data2['timestamp']) < pd.Timedelta(minutes=10)), 'upperband'].iloc[-3]
+        third_last_big_lowerband = ohlcv_data2.loc[(ohlcv_data2['timestamp'] < current_timestamp) & ((current_timestamp - ohlcv_data2['timestamp']) < pd.Timedelta(minutes=10)), 'lowerband'].iloc[-3]
+    else:
+        continue  # Skip this iteration
 
     # Check for bullish pattern
     if (
