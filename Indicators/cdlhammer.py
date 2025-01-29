@@ -62,8 +62,8 @@ cdlhammer_result = calculate_cdlhammer(ohlcv_data)
 # cdlhammer_result2 = calculate_cdlhammer(ohlcv_data2)
 
 # Print only rows where 'cdlhammer' is nonzero
-print("1 MINUTE CHART - CDL2CROWS (Two Crows)")
-filtered_results = [entry for entry in cdlhammer_result if entry[2]['cdl2crows'] != 0]
+print("1 MINUTE CHART - CDLHAMMER (Hammer)")
+filtered_results = [entry for entry in cdlhammer_result if entry[2]['cdlhammer'] != 0]
 
 for entry in filtered_results:
     print(entry)
