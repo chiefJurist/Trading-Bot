@@ -50,22 +50,22 @@ def calculate_cdl2crows(df):
 
 symbol = 'ETH/USDT'  # Example trading pair
 timeframe = '1m'  # Example timeframe
-timeframe2 = '5m'  # Example timeframe 2
-limit = 500  # Number of candles to fetch
+# timeframe2 = '5m'  # Example timeframe 2
+limit = 1500  # Number of candles to fetch
 
 # Fetch OHLCV data
 ohlcv_data = fetch_OHLCV(symbol, timeframe, limit)
-ohlcv_data2 = fetch_OHLCV(symbol, timeframe2, limit)
+# ohlcv_data2 = fetch_OHLCV(symbol, timeframe2, limit)
 
 # Calculate CDL2CROWS (Two Crows candlestick pattern)
 cdl2crows_result = calculate_cdl2crows(ohlcv_data)
-cdl2crows_result2 = calculate_cdl2crows(ohlcv_data2)
+# cdl2crows_result2 = calculate_cdl2crows(ohlcv_data2)
 
 # Print the result
 print("1 MINUTE CHART - CDL2CROWS (Two Crows)")
 for entry in cdl2crows_result:
     print(entry)
 print("")
-print("5 MINUTES CHART - CDL2CROWS (Two Crows)")
-for entry in cdl2crows_result2:
-    print(entry)
+# print("5 MINUTES CHART - CDL2CROWS (Two Crows)")
+# for entry in cdl2crows_result2:
+#     print(entry)
