@@ -61,11 +61,18 @@ ohlcv_data = fetch_OHLCV(symbol, timeframe, limit)
 cdl2crows_result = calculate_cdl2crows(ohlcv_data)
 # cdl2crows_result2 = calculate_cdl2crows(ohlcv_data2)
 
-# Print the result
+# Print only rows where 'cdl2crows' is nonzero
 print("1 MINUTE CHART - CDL2CROWS (Two Crows)")
-for entry in cdl2crows_result:
+filtered_results = [entry for entry in cdl2crows_result if entry[2]['cdl2crows'] != 0]
+
+for entry in filtered_results:
     print(entry)
-print("")
+
+# # Print the result
+# print("1 MINUTE CHART - CDL2CROWS (Two Crows)")
+# for entry in cdl2crows_result:
+#     print(entry)
+# print("")
 # print("5 MINUTES CHART - CDL2CROWS (Two Crows)")
 # for entry in cdl2crows_result2:
 #     print(entry)
