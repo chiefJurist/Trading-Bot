@@ -61,11 +61,18 @@ ohlcv_data = fetch_OHLCV(symbol, timeframe, limit)
 cdlhammer_result = calculate_cdlhammer(ohlcv_data)
 # cdlhammer_result2 = calculate_cdlhammer(ohlcv_data2)
 
-# Print the result
-print("1 MINUTE CHART - CDLHAMMER (Hammer)")
-for entry in cdlhammer_result:
+# Print only rows where 'cdlhammer' is nonzero
+print("1 MINUTE CHART - CDL2CROWS (Two Crows)")
+filtered_results = [entry for entry in cdlhammer_result if entry[2]['cdl2crows'] != 0]
+
+for entry in filtered_results:
     print(entry)
-print("")
+
+# # Print the result
+# print("1 MINUTE CHART - CDLHAMMER (Hammer)")
+# for entry in cdlhammer_result:
+#     print(entry)
+# print("")
 # print("5 MINUTES CHART - CDLHAMMER (Hammer)")
 # for entry in cdlhammer_result2:
 #     print(entry)
