@@ -50,22 +50,22 @@ def calculate_cdlhammer(df):
 
 symbol = 'ETH/USDT'  # Example trading pair
 timeframe = '1m'  # Example timeframe
-timeframe2 = '5m'  # Example timeframe 2
-limit = 500  # Number of candles to fetch
+# timeframe2 = '5m'  # Example timeframe 2
+limit = 1500  # Number of candles to fetch
 
 # Fetch OHLCV data
 ohlcv_data = fetch_OHLCV(symbol, timeframe, limit)
-ohlcv_data2 = fetch_OHLCV(symbol, timeframe2, limit)
+# ohlcv_data2 = fetch_OHLCV(symbol, timeframe2, limit)
 
 # Calculate CDLHAMMER (Hammer candlestick pattern)
 cdlhammer_result = calculate_cdlhammer(ohlcv_data)
-cdlhammer_result2 = calculate_cdlhammer(ohlcv_data2)
+# cdlhammer_result2 = calculate_cdlhammer(ohlcv_data2)
 
 # Print the result
 print("1 MINUTE CHART - CDLHAMMER (Hammer)")
 for entry in cdlhammer_result:
     print(entry)
 print("")
-print("5 MINUTES CHART - CDLHAMMER (Hammer)")
-for entry in cdlhammer_result2:
-    print(entry)
+# print("5 MINUTES CHART - CDLHAMMER (Hammer)")
+# for entry in cdlhammer_result2:
+#     print(entry)
