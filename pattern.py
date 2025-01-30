@@ -94,7 +94,7 @@ for i in range(2, len(ohlcv_data)):
 
 # Print all detected patterns in the desired format
 formatted_pattern_matches = [
-    [idx, match['timestamp'], {'type': match['type'], 'close': match['close'], 'upperband': match['upperband'], 'volume': match['volume']}]
+    [idx, match['timestamp'], {'type': match['type'], 'close': match['close'], 'lowerband': match['lowerband'], 'upperband': match['upperband']}]
     for idx, match in enumerate(pattern_matches)
 ]
 
