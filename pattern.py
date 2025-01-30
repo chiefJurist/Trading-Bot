@@ -54,12 +54,17 @@ pattern_matches = []
 for i in range(2, len(ohlcv_data)):
     # Get the current and previous candles for the 1-minute chart
     last_close = ohlcv_data['close'].iloc[i - 1]
-    last_volume = ohlcv_data['volume'].iloc[i - 1]
     second_last_close = ohlcv_data['close'].iloc[i - 2]
+    third_last_close = ohlcv_data['close'].iloc[i - 3]
+    last_open = ohlcv_data['open'].iloc[i - 1]
+    second_last_open = ohlcv_data['open'].iloc[i - 2]
+    third_last_open = ohlcv_data['open'].iloc[i - 3]
     last_upperband = ohlcv_data['upperband'].iloc[i - 1]
     last_lowerband = ohlcv_data['lowerband'].iloc[i - 1]
     second_last_upperband = ohlcv_data['upperband'].iloc[i - 2]
     second_last_lowerband = ohlcv_data['lowerband'].iloc[i - 2]
+    third_last_upperband = ohlcv_data['upperband'].iloc[i - 3]
+    third_last_lowerband = ohlcv_data['lowerband'].iloc[i - 3]
 
     # Find the corresponding 5-minute candles
     current_timestamp = ohlcv_data['timestamp'].iloc[i - 1]
@@ -67,26 +72,24 @@ for i in range(2, len(ohlcv_data)):
 
     # Check for bullish pattern
     if (
-        last_close > last_lowerband and second_last_close < second_last_lowerband #and last_big_close > last_big_lowerband and second_last_big_close > second_last_big_lowerband  and last_big_close > last_big_open and second_last_big_close > second_last_big_open
+        last_close > last_lowerband and second_last_close > second_last_lowerband and third_last_close < third_last_lowerband and second_last_close > second_last_open and last_close >last_open
     ):
         pattern_matches.append({
             'timestamp': current_timestamp,
             'type': 'Bullish',
             'close': last_close,
             'upperband': last_upperband,
-            'volume': last_volume,
         })
 
     # Check for bearish pattern
     if (
-        last_close < last_upperband and second_last_close > second_last_upperband
+        last_close < last_upperband and second_last_close < second_last_upperband and third_last_close > third_last_lowerband and second_last_close < second_last_open and last_close < last_open
     ):
         pattern_matches.append({
             'timestamp': current_timestamp,
             'type': 'Bearish',
             'close': last_close,
             'upperband': last_upperband,
-            'volume': last_volume,
         })
 
 # Print all detected patterns in the desired format
