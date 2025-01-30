@@ -53,21 +53,25 @@ pattern_matches = []
 # Loop through all 1-minute candles (starting from the 3rd candle to avoid out-of-bound errors)
 for i in range(2, len(ohlcv_data)):
     # Get the current and previous candles for the 1-minute chart
+    current_close = ohlcv_data['close'].iloc[i]
     last_close = ohlcv_data['close'].iloc[i - 1]
     second_last_close = ohlcv_data['close'].iloc[i - 2]
     third_last_close = ohlcv_data['close'].iloc[i - 3]
+    current_open = ohlcv_data['open'].iloc[i]
     last_open = ohlcv_data['open'].iloc[i - 1]
     second_last_open = ohlcv_data['open'].iloc[i - 2]
     third_last_open = ohlcv_data['open'].iloc[i - 3]
+    current_upperband = ohlcv_data['upperband'].iloc[i]
     last_upperband = ohlcv_data['upperband'].iloc[i - 1]
-    last_lowerband = ohlcv_data['lowerband'].iloc[i - 1]
     second_last_upperband = ohlcv_data['upperband'].iloc[i - 2]
-    second_last_lowerband = ohlcv_data['lowerband'].iloc[i - 2]
     third_last_upperband = ohlcv_data['upperband'].iloc[i - 3]
+    current_lowerband = ohlcv_data['lowerband'].iloc[i]
+    last_lowerband = ohlcv_data['lowerband'].iloc[i - 1]
+    second_last_lowerband = ohlcv_data['lowerband'].iloc[i - 2]
     third_last_lowerband = ohlcv_data['lowerband'].iloc[i - 3]
 
     # Find the corresponding 5-minute candles
-    current_timestamp = ohlcv_data['timestamp'].iloc[i - 1]
+    current_timestamp = ohlcv_data['timestamp'].iloc[i]
 
 
     # Check for bullish pattern
@@ -77,9 +81,9 @@ for i in range(2, len(ohlcv_data)):
         pattern_matches.append({
             'timestamp': current_timestamp,
             'type': 'Bullish',
-            'close': last_close,
-            'lowerband': last_lowerband,
-            'upperband': last_upperband,
+            'close': current_close,
+            'lowerband': current_lowerband,
+            'upperband': current_upperband,
         })
 
     # Check for bearish pattern
@@ -89,9 +93,9 @@ for i in range(2, len(ohlcv_data)):
         pattern_matches.append({
             'timestamp': current_timestamp,
             'type': 'Bearish',
-            'close': last_close,
-            'lowerband': last_lowerband,
-            'upperband': last_upperband,
+            'close': current_close,
+            'lowerband': current_lowerband,
+            'upperband': current_upperband,
         })
 
 # Print all detected patterns in the desired format
