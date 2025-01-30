@@ -78,6 +78,7 @@ for i in range(2, len(ohlcv_data)):
             'timestamp': current_timestamp,
             'type': 'Bullish',
             'close': last_close,
+            'lowerband': last_lowerband,
             'upperband': last_upperband,
         })
 
@@ -89,6 +90,7 @@ for i in range(2, len(ohlcv_data)):
             'timestamp': current_timestamp,
             'type': 'Bearish',
             'close': last_close,
+            'lowerband': last_lowerband,
             'upperband': last_upperband,
         })
 
