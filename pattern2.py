@@ -78,17 +78,17 @@ for i in range(2, len(ohlcv_data)):
     current_timestamp = ohlcv_data['timestamp'].iloc[i]
 
 
-    # Check for bullish pattern
-    if (
-        last_close > last_lowerband and second_last_close > second_last_lowerband and third_last_close < third_last_lowerband and second_last_close > second_last_open and last_close > last_open
-    ):
-        pattern_matches.append({
-            'timestamp': current_timestamp,
-            'type': 'Bullish',
-            'close': current_close,
-            'lowerband': current_lowerband,
-            'upperband': current_upperband,
-        })
+    # # Check for bullish pattern
+    # if (
+    #     last_close > last_lowerband and second_last_close > second_last_lowerband and third_last_close < third_last_lowerband and second_last_close > second_last_open and last_close > last_open
+    # ):
+    #     pattern_matches.append({
+    #         'timestamp': current_timestamp,
+    #         'type': 'Bullish',
+    #         'close': current_close,
+    #         'lowerband': current_lowerband,
+    #         'upperband': current_upperband,
+    #     })
 
     # Check for bearish pattern
     if (
