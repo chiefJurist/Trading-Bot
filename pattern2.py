@@ -51,7 +51,7 @@ ohlcv_data['upperband'], ohlcv_data['middleband'], ohlcv_data['lowerband'] = cal
 pattern_matches = []
 
 # Loop through all 1 day candles
-for i in ohlcv_data:
+for i in range(len(ohlcv_data)):
     # Get the needed data from the candle
     current_open = ohlcv_data['open'].iloc[i]
     current_close = ohlcv_data['close'].iloc[i]
