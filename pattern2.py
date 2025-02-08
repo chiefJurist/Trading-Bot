@@ -43,7 +43,7 @@ def calculate_bollinger_bands(close_prices, timeperiod=20, nbdevup=1, nbdevdn=1)
     return upperband, middleband, lowerband
 
 symbol = 'ETH/USDT'  # Example trading pair
-timeframe = '1m'  # Example timeframe
+timeframe = '1d'  # Example timeframe
 
 # Fetch OHLCV data
 ohlcv_data = fetch_OHLCV(symbol, timeframe)
@@ -96,7 +96,7 @@ for i in range(len(ohlcv_data)):
 
 # Print all detected patterns in the desired format
 formatted_pattern_matches = [
-    [idx, match['timestamp'], {'color': match['color'], 'open': match['open'], 'close': match['close'], 'high': match['high'], 'low': match['low'], 'candle-size': match['candle-size'], 'upper-wick': match['upper-wick'], 'lower-wick': match['lower-wick']}]
+    [idx, match['timestamp'], {'color': match['color'], 'open': match['open'], 'candle-size': match['candle-size'], 'upper-wick': match['upper-wick'], 'lower-wick': match['lower-wick']}]
     for idx, match in enumerate(pattern_matches)
 ]
 
