@@ -32,6 +32,8 @@ def fetch_OHLCV(symbol, timeframe, limit=50):
     df['timestamp'] = df['timestamp'].dt.tz_convert('Etc/GMT-1')  # Convert to UTC+1
     df['timestamp'] = df['timestamp'].dt.tz_localize(None)  # Remove timezone info
 
+     # Convert NumPy float64 to standard Python float
+    df = df.astype({'open': float, 'high': float, 'low': float, 'close': float, 'volume': float})
 
     return df
 
