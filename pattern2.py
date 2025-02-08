@@ -39,7 +39,7 @@ def calculate_bollinger_bands(close_prices, timeperiod=20, nbdevup=1, nbdevdn=1)
     return upperband, middleband, lowerband
 
 symbol = 'ETH/USDT'  # Example trading pair
-timeframe = '1d'  # Example timeframe
+timeframe = '1m'  # Example timeframe
 
 # Fetch OHLCV data
 ohlcv_data = fetch_OHLCV(symbol, timeframe)
