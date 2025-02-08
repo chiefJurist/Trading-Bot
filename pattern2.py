@@ -103,3 +103,4 @@ formatted_pattern_matches = [
 print("PATTERN MATCHES (1 MINUTE CHART)")
 for entry in formatted_pattern_matches:
     print(entry)
+    print()
