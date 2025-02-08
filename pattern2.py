@@ -81,7 +81,7 @@ for i in range(len(ohlcv_data)):
     # Check for bearish pattern
     if (current_close < current_open):
         pattern_matches.append({
-            'timestamp': float(current_timestamp),
+            'timestamp': current_timestamp,
             'color': 'red',
             'open' : float(current_open),
             'close': float(current_close),
