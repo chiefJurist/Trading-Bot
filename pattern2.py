@@ -32,9 +32,6 @@ def fetch_OHLCV(symbol, timeframe, limit=50):
     df['timestamp'] = df['timestamp'].dt.tz_convert('Etc/GMT-1')  # Convert to UTC+1
     df['timestamp'] = df['timestamp'].dt.tz_localize(None)  # Remove timezone info
 
-     # Convert NumPy float64 to standard Python float
-    df = df.astype({'open': float, 'high': float, 'low': float, 'close': float, 'volume': float})
-
     return df
 
 # Function to calculate Bollinger Bands
@@ -71,28 +68,28 @@ for i in range(len(ohlcv_data)):
         pattern_matches.append({
             'timestamp': current_timestamp,
             'color': 'green',
-            'open' : current_open,
-            'close': current_close,
-            'high': current_high,
-            'low': current_low,
-            'candle-size': current_close - current_open,
-            'upper-wick': current_high - current_close,
-            'lower-wick': current_open - current_low,
+            'open' : float(current_open),
+            'close': float(current_close),
+            'high': float(current_high),
+            'low': float(current_low),
+            'candle-size': float(current_close - current_open),
+            'upper-wick': float(current_high - current_close),
+            'lower-wick': float(current_open - current_low),
 
         })
 
     # Check for bearish pattern
     if (current_close < current_open):
         pattern_matches.append({
-            'timestamp': current_timestamp,
+            'timestamp': float(current_timestamp),
             'color': 'red',
-            'open' : current_open,
-            'close': current_close,
-            'high': current_high,
-            'low': current_low,
-            'candle-size': current_open - current_close,
-            'upper-wick': current_high - current_open,
-            'lower-wick': current_close - current_low,
+            'open' : float(current_open),
+            'close': float(current_close),
+            'high': float(current_high),
+            'low': float(current_low),
+            'candle-size': float(current_open - current_close),
+            'upper-wick': float(current_high - current_open),
+            'lower-wick': float(current_close - current_low),
 
         })
 
