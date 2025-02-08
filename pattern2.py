@@ -25,7 +25,7 @@ binance_futures = ccxt.binanceusdm({
 })
 
 # Function for fetching OHLCV
-def fetch_OHLCV(symbol, timeframe, limit=1500):
+def fetch_OHLCV(symbol, timeframe, limit=50):
     bars = binance_futures.fetch_ohlcv(symbol, timeframe, limit=limit)
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
@@ -38,8 +38,8 @@ def calculate_bollinger_bands(close_prices, timeperiod=20, nbdevup=1, nbdevdn=1)
     )
     return upperband, middleband, lowerband
 
-symbol = 'OGN/USDT'  # Example trading pair
-timeframe = '1m'  # Example timeframe
+symbol = 'ETH/USDT'  # Example trading pair
+timeframe = '1D'  # Example timeframe
 
 # Fetch OHLCV data
 ohlcv_data = fetch_OHLCV(symbol, timeframe)
@@ -50,61 +50,49 @@ ohlcv_data['upperband'], ohlcv_data['middleband'], ohlcv_data['lowerband'] = cal
 # Initialize results dictionary
 pattern_matches = []
 
-# Loop through all 1-minute candles (starting from the 3rd candle to avoid out-of-bound errors)
-for i in range(2, len(ohlcv_data)):
-    # Get the current and previous candles for the 1-minute chart
+# Loop through all 1 day candles
+for i in ohlcv_data:
+    # Get the needed data from the candle
     current_open = ohlcv_data['open'].iloc[i]
     current_close = ohlcv_data['close'].iloc[i]
-    current_upperband = ohlcv_data['upperband'].iloc[i]
-    current_lowerband = ohlcv_data['lowerband'].iloc[i]
-    last_open = ohlcv_data['open'].iloc[i - 1]
-    last_close = ohlcv_data['close'].iloc[i - 1]
-    last_upperband = ohlcv_data['upperband'].iloc[i - 1]
-    last_lowerband = ohlcv_data['lowerband'].iloc[i - 1]
-    second_last_open = ohlcv_data['open'].iloc[i - 2]
-    second_last_close = ohlcv_data['close'].iloc[i - 2]
-    second_last_upperband = ohlcv_data['upperband'].iloc[i - 2]
-    second_last_lowerband = ohlcv_data['lowerband'].iloc[i - 2]
-    third_last_open = ohlcv_data['open'].iloc[i - 3]
-    third_last_close = ohlcv_data['close'].iloc[i - 3]
-    third_last_upperband = ohlcv_data['upperband'].iloc[i - 3]
-    third_last_lowerband = ohlcv_data['lowerband'].iloc[i - 3]
-    fourth_last_open = ohlcv_data['open'].iloc[i - 4]
-    fourth_last_close = ohlcv_data['close'].iloc[i - 4]
-    fourth_last_upperband = ohlcv_data['upperband'].iloc[i - 4]
-    fourth_last_lowerband = ohlcv_data['lowerband'].iloc[i - 4]
-
-    # Find the corresponding 5-minute candles
+    current_high = ohlcv_data['high'].iloc[i]
+    current_low = ohlcv_data['low'].iloc[i]
     current_timestamp = ohlcv_data['timestamp'].iloc[i]
 
 
-    # # Check for bullish pattern
-    # if (
-    #     last_close > last_lowerband and second_last_close > second_last_lowerband and third_last_close < third_last_lowerband and second_last_close > second_last_open and last_close > last_open
-    # ):
-    #     pattern_matches.append({
-    #         'timestamp': current_timestamp,
-    #         'type': 'Bullish',
-    #         'close': current_close,
-    #         'lowerband': current_lowerband,
-    #         'upperband': current_upperband,
-    #     })
-
-    # Check for bearish pattern
-    if (
-        last_close < last_upperband and second_last_close < second_last_upperband and third_last_close < third_last_upperband and fourth_last_close > fourth_last_upperband and third_last_close < third_last_open and second_last_close < second_last_open and last_close < last_open
-    ):
+    # Check for bullish pattern
+    if (current_close > current_open):
         pattern_matches.append({
             'timestamp': current_timestamp,
-            'type': 'Bearish',
+            'color': 'green',
+            'open' : current_open,
             'close': current_close,
-            'lowerband': current_lowerband,
-            'upperband': current_upperband,
+            'high': current_high,
+            'low': current_low,
+            'candle-size': current_close - current_open,
+            'upper-wick': current_high - current_close,
+            'lower-wick': current_open - current_low,
+
+        })
+
+    # Check for bearish pattern
+    if (current_close < current_open):
+        pattern_matches.append({
+            'timestamp': current_timestamp,
+            'color': 'red',
+            'open' : current_open,
+            'close': current_close,
+            'high': current_high,
+            'low': current_low,
+            'candle-size': current_open - current_close,
+            'upper-wick': current_high - current_open,
+            'lower-wick': current_close - current_low,
+
         })
 
 # Print all detected patterns in the desired format
 formatted_pattern_matches = [
-    [idx, match['timestamp'], {'type': match['type'], 'close': match['close'], 'lowerband': match['lowerband'], 'upperband': match['upperband']}]
+    [idx, match['timestamp'], {'color': match['color'], 'open': match['open'], 'close': match['close'], 'high': match['high'], 'low': match['low'], 'candle-size': match['candle-size'], 'upper-wick': match['upper-wick'], 'lower-wick': match['lower-wick']}]
     for idx, match in enumerate(pattern_matches)
 ]
 
