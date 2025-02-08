@@ -30,6 +30,8 @@ def fetch_OHLCV(symbol, timeframe, limit=50):
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms', utc=True)  # Ensure UTC
     df['timestamp'] = df['timestamp'].dt.tz_convert('Etc/GMT-1')  # Convert to UTC+1
+    df['timestamp'] = df['timestamp'].dt.tz_localize(None)  # Remove timezone info
+
 
     return df
 
