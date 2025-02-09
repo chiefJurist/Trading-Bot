@@ -25,7 +25,7 @@ binance_futures = ccxt.binanceusdm({
 })
 
 # Function for fetching OHLCV
-def fetch_OHLCV(symbol, timeframe, limit=50):
+def fetch_OHLCV(symbol, timeframe, limit=41):
     bars = binance_futures.fetch_ohlcv(symbol, timeframe, limit=limit)
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms', utc=True)  # Ensure UTC
@@ -103,4 +103,4 @@ formatted_pattern_matches = [
 print("PATTERN MATCHES (1 MINUTE CHART)")
 for entry in formatted_pattern_matches:
     print(entry)
-    print()
+    print('')
