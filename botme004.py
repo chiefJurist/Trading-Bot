@@ -161,6 +161,11 @@ def manage_futures_positions_and_balance():
                     print(f"Error in creating close order or stoploss order for long positions when no position is opened : {e}")
                 time.sleep(10)  # add a break for safety
 
+        #Trailing Stoploss Strategy
+        if long_position_open :
+            if second_last_close > second_last_lowerband and last_close < last_lowerband:
+                pass
+
 
         # MANAGING SHORT POSITIONS
         if not short_position_open: #ensure no short position is opened 
