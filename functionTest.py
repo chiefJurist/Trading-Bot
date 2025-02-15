@@ -25,7 +25,7 @@ binance_futures = ccxt.binanceusdm({
 })
 
 #Setting leverage
-binance_futures.set_leverage(4, 'ETH/USDT:USDT')
+binance_futures.set_leverage(10, 'ETH/USDT:USDT')
 
 #Fetching USDT Balance
 free_usdt_balance = binance_futures.fetch_balance()['free']['USDT']
@@ -35,7 +35,7 @@ current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
 
 #Opening long position
 try:
-    amount = free_usdt_balance * 2 / current_price #using the half capital
+    amount = free_usdt_balance * 5 / current_price #using the half capital
     long_position = binance_futures.create_order(
         symbol="ETH/USDT:USDT",  # Symbol for the asset
         side="BUY",                     # Buy to open a long position
@@ -82,7 +82,7 @@ except Exception as e:
 
 #Opening short position
 try:
-    amount = free_usdt_balance * 4 / current_price #using the entire capital
+    amount = free_usdt_balance * 10 / current_price #using the entire capital
     short_position = binance_futures.create_order(
         symbol='ETH/USDT:USDT',  # Symbol for the asset
         side='SELL',                        # Sell to open a short position
