@@ -24,71 +24,124 @@ binance_futures = ccxt.binanceusdm({
     'secret': FUTURES_SECRET_KEY,
 })
 
+#Setting leverage
+binance_futures.set_leverage(4, 'ETH/USDT:USDT')
 
-# Function for fetching OHLCV
-def fetch_OHLCV(symbol, timeframe, limit=500):
-    bars = binance_futures.fetch_ohlcv(symbol, timeframe, limit=limit)
-    df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
-    df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
-    return df
+#Fetching USDT Balance
+free_usdt_balance = binance_futures.fetch_balance()['free']['USDT']
 
-#Function For Calculating Bollinger Bands
-def calculate_bollinger_bands(close_prices, timeperiod=20, nbdevup=1, nbdevdn=1):
-    upperband, middleband, lowerband = ta.BBANDS(
-        close_prices, timeperiod=timeperiod, nbdevup=nbdevup, nbdevdn=nbdevdn, matype=0
+#Getting the current price of the asset
+current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
+
+#Opening long position
+try:
+    amount = free_usdt_balance * 2 / current_price #using the half capital
+    long_position = binance_futures.create_order(
+        symbol="ETH/USDT:USDT",  # Symbol for the asset
+        side="BUY",                     # Buy to open a long position
+        type="MARKET",                  # Market order
+        amount=amount,                  # Amount of asset to buy
+        params={"positionSide": "LONG"} # Specify "LONG" since you're in Hedge Mode
     )
-    return upperband, middleband, lowerband
+    print("Successfully opened long position")
+except Exception as e:
+    print(f"Error in opening long positions : {e}")
+# Closing the position
+try:
+    open_price = binance_futures.fetch_closed_orders('ETH/USDT:USDT')[-1]['average']
+    target_price = open_price + (open_price * 0.015)
+    stop_loss_price = open_price - (open_price * 0.0025)  # Stop-Loss price
+    close_amount = float(amount)
+    # A take-profit order
+    long_take_profit = binance_futures.create_order(
+        symbol='ETH/USDT:USDT',  # Symbol for the asset
+        side='SELL',                  # Sell to close the long position
+        type='LIMIT',                 # Limit order
+        amount=close_amount,          # Amount to sell
+        price=target_price,           # Target price for the limit order
+        params = {
+            "positionSide": "LONG",  # Specify "LONG" to close the long position
+            "timeInForce": "GTC"     # Good 'til canceled; adjust as necessary
+        }
+    )
+    print("successfully created close order for long position")
+    # A stop-loss order
+    long_stoploss = binance_futures.create_order(
+        symbol='ETH/USDT:USDT',  # Symbol for the asset
+        side='SELL',            # Sell to close the long position
+        type='STOP_MARKET',     # Stop market order
+        amount=close_amount,    # Amount to sell
+        params={
+            "positionSide": "LONG",  # Specify "LONG" to close the long position
+            "stopPrice": stop_loss_price,  # Stop price for the order
+        }
+    )
+    print("successfully created stoploss order for long position")
+except Exception as e:
+    print(f"Error in creating close order or stoploss order for long positions when no position is opened : {e}")
 
+#Opening short position
+try:
+    amount = free_usdt_balance * 4 / current_price #using the entire capital
+    short_position = binance_futures.create_order(
+        symbol='ETH/USDT:USDT',  # Symbol for the asset
+        side='SELL',                        # Sell to open a short position
+        type='MARKET',                      # Market order
+        amount=amount,                      # Amount to sell
+        params={"positionSide": "SHORT"}    # Specify "SHORT" to open the short position
+    )
+    print("Successfully opened short position")
+except Exception as e:
+    print(f"Error in opening short positions when no position is opened : {e}")
+# Closing the position
+try:
+    open_price = binance_futures.fetch_closed_orders('ETH/USDT:USDT')[-1]['average']
+    target_price = open_price - (open_price * 0.015)
+    stop_loss_price = open_price + (open_price * 0.0025)  # Stop-Loss price
+    close_amount = float(amount)
+    # A take-profit order
+    short_take_profit = binance_futures.create_order(
+        symbol='ETH/USDT:USDT',      # Symbol for the asset
+        side='BUY',                   # Buy to close the short position
+        type='LIMIT',                 # Limit order
+        amount=close_amount,          # Amount to buy
+        price=target_price,           # Target price for the limit order
+        params = {
+            "positionSide": "SHORT",  # Specify "SHORT" to close the short position
+            "timeInForce": "GTC"      # Good 'til canceled; adjust as necessary
+        }
+    )
+    print("successfully created close order for short position")
+    # A stoploss order
+    short_stoploss = binance_futures.create_order(
+        symbol='ETH/USDT:USDT',  # Symbol for the asset
+        side='BUY',             # Buy to close the short position
+        type='STOP_MARKET',     # Stop market order
+        amount=close_amount,    # Amount to buy
+        params={
+            "positionSide": "SHORT",  # Specify "SHORT" to close the short position
+            "stopPrice": stop_loss_price,  # Stop price for the order
+        }
+    )
+    print("successfully created stoploss order for short position")
+except Exception as e:
+    print(f"Error in creating close order for short positions when no position is opened : {e}")
 
-#Fetching OHLCV
-df = fetch_OHLCV('ETH/USDT:USDT', '1m')
-df2 = fetch_OHLCV('ETH/USDT:USDT', '1d')
-
-# Calculate Bollinger Bands for both timeframes
-df['upperband'], df['middleband'], df['lowerband'] = calculate_bollinger_bands(df['close'])
-df2['upperband'], df2['middleband'], df2['lowerband'] = calculate_bollinger_bands(df2['close'])
-
-print("last_open: ", df['open'].iloc[-2])
+print("Long Position: ")
+print(long_position)
 print("")
-print("last_close: ", df['close'].iloc[-2])
+print("Long Position Take Profit Order: ")
+print(long_take_profit)
 print("")
-print("last_upperband: ", df['upperband'].iloc[-2])
+print("Long Position Stoploss Order: ")
+print(long_stoploss)
 print("")
-print("last_lowerband: ", df['lowerband'].iloc[-2])
+print("Short Position: ")
+print(short_position)
 print("")
-print("second_last_open: ", df['open'].iloc[-3])
+print("Short Position Take Profit Order: ")
+print(short_take_profit)
 print("")
-print("second_last_close: ", df['close'].iloc[-3])
-print("")
-print("second_last_upperband: ", df['upperband'].iloc[-3])
-print("")
-print("second_last_lowerband: ", df['lowerband'].iloc[-3])
-print("")
-print("third_last_open: ", df['open'].iloc[-4])
-print("")
-print("third_last_close: ", df['close'].iloc[-4])
-print("")
-print("third_last_upperband: ", df['upperband'].iloc[-4])
-print("")
-print("third_last_lowerband: ", df['lowerband'].iloc[-4])
-print("")
-print("fourth_last_open: ", df['open'].iloc[-5])
-print("")
-print("fourth_last_close: ", df['close'].iloc[-5])
-print("")
-print("fourth_last_upperband: ", df['upperband'].iloc[-5])
-print("")
-print("fourth_last_lowerband: ", df['lowerband'].iloc[-5])
-print("")
-print("last_big_open: ", df2['open'].iloc[-2])
-print("")
-print("last_big_close: ", df2['close'].iloc[-2])
-print("")
-print("last_big_high: ", df2['high'].iloc[-2])
-print("")
-print("last_big_low: ", df2['low'].iloc[-2])
-print("")
-print("last_big_upperband: ", df2['upperband'].iloc[-2])
-print("")
-print("last_big_lowerband: ", df2['lowerband'].iloc[-2])
+print("Short Position Stoploss Order: ")
+print(short_stoploss)
 print("")
