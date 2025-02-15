@@ -67,6 +67,8 @@ def manage_futures_positions_and_balance():
     df = fetch_OHLCV('ETH/USDT:USDT', '1m')
     df2 = fetch_OHLCV('ETH/USDT:USDT', '1d')
 
+    # Calculate Bollinger Bands for 1m chart
+    df['upperband'], df['middleband'], df['lowerband'] = calculate_bollinger_bands(df['close'])
 
     #Points in The Chart
     last_open = df['open'].iloc[-2]                     #last candle open price

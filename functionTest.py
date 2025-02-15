@@ -44,6 +44,9 @@ def calculate_bollinger_bands(close_prices, timeperiod=20, nbdevup=1, nbdevdn=1)
 df = fetch_OHLCV('ETH/USDT:USDT', '1m')
 df2 = fetch_OHLCV('ETH/USDT:USDT', '1d')
 
+# Calculate Bollinger Bands for both timeframes
+df['upperband'], df['middleband'], df['lowerband'] = calculate_bollinger_bands(df['close'])
+df2['upperband'], df2['middleband'], df2['lowerband'] = calculate_bollinger_bands(df2['close'])
 
 print("last_open: ", df['open'].iloc[-2])
 print("")
@@ -84,4 +87,8 @@ print("")
 print("last_big_high: ", df2['high'].iloc[-2])
 print("")
 print("last_big_low: ", df2['low'].iloc[-2])
+print("")
+print("last_big_upperband: ", df2['upperband'].iloc[-2])
+print("")
+print("last_big_lowerband: ", df2['lowerband'].iloc[-2])
 print("")
