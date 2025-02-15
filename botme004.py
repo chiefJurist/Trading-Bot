@@ -26,7 +26,7 @@ binance_futures = ccxt.binanceusdm({
 
 
 # Function for fetching OHLCV
-def fetch_OHLCV(symbol, timeframe, limit=1500):
+def fetch_OHLCV(symbol, timeframe, limit=500):
     bars = binance_futures.fetch_ohlcv(symbol, timeframe, limit=limit)
     df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
@@ -45,15 +45,28 @@ def manage_futures_positions_and_balance():
     #Setting leverage
     binance_futures.set_leverage(20, 'ETH/USDT:USDT')
 
+    #Checking For Open Positions And Open Orders
+    positions = binance_futures.fetch_positions_risk()
+    orders = binance_futures.fetch_open_orders('ETH/USDT:USDT')
+
+    # Check If There Is An Open Long Or Short Position
+    long_position_open = any(pos['side'] == 'long' for pos in positions)
+    short_position_open = any(pos['side'] == 'short' for pos in positions)
+
     #Fetching USDT Balance
     total_usdt_balance = binance_futures.fetch_balance()['total']['USDT']
     free_usdt_balance = binance_futures.fetch_balance()['free']['USDT']
 
+    #Size For The Trade
+    if total_usdt_balance > 200 :
+        trade_size = 200
+    else :
+        trade_size = total_usdt_balance
+
     #Fetching OHLCV
     df = fetch_OHLCV('ETH/USDT:USDT', '1m')
+    df2 = fetch_OHLCV('ETH/USDT:USDT', '1d')
 
-    #Calculating indicators
-    upperband, middleband, lowerband = calculate_bollinger_bands(df)
 
     #Points in The Chart
     last_open = df['open'].iloc[-2]                     #last candle open price
@@ -72,26 +85,35 @@ def manage_futures_positions_and_balance():
     fourth_last_close = df['close'].iloc[-5]            #fourth to the last candle close price
     fourth_last_upperband = df['upperband'].iloc[-5]    #fourth to the last candle upperband
     fourth_last_lowerband = df['lowerband'].iloc[-5]    #fourth to the last candle lowerband
+    last_big_open = df2['open'].iloc[-2]                #last candle open price on the 1 day chart
+    last_big_close = df2['close'].iloc[-2]              #last candle close price on the 1 day chart
+    last_big_high = df2['high'].iloc[-2]                #last candle high price on the 1 day chart
+    last_big_low = df2['low'].iloc[-2]                  #last candle low price on the 1 day chart
+    
+    #Bullish candle parts for the 1 day chart 
+    if last_big_close > last_big_open:
+        candle_size = last_big_close - last_big_open
+        upper_wick = last_big_high - last_big_close
+        lower_wick = last_big_open - last_big_low
 
-    #Checking for open positions and open orders
-    positions = binance_futures.fetch_positions_risk()
-    orders = binance_futures.fetch_open_orders('ETH/USDT:USDT')
-
-    # Check if there is an open long or short position
-    long_position_open = any(pos['side'] == 'long' for pos in positions)
-    short_position_open = any(pos['side'] == 'short' for pos in positions)
+    #Bearish candle parts for the 1 day chart 
+    if last_big_open > last_big_close:
+        candle_size = last_big_open - last_big_close
+        upper_wick = last_big_high - last_big_open
+        lower_wick = last_big_close - last_big_low
     
     #Getting the current price of the asset
-    current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last'] #fetching the current price
+    current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
 
 
     #MAIN TRADING LOGIC
-    if total_usdt_balance < 200:
+    if (candle_size * 2.5) > upper_wick and (candle_size * 2.5) > lower_wick : #proceeding in our predced trend
         # MANAGING LONG POSITIONS
         if not long_position_open: #ensure no long position is opened 
             if last_close > last_lowerband and second_last_close > second_last_lowerband and third_last_close < third_last_lowerband and second_last_close > second_last_open and last_close > last_open: #trading logic
+                #Opening the position
                 try:
-                    amount = total_usdt_balance * 20 / current_price #using the entire capital
+                    amount = trade_size * 20 / current_price #using the entire capital
                     binance_futures.create_order(
                         symbol="ETH/USDT:USDT",  # Symbol for the asset
                         side="BUY",                     # Buy to open a long position
@@ -100,14 +122,15 @@ def manage_futures_positions_and_balance():
                         params={"positionSide": "LONG"} # Specify "LONG" since you're in Hedge Mode
                     )
                     print("Successfully opened long position")
-                    time.sleep(10) #add a break for safety
                 except Exception as e:
-                    print(f"Error in opening long positions when no position is opened : {e}")
+                    print(f"Error in opening long positions : {e}")
+                time.sleep(10) #add a break for safety
+
                 # Closing the position
                 try:
                     open_price = binance_futures.fetch_closed_orders('ETH/USDT:USDT')[-1]['average']
-                    target_price = open_price + (open_price * 0.01)
-                    stop_loss_price = open_price - (open_price * 0.001)  # Stop-Loss price
+                    target_price = open_price + (open_price * 0.015)
+                    stop_loss_price = open_price - (open_price * 0.0025)  # Stop-Loss price
                     close_amount = float(amount)
                     # A take-profit order
                     binance_futures.create_order(
@@ -121,6 +144,7 @@ def manage_futures_positions_and_balance():
                             "timeInForce": "GTC"     # Good 'til canceled; adjust as necessary
                         }
                     )
+                    print("successfully created close order for long position")
                     # A stop-loss order
                     binance_futures.create_order(
                         symbol='ETH/USDT:USDT',  # Symbol for the asset
@@ -132,16 +156,17 @@ def manage_futures_positions_and_balance():
                             "stopPrice": stop_loss_price,  # Stop price for the order
                         }
                     )
-                    time.sleep(10)  # add a break for safety
+                    print("successfully created stoploss order for long position")
                 except Exception as e:
-                    print(f"Error in creating close order for long positions when no position is opened : {e}")
-                
+                    print(f"Error in creating close order or stoploss order for long positions when no position is opened : {e}")
+                time.sleep(10)  # add a break for safety
+
+
         # MANAGING SHORT POSITIONS
         if not short_position_open: #ensure no short position is opened 
-            if k[498] < d[498] and last_close < upperband[498] and second_last_close > upperband[497] and k[498] < d[498]:  #normal trading logic
-                if (big_upperband[498] - big_last_high) <= 5 : #proceeding if we are at a top on a larger scale
+            if last_close < last_upperband and second_last_close < second_last_upperband and third_last_close < third_last_upperband and fourth_last_close > fourth_last_lowerband and last_close < last_open and second_last_close < second_last_open and third_last_close < third_last_open: #trading logic
                     try:
-                        amount = usdt_balance * 50 / current_price #using half of the capital
+                        amount = trade_size * 20 / current_price #using half of the capital
                         binance_futures.create_order(
                             symbol='ETH/USDT:USDT',  # Symbol for the asset
                             side='SELL',                        # Sell to open a short position
@@ -149,14 +174,16 @@ def manage_futures_positions_and_balance():
                             amount=amount,                      # Amount to sell
                             params={"positionSide": "SHORT"}    # Specify "SHORT" to open the short position
                         )
-                        time.sleep(10) #add a break for safety
+                        print("Successfully opened short position")
                     except Exception as e:
                         print(f"Error in opening short positions when no position is opened : {e}")
+                    time.sleep(10) #add a break for safety
+
                     # Closing the position
                     try:
                         open_price = binance_futures.fetch_closed_orders('ETH/USDT:USDT')[-1]['average']
-                        target_price = open_price - (open_price * 0.01)
-                        stop_loss_price = open_price + (open_price * 0.001)  # Stop-Loss price
+                        target_price = open_price - (open_price * 0.015)
+                        stop_loss_price = open_price + (open_price * 0.0025)  # Stop-Loss price
                         close_amount = float(amount)
                         # A take-profit order
                         binance_futures.create_order(
@@ -170,6 +197,7 @@ def manage_futures_positions_and_balance():
                                 "timeInForce": "GTC"      # Good 'til canceled; adjust as necessary
                             }
                         )
+                        print("successfully created close order for short position")
                         # A stoploss order
                         binance_futures.create_order(
                             symbol='ETH/USDT:USDT',  # Symbol for the asset
@@ -181,11 +209,10 @@ def manage_futures_positions_and_balance():
                                 "stopPrice": stop_loss_price,  # Stop price for the order
                             }
                         )
-                        time.sleep(10)  # add a break for safety
+                        print("successfully created stoploss order for short position")
                     except Exception as e:
                         print(f"Error in creating close order for short positions when no position is opened : {e}")
-    elif total_usdt_balance > 200:
-        pass
+                    time.sleep(10)  # add a break for safety
     
             
 
