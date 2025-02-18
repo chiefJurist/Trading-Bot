@@ -103,13 +103,24 @@ def manage_futures_positions_and_balance():
         candle_size = last_big_open - last_big_close
         upper_wick = last_big_high - last_big_open
         lower_wick = last_big_close - last_big_low
+
+    # Function to cancel existing stop-loss orders
+    def cancel_existing_stop_loss(position_side):
+        try:
+            open_orders = binance_futures.fetch_open_orders('ETH/USDT:USDT')
+            for order in open_orders:
+                if order['type'] == 'STOP_MARKET' and order['side'] in ['BUY', 'SELL'] and order['info']['positionSide'] == position_side:
+                    binance_futures.cancel_order(order['id'], 'ETH/USDT:USDT')
+                    print(f"Cancelled existing stop-loss order for {position_side}")
+        except Exception as e:
+            print(f"Error canceling existing stop-loss order for {position_side}: {e}")
     
     #Getting the current price of the asset
     current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
 
 
     #MAIN TRADING LOGIC
-    if (candle_size * 2.5) > upper_wick and (candle_size * 2.5) > lower_wick : #proceeding in our predced trend
+    if (candle_size * 2.5) > upper_wick and (candle_size * 2.5) > lower_wick : #proceeding in our current trend
         # MANAGING LONG POSITIONS
         if not long_position_open: #ensure no long position is opened 
             if last_close > last_lowerband and second_last_close > second_last_lowerband and third_last_close < third_last_lowerband and second_last_close > second_last_open and last_close > last_open: #trading logic
@@ -125,7 +136,7 @@ def manage_futures_positions_and_balance():
                     )
                     print("Successfully opened long position")
                 except Exception as e:
-                    print(f"Error in opening long positions : {e}")
+                    print(f"Error in opening long position : {e}")
                 time.sleep(10) #add a break for safety
 
                 # Closing the position
@@ -146,7 +157,7 @@ def manage_futures_positions_and_balance():
                             "timeInForce": "GTC"     # Good 'til canceled; adjust as necessary
                         }
                     )
-                    print("successfully created close order for long position")
+                    print("successfully created initial close order for long position")
                     # A stop-loss order
                     binance_futures.create_order(
                         symbol='ETH/USDT:USDT',  # Symbol for the asset
@@ -158,20 +169,40 @@ def manage_futures_positions_and_balance():
                             "stopPrice": stop_loss_price,  # Stop price for the order
                         }
                     )
-                    print("successfully created stoploss order for long position")
+                    print("successfully created initial stoploss order for long position")
                 except Exception as e:
-                    print(f"Error in creating close order or stoploss order for long positions when no position is opened : {e}")
+                    print(f"Error in creating initial close order or stoploss order for long position : {e}")
                 time.sleep(10)  # add a break for safety
 
-        #Trailing Stoploss Strategy
+        #Trailing Stoploss Strategy For Lond Position
         if long_position_open :
-            if second_last_close > second_last_lowerband and last_close < last_lowerband:
-                pass
+            position_entry =  long_position_open[-1]['average']
+            if second_last_close > second_last_lowerband and last_close < last_lowerband and position_entry < last_close :
+                #Cancel existing stoploss
+                cancel_existing_stop_loss()
+                #The new stoploss order
+                new_stop_loss_price = last_close - (last_close * 0.0025)  # Stop-Loss price
+                try:
+                    binance_futures.create_order(
+                        symbol='ETH/USDT:USDT',  # Symbol for the asset
+                        side='SELL',             # Buy to close the short position
+                        type='STOP_MARKET',     # Stop market order
+                        amount=close_amount,    # Amount to buy
+                        params={
+                            "positionSide": "LONG",  # Specify "SHORT" to close the short position
+                            "stopPrice": new_stop_loss_price,  # Stop price for the order
+                        }
+                    )
+                    print("successfully created another stoploss order for long position")
+                except Exception as e:
+                        print(f"Error in creating another stoploss order for long positions : {e}")
+                time.sleep(70)  # add a break for safety
+    
 
 
         # MANAGING SHORT POSITIONS
         if not short_position_open: #ensure no short position is opened 
-            if last_close < last_upperband and second_last_close < second_last_upperband and third_last_close < third_last_upperband and fourth_last_close > fourth_last_lowerband and last_close < last_open and second_last_close < second_last_open and third_last_close < third_last_open: #trading logic
+            if last_close < last_upperband and second_last_close < second_last_upperband and third_last_close < third_last_upperband and fourth_last_close > fourth_last_upperband and last_close < last_open and second_last_close < second_last_open and third_last_close < third_last_open: #trading logic
                     try:
                         amount = trade_size * 20 / current_price #using half of the capital
                         binance_futures.create_order(
@@ -183,7 +214,7 @@ def manage_futures_positions_and_balance():
                         )
                         print("Successfully opened short position")
                     except Exception as e:
-                        print(f"Error in opening short positions when no position is opened : {e}")
+                        print(f"Error in opening short position : {e}")
                     time.sleep(10) #add a break for safety
 
                     # Closing the position
@@ -204,7 +235,7 @@ def manage_futures_positions_and_balance():
                                 "timeInForce": "GTC"      # Good 'til canceled; adjust as necessary
                             }
                         )
-                        print("successfully created close order for short position")
+                        print("successfully created initial close order for short position")
                         # A stoploss order
                         binance_futures.create_order(
                             symbol='ETH/USDT:USDT',  # Symbol for the asset
@@ -216,18 +247,42 @@ def manage_futures_positions_and_balance():
                                 "stopPrice": stop_loss_price,  # Stop price for the order
                             }
                         )
-                        print("successfully created stoploss order for short position")
+                        print("successfully created initial stoploss order for short position")
                     except Exception as e:
-                        print(f"Error in creating close order for short positions when no position is opened : {e}")
+                        print(f"Error in creating initial close order or stoploss order for short position : {e}")
                     time.sleep(10)  # add a break for safety
-    
+
+        #Trailing Stoploss Strategy
+        if short_position_open :
+            position_entry =  short_position_open[-1]['average']
+            if second_last_close < second_last_upperband and last_close > last_upperband and position_entry > last_close :
+                #Cancel existing stoploss
+                cancel_existing_stop_loss()
+                
+                #The new stoploss order
+                new_stop_loss_price = last_close + (last_close * 0.0025)  # Stop-Loss price
+                try:
+                    binance_futures.create_order(
+                        symbol='ETH/USDT:USDT',  # Symbol for the asset
+                        side='BUY',             # Buy to close the short position
+                        type='STOP_MARKET',     # Stop market order
+                        amount=close_amount,    # Amount to buy
+                        params={
+                            "positionSide": "SHORT",  # Specify "SHORT" to close the short position
+                            "stopPrice": new_stop_loss_price,  # Stop price for the order
+                        }
+                    )
+                    print("successfully created another stoploss order for short position")
+                except Exception as e:
+                        print(f"Error in creating another stoploss order for short position : {e}")
+                time.sleep(10)  # add a break for safety
             
 
 
 #General Function
 def main():
     # initial_transfer()
-    
+        
     while True:
         try: 
             manage_futures_positions_and_balance()
