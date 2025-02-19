@@ -275,7 +275,7 @@ def manage_futures_positions_and_balance():
                     print("successfully created another stoploss order for short position")
                 except Exception as e:
                         print(f"Error in creating another stoploss order for short position : {e}")
-                time.sleep(10)  # add a break for safety
+                time.sleep(70)  # add a break for safety
             
 
 
