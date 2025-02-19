@@ -25,7 +25,7 @@ binance_futures = ccxt.binanceusdm({
 })
 
 #Setting leverage
-binance_futures.set_leverage(10, 'ETH/USDT:USDT')
+binance_futures.set_leverage(20, 'ETH/USDT:USDT')
 
 #Fetching USDT Balance
 free_usdt_balance = binance_futures.fetch_balance()['free']['USDT']
@@ -35,7 +35,7 @@ current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
 
 #Opening long position
 try:
-    amount = free_usdt_balance * 5 / current_price #using the half capital
+    amount = free_usdt_balance * 19.9 / current_price #using the half capital
     long_position = binance_futures.create_order(
         symbol="ETH/USDT:USDT",  # Symbol for the asset
         side="BUY",                     # Buy to open a long position
@@ -80,68 +80,68 @@ try:
 except Exception as e:
     print(f"Error in creating close order or stoploss order for long positions when no position is opened : {e}")
 
-#Opening short position
-try:
-    amount = free_usdt_balance * 10 / current_price #using the entire capital
-    short_position = binance_futures.create_order(
-        symbol='ETH/USDT:USDT',  # Symbol for the asset
-        side='SELL',                        # Sell to open a short position
-        type='MARKET',                      # Market order
-        amount=amount,                      # Amount to sell
-        params={"positionSide": "SHORT"}    # Specify "SHORT" to open the short position
-    )
-    print("Successfully opened short position")
-except Exception as e:
-    print(f"Error in opening short positions when no position is opened : {e}")
-# Closing the position
-try:
-    open_price = binance_futures.fetch_closed_orders('ETH/USDT:USDT')[-1]['average']
-    target_price = open_price - (open_price * 0.015)
-    stop_loss_price = open_price + (open_price * 0.0025)  # Stop-Loss price
-    close_amount = float(amount)
-    # A take-profit order
-    short_take_profit = binance_futures.create_order(
-        symbol='ETH/USDT:USDT',      # Symbol for the asset
-        side='BUY',                   # Buy to close the short position
-        type='LIMIT',                 # Limit order
-        amount=close_amount,          # Amount to buy
-        price=target_price,           # Target price for the limit order
-        params = {
-            "positionSide": "SHORT",  # Specify "SHORT" to close the short position
-            "timeInForce": "GTC"      # Good 'til canceled; adjust as necessary
-        }
-    )
-    print("successfully created close order for short position")
-    # A stoploss order
-    short_stoploss = binance_futures.create_order(
-        symbol='ETH/USDT:USDT',  # Symbol for the asset
-        side='BUY',             # Buy to close the short position
-        type='STOP_MARKET',     # Stop market order
-        amount=close_amount,    # Amount to buy
-        params={
-            "positionSide": "SHORT",  # Specify "SHORT" to close the short position
-            "stopPrice": stop_loss_price,  # Stop price for the order
-        }
-    )
-    print("successfully created stoploss order for short position")
-except Exception as e:
-    print(f"Error in creating close order for short positions when no position is opened : {e}")
+# #Opening short position
+# try:
+#     amount = free_usdt_balance * 10 / current_price #using the entire capital
+#     short_position = binance_futures.create_order(
+#         symbol='ETH/USDT:USDT',  # Symbol for the asset
+#         side='SELL',                        # Sell to open a short position
+#         type='MARKET',                      # Market order
+#         amount=amount,                      # Amount to sell
+#         params={"positionSide": "SHORT"}    # Specify "SHORT" to open the short position
+#     )
+#     print("Successfully opened short position")
+# except Exception as e:
+#     print(f"Error in opening short positions when no position is opened : {e}")
+# # Closing the position
+# try:
+#     open_price = binance_futures.fetch_closed_orders('ETH/USDT:USDT')[-1]['average']
+#     target_price = open_price - (open_price * 0.015)
+#     stop_loss_price = open_price + (open_price * 0.0025)  # Stop-Loss price
+#     close_amount = float(amount)
+#     # A take-profit order
+#     short_take_profit = binance_futures.create_order(
+#         symbol='ETH/USDT:USDT',      # Symbol for the asset
+#         side='BUY',                   # Buy to close the short position
+#         type='LIMIT',                 # Limit order
+#         amount=close_amount,          # Amount to buy
+#         price=target_price,           # Target price for the limit order
+#         params = {
+#             "positionSide": "SHORT",  # Specify "SHORT" to close the short position
+#             "timeInForce": "GTC"      # Good 'til canceled; adjust as necessary
+#         }
+#     )
+#     print("successfully created close order for short position")
+#     # A stoploss order
+#     short_stoploss = binance_futures.create_order(
+#         symbol='ETH/USDT:USDT',  # Symbol for the asset
+#         side='BUY',             # Buy to close the short position
+#         type='STOP_MARKET',     # Stop market order
+#         amount=close_amount,    # Amount to buy
+#         params={
+#             "positionSide": "SHORT",  # Specify "SHORT" to close the short position
+#             "stopPrice": stop_loss_price,  # Stop price for the order
+#         }
+#     )
+#     print("successfully created stoploss order for short position")
+# except Exception as e:
+#     print(f"Error in creating close order for short positions when no position is opened : {e}")
 
-print("Long Position: ")
-print(long_position)
-print("")
-print("Long Position Take Profit Order: ")
-print(long_take_profit)
-print("")
-print("Long Position Stoploss Order: ")
-print(long_stoploss)
-print("")
-print("Short Position: ")
-print(short_position)
-print("")
-print("Short Position Take Profit Order: ")
-print(short_take_profit)
-print("")
-print("Short Position Stoploss Order: ")
-print(short_stoploss)
-print("")
+# print("Long Position: ")
+# print(long_position)
+# print("")
+# print("Long Position Take Profit Order: ")
+# print(long_take_profit)
+# print("")
+# print("Long Position Stoploss Order: ")
+# print(long_stoploss)
+# print("")
+# print("Short Position: ")
+# print(short_position)
+# print("")
+# print("Short Position Take Profit Order: ")
+# print(short_take_profit)
+# print("")
+# print("Short Position Stoploss Order: ")
+# print(short_stoploss)
+# print("")
