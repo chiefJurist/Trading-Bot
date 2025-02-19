@@ -170,23 +170,23 @@ df2 = fetch_OHLCV('ETH/USDT:USDT', '1d')
 df['upperband'], df['middleband'], df['lowerband'] = calculate_bollinger_bands(df['close'])
 
 #Points in The Chart
-print("last open : ", last_open = df['open'].iloc[-2])                     #last candle open price
-print("last close : ", last_close = df['close'].iloc[-2])                   #last candle close price
-print("last upperband : ", last_upperband = df['upperband'].iloc[-2])           #last candle upperband
-print("last lowerband : ", last_lowerband = df['lowerband'].iloc[-2])           #last candle lowerband
-print("second to the last open : ", second_last_open = df['open'].iloc[-3])              #second to the last candle open price
-print("second to the last close : ", second_last_close = df['close'].iloc[-3])            #second to the last candle close price
-print("second to the last upperband : ", second_last_upperband = df['upperband'].iloc[-3])    #second to the last candle upperband
-print("second to the last lowerband : ", second_last_lowerband = df['lowerband'].iloc[-3])    #second to the last candle lowerband
-print("third to the last open : ", third_last_open = df['open'].iloc[-4])               #third to the last candle open price
-print("third to the last close : ", third_last_close = df['close'].iloc[-4])             #third to the last candle close price
-print("third to the last upperband : ", third_last_upperband = df['upperband'].iloc[-4])     #third to the last candle upperband
-print("third to the last lowerband : ", third_last_lowerband = df['lowerband'].iloc[-4])     #third to the last candle lowerband
-print("fourth to the last open : ", fourth_last_open = df['open'].iloc[-5])              #fourth to the last candle open price
-print("fourth to the last close : ", fourth_last_close = df['close'].iloc[-5])            #fourth to the last candle close price
-print("fourth to the last upperband : ", fourth_last_upperband = df['upperband'].iloc[-5])    #fourth to the last candle upperband
-print("fourth to the last lowerband : ", fourth_last_lowerband = df['lowerband'].iloc[-5])    #fourth to the last candle lowerband
-print("last big open : ", last_big_open = df2['open'].iloc[-2])                #last candle open price on the 1 day chart
-print("last big close : ", last_big_close = df2['close'].iloc[-2])              #last candle close price on the 1 day chart
-print("last big high : ", last_big_high = df2['high'].iloc[-2])                #last candle high price on the 1 day chart
-print("last big low : ", last_big_low = df2['low'].iloc[-2])                  #last candle low price on the 1 day chart
+print("last open : ", df['open'].iloc[-2])                     #last candle open price
+print("last close : ", df['close'].iloc[-2])                   #last candle close price
+print("last upperband : ", df['upperband'].iloc[-2])           #last candle upperband
+print("last lowerband : ", df['lowerband'].iloc[-2])           #last candle lowerband
+print("second to the last open : ", df['open'].iloc[-3])              #second to the last candle open price
+print("second to the last close : ", df['close'].iloc[-3])            #second to the last candle close price
+print("second to the last upperband : ", df['upperband'].iloc[-3])    #second to the last candle upperband
+print("second to the last lowerband : ", df['lowerband'].iloc[-3])    #second to the last candle lowerband
+print("third to the last open : ", df['open'].iloc[-4])               #third to the last candle open price
+print("third to the last close : ", df['close'].iloc[-4])             #third to the last candle close price
+print("third to the last upperband : ", df['upperband'].iloc[-4])     #third to the last candle upperband
+print("third to the last lowerband : ", df['lowerband'].iloc[-4])     #third to the last candle lowerband
+print("fourth to the last open : ", df['open'].iloc[-5])              #fourth to the last candle open price
+print("fourth to the last close : ", df['close'].iloc[-5])            #fourth to the last candle close price
+print("fourth to the last upperband : ", df['upperband'].iloc[-5])    #fourth to the last candle upperband
+print("fourth to the last lowerband : ", df['lowerband'].iloc[-5])    #fourth to the last candle lowerband
+print("last big open : ", df2['open'].iloc[-2])                #last candle open price on the 1 day chart
+print("last big close : ", df2['close'].iloc[-2])              #last candle close price on the 1 day chart
+print("last big high : ", df2['high'].iloc[-2])                #last candle high price on the 1 day chart
+print("last big low : ", df2['low'].iloc[-2])                  #last candle low price on the 1 day chart
