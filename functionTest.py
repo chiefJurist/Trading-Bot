@@ -35,7 +35,7 @@ current_price = binance_futures.fetch_ticker('ETH/USDT:USDT')['last']
 
 #Opening long position
 try:
-    amount = free_usdt_balance * 19.8 / current_price #using the half capital
+    amount = free_usdt_balance * 19.7 / current_price #using the half capital
     long_position = binance_futures.create_order(
         symbol="ETH/USDT:USDT",  # Symbol for the asset
         side="BUY",                     # Buy to open a long position
