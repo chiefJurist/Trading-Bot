@@ -128,7 +128,7 @@ def manage_futures_positions_and_balance():
             if last_close > last_lowerband and second_last_close > second_last_lowerband and third_last_close < third_last_lowerband and second_last_close > second_last_open and last_close > last_open: #trading logic
                 #Opening the position
                 try:
-                    amount = trade_size * 19 / current_price #using the entire capital
+                    amount = trade_size * 19.5 / current_price #using the entire capital
                     binance_futures.create_order(
                         symbol="ETH/USDT:USDT",  # Symbol for the asset
                         side="BUY",                     # Buy to open a long position
@@ -206,7 +206,7 @@ def manage_futures_positions_and_balance():
         if not short_position_open and candle_type == "bearish": #ensure no short position is opened and we are in the correct trend
             if last_close < last_upperband and second_last_close < second_last_upperband and third_last_close < third_last_upperband and fourth_last_close > fourth_last_upperband and last_close < last_open and second_last_close < second_last_open and third_last_close < third_last_open: #trading logic
                     try:
-                        amount = trade_size * 19 / current_price #using half of the capital
+                        amount = trade_size * 19.5 / current_price #using half of the capital
                         binance_futures.create_order(
                             symbol='ETH/USDT:USDT',  # Symbol for the asset
                             side='SELL',                        # Sell to open a short position
