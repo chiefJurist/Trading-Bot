@@ -69,6 +69,10 @@ for i in range(len(ohlcv_data)):
     current_ema50 = ohlcv_data['ema_50'].iloc[i]
     current_ema200 = ohlcv_data['ema_200'].iloc[i]
 
+    if (current_close > current_open):
+        color = 'green'
+    else:
+        color = 'red'
 
     # Check for bullish pattern
     if (current_close > current_ema50 and current_ema50 > current_ema200):
@@ -78,7 +82,8 @@ for i in range(len(ohlcv_data)):
             'open' : float(current_open),
             'close': float(current_close),
             'EMA-50': float(current_ema50),
-            'EMA-200': float(current_ema200)
+            'EMA-200': float(current_ema200),
+            'color' : color
         })
 
     # Check for bearish pattern
@@ -89,7 +94,8 @@ for i in range(len(ohlcv_data)):
             'open' : float(current_open),
             'close': float(current_close),
             'EMA-50': float(current_ema50),
-            'EMA-200': float(current_ema200)
+            'EMA-200': float(current_ema200),
+            'color' : color
         })
 
 # Print all detected patterns in the desired format
