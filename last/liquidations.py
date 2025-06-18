@@ -1,7 +1,7 @@
 import asyncio
 import websockets
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 
 BINANCE_WS_URL = "wss://fstream.binance.com/ws/!forceOrder@arr"
 MIN_USD_VALUE = 10000  # Minimum liquidation value to display
@@ -14,7 +14,7 @@ def format_liquidation(data):
     price = float(order["ap"])        # Price in USDT
     value = quantity * price          # USD value of the liquidation
     timestamp = int(order["T"]) // 1000
-    time_str = datetime.fromtimestamp(timestamp, datetime.UTC).strftime('%Y-%m-%d %H:%M:%S UTC')
+    time_str = datetime.fromtimestamp(timestamp, timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')
     return {
         "symbol": symbol,
         "side": side,
