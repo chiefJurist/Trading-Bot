@@ -14,8 +14,7 @@ def format_liquidation(data):
     price = float(order["ap"])        # Price in USDT
     value = quantity * price          # USD value of the liquidation
     timestamp = int(order["T"]) // 1000
-    time_str = datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S UTC')
-
+    time_str = datetime.fromtimestamp(timestamp, datetime.UTC).strftime('%Y-%m-%d %H:%M:%S UTC')
     return {
         "symbol": symbol,
         "side": side,
