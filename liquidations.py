@@ -53,8 +53,8 @@ def parse_force_order(msg_text):
         filled_qty = float(o.get("z", 0))
         usd_value = avg_price * filled_qty
 
-        if usd_value < MIN_USD_VALUE:
-            return None
+        # if usd_value < MIN_USD_VALUE:
+        #     return None
 
         return {
             "symbol": o.get("s"),
