@@ -1,134 +1,150 @@
-# requirements:
-# pip install aiohttp websockets aiofiles
-# Python 3.8+
-
 import asyncio
 import json
-from datetime import datetime
 import aiohttp
 import aiofiles
 import websockets
+from datetime import datetime
 
-# Binance Futures REST endpoint to get all trading pairs
+# Fetch symbol list
 EXCHANGE_INFO_URL = "https://fapi.binance.com/fapi/v1/exchangeInfo"
-
-# Max number of streams per websocket connection allowed by Binance
-MAX_STREAMS_PER_CONN = 200
-
-# Output CSV file (set to None to disable)
-CSV_FILE = "all_binance_liquidations.csv"
-
-# Minimum liquidation value in USD to display (optional filter)
-MIN_USD_VALUE = 500.0
-
+MAX_STREAMS_PER_CONN = 150  # leave margin for dual streams
+CSV_FILE = "combined_liquidations.csv"
+MIN_USD = 100.0  # threshold
 
 async def fetch_symbols():
-    """Fetch all active USDT futures symbols."""
     async with aiohttp.ClientSession() as session:
         async with session.get(EXCHANGE_INFO_URL) as resp:
             data = await resp.json()
-            symbols = [
+            syms = [
                 s["symbol"].lower()
                 for s in data["symbols"]
                 if s["status"] == "TRADING" and s["quoteAsset"] == "USDT"
             ]
-            print(f"Fetched {len(symbols)} USDT pairs.")
-            return symbols
+            return syms
 
-
-async def write_csv_header_if_needed():
-    """Create CSV header if not exists."""
+async def write_csv_header():
     try:
-        async with aiofiles.open(CSV_FILE, mode="r") as f:
+        async with aiofiles.open(CSV_FILE, "r") as f:
             await f.readline()
     except FileNotFoundError:
-        async with aiofiles.open(CSV_FILE, mode="w") as f:
-            await f.write("timestamp,symbol,side,avg_price,filled_qty,usd_value,order_type\n")
+        async with aiofiles.open(CSV_FILE, "w") as f:
+            await f.write("timestamp,type,symbol,side,qty,price,usd_value,extra\n")
 
+async def append_csv(record: dict):
+    async with aiofiles.open(CSV_FILE, "a") as f:
+        ts = datetime.utcfromtimestamp(record["time"] / 1000).isoformat()
+        line = (
+            f'{ts},{record["type"]},{record["symbol"]},{record.get("side","")},'
+            f'{record.get("qty",0)},{record.get("price",0)},{record.get("usd_value",0)},'
+            f'{record.get("extra","")}\n'
+        )
+        await f.write(line)
 
-async def append_to_csv(liq):
-    """Append liquidation entry to CSV."""
-    async with aiofiles.open(CSV_FILE, mode="a") as f:
-        ts = datetime.utcfromtimestamp(liq["trade_time"]/1000.0).isoformat()
-        row = f'{ts},{liq["symbol"]},{liq["side"]},{liq["avg_price"]},{liq["filled_qty"]},{liq["usd_value"]},{liq["order_type"]}\n'
-        await f.write(row)
-
-
-async def handle_message(message):
-    """Parse a single message."""
-    msg = json.loads(message)
-    data = msg.get("data") or msg
-
-    if not isinstance(data, dict):
-        return
-
+async def parse_force_order(msg):
+    # msg is a JSON string
+    obj = json.loads(msg)
+    data = obj.get("data") or obj
     if data.get("e") != "forceOrder":
-        return
-
+        return None
     o = data.get("o", {})
-    try:
-        symbol = o.get("s")
-        side = o.get("S")
-        avg_price = float(o.get("ap") or 0)
-        qty = float(o.get("z") or 0)
-        price = float(o.get("p") or 0)
-        order_type = o.get("o")
-        trade_time = int(o.get("T") or data.get("E"))
-        usd_value = (avg_price or price) * qty
-    except Exception:
-        return
+    symbol = o.get("s")
+    side = o.get("S")
+    avg = float(o.get("ap") or 0)
+    qty = float(o.get("z") or 0)
+    price = float(o.get("p") or 0)
+    trade_time = int(o.get("T") or data.get("E") or 0)
+    usd = (avg or price) * qty
+    if usd < MIN_USD:
+        return None
+    return {
+        "type": "forceOrder",
+        "symbol": symbol,
+        "side": side,
+        "qty": qty,
+        "price": avg or price,
+        "usd_value": usd,
+        "time": trade_time,
+        "extra": ""
+    }
 
-    if usd_value < MIN_USD_VALUE:
-        return
+def parse_agg_trade(obj):
+    # obj is dict (already parsed). We'll detect aggressive side (maker) as possible liquidation
+    # fields: e, E, s, a, p, q, f, l, T, m
+    if obj.get("e") != "aggTrade":
+        return None
+    symbol = obj.get("s")
+    price = float(obj.get("p") or 0)
+    qty = float(obj.get("q") or 0)
+    trade_time = int(obj.get("T") or 0)
+    m = obj.get("m", False)  # whether buyer is maker
+    # Heuristic: if m == False (so buyer is taker) or large qty, treat as possible liquidation
+    # This is heuristic — tune as needed
+    # We record side = “SELL” if buyer is maker (i.e. liquidation sell), else “BUY”
+    side = "BUY" if (not m) else "SELL"
+    usd = price * qty
+    if usd < MIN_USD:
+        return None
+    return {
+        "type": "aggTrade",
+        "symbol": symbol,
+        "side": side,
+        "qty": qty,
+        "price": price,
+        "usd_value": usd,
+        "time": trade_time,
+        "extra": f"m={m}"
+    }
 
-    t = datetime.utcfromtimestamp(trade_time / 1000.0).strftime("%H:%M:%S")
-    print(f"{t} | {symbol} | {side} | {qty:.3f} @ {avg_price:.3f} → ${usd_value:,.0f}")
-
-    if CSV_FILE:
-        liq = {
-            "symbol": symbol,
-            "side": side,
-            "avg_price": avg_price,
-            "filled_qty": qty,
-            "usd_value": usd_value,
-            "order_type": order_type,
-            "trade_time": trade_time
-        }
-        await append_to_csv(liq)
-
-
-async def listen_stream_group(symbols):
-    """Listen to a group of symbols (<=200) in one combined stream."""
-    streams = "/".join(f"{s}@forceOrder" for s in symbols)
-    ws_url = f"wss://fstream.binance.com/stream?streams={streams}"
-
+async def handle_ws_stream(streams: list, mode: str):
+    """
+    mode = "forceOrder" or "aggTrade"
+    streams: list of symbols, e.g., ["btcusdt","ethusdt",...]
+    """
+    # build combined stream string
+    stream_names = []
+    for s in streams:
+        stream_names.append(f"{s}@{mode}")
+    combined = "/".join(stream_names)
+    url = f"wss://fstream.binance.com/stream?streams={combined}"
     while True:
         try:
-            async with websockets.connect(ws_url, ping_interval=60) as ws:
-                print(f"Connected to {len(symbols)} streams...")
+            async with websockets.connect(url, ping_interval=60) as ws:
+                print(f"[{mode}] connected to {len(streams)} streams")
                 async for msg in ws:
-                    await handle_message(msg)
+                    msgj = json.loads(msg)
+                    data = msgj.get("data")
+                    # sometimes top-level direct
+                    if mode == "forceOrder":
+                        rec = await parse_force_order(msg)
+                    else:  # aggTrade
+                        # msg is wrapper {"stream": "...", "data": {...}}
+                        rec = parse_agg_trade(data or msgj)
+                    if rec:
+                        await append_csv(rec)
+                        # print to console
+                        t = datetime.utcfromtimestamp(rec["time"] / 1000).strftime("%H:%M:%S")
+                        print(f"{t} | {rec['type']} | {rec['symbol']} | {rec['side']} | {rec['qty']} @ {rec['price']} → ${rec['usd_value']:.0f} {rec.get('extra','')}")
         except Exception as e:
-            print(f"Connection error ({e}) — reconnecting in 3s...")
+            print(f"[{mode}] error {e}, reconnecting in 3s...")
             await asyncio.sleep(3)
 
-
 async def main():
-    symbols = await fetch_symbols()
+    syms = await fetch_symbols()
+    await write_csv_header()
 
-    if CSV_FILE:
-        await write_csv_header_if_needed()
+    # Split symbols into manageable groups
+    # We need to run 2 modes, so maybe half for each or duplicate lists
+    groups = [syms[i : i + MAX_STREAMS_PER_CONN] for i in range(0, len(syms), MAX_STREAMS_PER_CONN)]
 
-    # Split symbols into groups of <=200
-    groups = [symbols[i:i + MAX_STREAMS_PER_CONN] for i in range(0, len(symbols), MAX_STREAMS_PER_CONN)]
-    print(f"Creating {len(groups)} websocket connections...")
+    tasks = []
+    for g in groups:
+        tasks.append(handle_ws_stream(g, "forceOrder"))
+        tasks.append(handle_ws_stream(g, "aggTrade"))
 
-    # Run all listeners concurrently
-    await asyncio.gather(*(listen_stream_group(g) for g in groups))
-
+    await asyncio.gather(*tasks)
 
 if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        print("Stopped.")
+        print("Interrupted.")
