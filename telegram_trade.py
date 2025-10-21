@@ -108,8 +108,6 @@ async def handle_ws_stream(symbols, liq_queue):
                     liq = parse_force_order(msg)
                     if not liq:
                         continue
-                    ts = datetime.utcfromtimestamp(liq["trade_time"] / 1000.0).strftime("%H:%M:%S")
-                    print(f"{ts} | {liq['symbol']} | {liq['side']} | {liq['filled_qty']:.3f} @ {liq['avg_price']:.3f} → ${liq['usd_value']:.0f}")
                     await append_to_csv(liq)
                     await liq_queue.put(liq)
         except Exception as e:
