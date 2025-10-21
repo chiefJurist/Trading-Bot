@@ -1,7 +1,3 @@
-# requirements:
-# pip install websockets aiofiles aiohttp
-# Python 3.8+
-
 import asyncio
 import json
 import aiofiles
@@ -14,7 +10,6 @@ REST_URL = "https://fapi.binance.com/fapi/v1/exchangeInfo"
 WS_URL = "wss://fstream.binance.com/stream?streams="
 
 # Config
-MIN_USD_VALUE = 100.0  # minimum liquidation size to show
 MAX_STREAMS_PER_CONN = 100  # Binance limits 200 per connection; keep lower for stability
 CSV_FILE = "binance_liquidations.csv"
 
@@ -52,9 +47,6 @@ def parse_force_order(msg_text):
         avg_price = float(o.get("ap", 0))
         filled_qty = float(o.get("z", 0))
         usd_value = avg_price * filled_qty
-
-        # if usd_value < MIN_USD_VALUE:
-        #     return None
 
         return {
             "symbol": o.get("s"),
