@@ -68,7 +68,7 @@ async def handle_ws_stream(symbols):
                     if not liq:
                         continue
                     ts = datetime.utcfromtimestamp(liq["trade_time"]/1000.0).strftime("%H:%M:%S")
-                    print(f"{ts} | {liq['symbol']} | {liq['side']} | {liq['filled_qty']:.3f} @ {liq['avg_price']:.3f} → ${liq['usd_value']:.0f}")
+                    #print(f"{ts} | {liq['symbol']} | {liq['side']} | {liq['filled_qty']:.3f} @ {liq['avg_price']:.3f} → ${liq['usd_value']:.0f}")
                     await append_to_csv(liq)
         except Exception as e:
             print(f"[{datetime.utcnow().isoformat()}] Reconnecting due to: {e}")
@@ -103,7 +103,7 @@ async def analyze_patterns():
                         results.append([symbol, side, current_time])
 
             if results:
-                print("\nPattern Detected:")
+                # print("\nPattern Detected:")
                 for r in results:
                     print(r)
             else:
