@@ -107,7 +107,8 @@ async def analyze_patterns():
                 for r in results:
                     print(r)
             else:
-                print(f"[{current_time}] No matching patterns.")
+                pass
+                #print(f"[{current_time}] No matching patterns.")
 
         except Exception as e:
             print(f"[Pattern Error] {e}")
