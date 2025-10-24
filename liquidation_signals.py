@@ -1,44 +1,68 @@
 import csv
-from datetime import datetime
+from datetime import datetime, timedelta
 from collections import defaultdict
 
-INPUT_FILE = "binance_liquidations.csv"
-OUTPUT_FILE = "signals.csv"
+# File paths
+SOURCE_FILE = "binance_liquidations.csv"
+SIGNALS_FILE = "signals.csv"
 
-def truncate_to_minute(ts_str):
-    """Convert timestamp to YYYY-MM-DD HH:MM (minute precision)."""
-    ts = datetime.fromisoformat(ts_str)
-    return ts.strftime("%Y-%m-%d %H:%M")
+# Timezone offset (UTC+1)
+TZ_OFFSET = timedelta(hours=1)
 
-def process_liquidations():
-    grouped = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
-    # Structure: grouped[minute][symbol][side] = count
+def analyze_liquidations():
+    grouped = defaultdict(lambda: {"BUY": 0, "SELL": 0})
 
-    # Read the existing liquidation file
-    with open(INPUT_FILE, newline='') as f:
+    # ---- Read the liquidation CSV ----
+    with open(SOURCE_FILE, "r") as f:
         reader = csv.DictReader(f)
         for row in reader:
-            minute = truncate_to_minute(row['timestamp'])
-            symbol = row['symbol']
-            side = row['side'].upper().strip()
-            grouped[minute][symbol][side] += 1
+            try:
+                # Parse UTC timestamp and convert to UTC+1
+                dt_utc = datetime.fromisoformat(row["timestamp"])
+                dt_local = dt_utc + TZ_OFFSET
 
-    # Write filtered signals
-    with open(OUTPUT_FILE, "w", newline='') as f:
-        writer = csv.writer(f)
-        writer.writerow(["date", "time", "pair", "side", "occurrences"])
+                # Round to the nearest minute (zero out seconds & microseconds)
+                minute = dt_local.replace(second=0, microsecond=0)
 
-        for minute, symbols in grouped.items():
-            for symbol, sides in symbols.items():
-                for side, count in sides.items():
-                    if count >= 7:
-                        # Check if there's no opposing side in same minute
-                        opposite = "BUY" if side == "SELL" else "SELL"
-                        if opposite not in sides:
-                            date_part, time_part = minute.split(" ")
-                            writer.writerow([date_part, time_part, symbol, side, count])
+                key = (minute, row["symbol"])
+                side = row["side"].upper().strip()
+                grouped[key][side] += 1
+            except Exception as e:
+                print("Skipping row due to error:", e)
 
-    print(f"✅ Done! Results saved to {OUTPUT_FILE}")
+    # ---- Analyze and extract strong signals ----
+    results = []
+    for (minute, symbol), counts in grouped.items():
+        buy_count = counts["BUY"]
+        sell_count = counts["SELL"]
+
+        # Check BUY signals
+        if buy_count >= 7 and sell_count == 0:
+            results.append({
+                "date": minute.strftime("%Y-%m-%d"),
+                "time": minute.strftime("%H:%M"),
+                "pair": symbol,
+                "side": "BUY",
+                "occurrences": buy_count
+            })
+
+        # Check SELL signals
+        elif sell_count >= 7 and buy_count == 0:
+            results.append({
+                "date": minute.strftime("%Y-%m-%d"),
+                "time": minute.strftime("%H:%M"),
+                "pair": symbol,
+                "side": "SELL",
+                "occurrences": sell_count
+            })
+
+    # ---- Write signals.csv ----
+    with open(SIGNALS_FILE, "w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=["date", "time", "pair", "side", "occurrences"])
+        writer.writeheader()
+        writer.writerows(results)
+
+    print(f"✅ Analysis complete. {len(results)} signals saved to {SIGNALS_FILE}")
 
 if __name__ == "__main__":
-    process_liquidations()
+    analyze_liquidations()
