@@ -6,6 +6,7 @@ import asyncio
 
 INPUT_FILE = "binance_liquidations.csv"
 OUTPUT_FILE = "signals_combined.csv"
+TIME_OFFSET = timedelta(hours=1)  # UTC+1
 
 def parse_timestamp(ts):
     """Convert timestamp string to minute-based datetime."""
@@ -54,8 +55,10 @@ async def analyze_liquidations():
                         for r in combined
                     )
                     if not has_opposite:
+                        # Apply UTC+1 offset
+                        local_time = main_min + TIME_OFFSET
                         await out.write(
-                            f"{main_min.date()},{main_min.time().strftime('%H:%M')},{symbol},{side},{count}\n"
+                            f"{local_time.date()},{local_time.time().strftime('%H:%M')},{symbol},{side},{count}\n"
                         )
 
     print(f"Analysis complete. Results saved in {OUTPUT_FILE}")
