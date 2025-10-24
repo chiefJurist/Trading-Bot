@@ -1,97 +1,64 @@
+import csv
+from datetime import datetime, timedelta
+from collections import defaultdict, Counter
+import aiofiles
 import asyncio
-import json
-import aiohttp
-import websockets
-from datetime import datetime, timedelta, timezone
-from collections import defaultdict
 
-# Binance Futures endpoints
-REST_URL = "https://fapi.binance.com/fapi/v1/exchangeInfo"
-WS_URL = "wss://fstream.binance.com/stream?streams="
+INPUT_FILE = "binance_liquidations.csv"
+OUTPUT_FILE = "signals.csv"
 
-# Config
-MAX_STREAMS_PER_CONN = 100  # Binance allows up to 200; 100 for stability
-LIQ_WINDOW_MINUTES = 2
-MIN_COUNT = 7
-LOCAL_TZ = timezone(timedelta(hours=1))  # UTC+1
+def parse_timestamp(ts):
+    """Convert timestamp string to minute-based datetime."""
+    dt = datetime.fromisoformat(ts)
+    return dt.replace(second=0, microsecond=0)
 
-# ---- Fetch all perpetual futures symbols ----
-async def fetch_symbols():
-    async with aiohttp.ClientSession() as session:
-        async with session.get(REST_URL) as resp:
-            data = await resp.json()
-            return [s["symbol"] for s in data["symbols"] if s["contractType"] == "PERPETUAL"]
+async def analyze_liquidations():
+    # Step 1: Read all rows
+    minutes = defaultdict(list)
 
-# ---- Parse each liquidation message ----
-def parse_force_order(msg_text):
-    try:
-        data = json.loads(msg_text)
-        payload = data.get("data", {})
-        o = payload.get("o", {})
+    async with aiofiles.open(INPUT_FILE, "r") as f:
+        header = await f.readline()  # skip header
+        async for line in f:
+            parts = line.strip().split(",")
+            if len(parts) < 6:
+                continue
+            ts, symbol, side, avg_price, qty, usd_value = parts
+            minute = parse_timestamp(ts)
+            minutes[minute].append({"symbol": symbol, "side": side})
 
-        trade_time = datetime.fromtimestamp(o.get("T", payload.get("E", 0)) / 1000.0, LOCAL_TZ)
-        return {
-            "symbol": o.get("s"),
-            "side": o.get("S"),
-            "trade_time": trade_time
-        }
-    except Exception:
-        return None
+    # Step 2: Sort minute keys
+    sorted_minutes = sorted(minutes.keys())
 
-# ---- WebSocket handler for a batch of symbols ----
-async def handle_ws_stream(symbols):
-    stream_names = [f"{sym.lower()}@forceOrder" for sym in symbols]
-    url = WS_URL + "/".join(stream_names)
-    liq_buffer = []
-    last_checked = datetime.now(LOCAL_TZ)
+    # Step 3: Prepare output CSV
+    async with aiofiles.open(OUTPUT_FILE, "w") as out:
+        await out.write("date,time,pair,side,occurrences\n")
 
-    while True:
-        try:
-            async with websockets.connect(url, ping_interval=60, ping_timeout=10) as ws:
-                print(f"[{datetime.now(LOCAL_TZ).isoformat()}] Connected to {len(symbols)} symbols.")
-                async for msg in ws:
-                    liq = parse_force_order(msg)
-                    if not liq:
-                        continue
-                    liq_buffer.append(liq)
+        # Step 4: Loop through each minute (skip the first one)
+        for i in range(1, len(sorted_minutes)):
+            pre_min = sorted_minutes[i - 1]
+            main_min = sorted_minutes[i]
 
-                    # Run analysis once per minute
-                    now = datetime.now(LOCAL_TZ)
-                    if (now - last_checked).total_seconds() >= 60:
-                        cutoff = now - timedelta(minutes=LIQ_WINDOW_MINUTES)
-                        recent_liqs = [l for l in liq_buffer if l["trade_time"] >= cutoff]
-                        liq_buffer = recent_liqs  # keep buffer only for last 2 mins
+            # Combine both minutes’ signals
+            combined = minutes[pre_min] + minutes[main_min]
 
-                        # Group by (symbol, side)
-                        counts = defaultdict(int)
-                        sides_by_symbol = defaultdict(set)
-                        for l in recent_liqs:
-                            counts[(l["symbol"], l["side"])] += 1
-                            sides_by_symbol[l["symbol"]].add(l["side"])
+            # Count occurrences per (symbol, side)
+            counts = Counter((row["symbol"], row["side"]) for row in combined)
 
-                        # Analyze results
-                        for (sym, side), count in counts.items():
-                            # Only print if >=7 same-side signals, and no opposite side
-                            if count >= MIN_COUNT and len(sides_by_symbol[sym]) == 1:
-                                print(f"{sym} | {side} | {now.strftime('%H:%M')}")
+            # Step 5: Check for qualifying signals
+            for (symbol, side), count in counts.items():
+                if count >= 7:
+                    # Check for any opposing side in same period
+                    opposite_side = "BUY" if side == "SELL" else "SELL"
+                    has_opposite = any(
+                        r["symbol"] == symbol and r["side"] == opposite_side
+                        for r in combined
+                    )
+                    if not has_opposite:
+                        await out.write(
+                            f"{main_min.date()},{main_min.time().strftime('%H:%M')},{symbol},{side},{count}\n"
+                        )
 
-                        last_checked = now
-
-        except Exception as e:
-            print(f"[{datetime.now(LOCAL_TZ).isoformat()}] Reconnecting due to error: {e}")
-            await asyncio.sleep(3)
-
-# ---- Main entrypoint ----
-async def main():
-    symbols = await fetch_symbols()
-    groups = [symbols[i:i + MAX_STREAMS_PER_CONN] for i in range(0, len(symbols), MAX_STREAMS_PER_CONN)]
-
-    print(f"Tracking {len(symbols)} symbols across {len(groups)} websocket connections...")
-    tasks = [handle_ws_stream(group) for group in groups]
-    await asyncio.gather(*tasks)
+    print(f"✅ Analysis complete. Results saved in {OUTPUT_FILE}")
 
 if __name__ == "__main__":
-    try:
-        asyncio.run(main())
-    except KeyboardInterrupt:
-        print("Exited cleanly.")
+    asyncio.run(analyze_liquidations())
