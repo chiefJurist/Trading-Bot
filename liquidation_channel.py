@@ -96,12 +96,20 @@ async def handle_ws_stream(symbols):
 
                     ts = datetime.utcfromtimestamp(liq["trade_time"] / 1000.0)
                     minute_key = ts.strftime("%H:%M")
-                    text = (
-                        f"💥 <b>{liq['symbol']}</b> | {liq['side']}\n"
-                        f"Qty: <b>{liq['filled_qty']:.3f}</b>\n"
-                        f"Price: <b>{liq['avg_price']:.4f}</b>\n"
-                        f"Value: <b>${liq['usd_value']:.0f}</b>"
-                    )
+                    if liq['side'] == 'SELL':
+                        text = (
+                            f"💥🔴 <b>{liq['symbol']}</b> | {liq['side']}\n"
+                            f"Qty: <b>{liq['filled_qty']:.3f}</b>\n"
+                            f"Price: <b>{liq['avg_price']:.4f}</b>\n"
+                            f"Value: <b>${liq['usd_value']:.0f}</b>"
+                        )
+                    else:
+                        text = (
+                            f"💥🟢 <b>{liq['symbol']}</b> | {liq['side']}\n"
+                            f"Qty: <b>{liq['filled_qty']:.3f}</b>\n"
+                            f"Price: <b>{liq['avg_price']:.4f}</b>\n"
+                            f"Value: <b>${liq['usd_value']:.0f}</b>"
+                        )
                     pending_msgs[minute_key].append(text)
 
         except Exception as e:
