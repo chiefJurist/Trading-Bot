@@ -1,9 +1,9 @@
 import asyncio
 import json
+import aiofiles
 import aiohttp
 import websockets
 from datetime import datetime
-from collections import defaultdict
 
 # Binance Futures endpoints
 REST_URL = "https://fapi.binance.com/fapi/v1/exchangeInfo"
@@ -11,25 +11,38 @@ WS_URL = "wss://fstream.binance.com/stream?streams="
 
 # Telegram Config
 TELEGRAM_BOT_TOKEN = "8567226515:AAGq-HYbDTk-oKZAzy6mRmAdvPDKWM1OWNY"
-TELEGRAM_CHAT_ID = "@binance_liqs"  # or numeric ID like -100xxxxxxxxxx
+TELEGRAM_CHAT_ID = "@binance_liqs"  # or numeric ID like -1001234567890
 
 # Config
 MAX_STREAMS_PER_CONN = 100
-BATCH_INTERVAL = 30  # seconds between grouped Telegram sends
+CSV_FILE = "binance_liquidations.csv"
 
 
-# ---- Utility ----
+# ---- Utility Functions ----
 async def fetch_symbols():
-    """Fetch all USDⓈ-M perpetual futures symbols."""
     async with aiohttp.ClientSession() as session:
         async with session.get(REST_URL) as resp:
             data = await resp.json()
             return [s["symbol"] for s in data["symbols"] if s["contractType"] == "PERPETUAL"]
 
+async def write_csv_header():
+    try:
+        async with aiofiles.open(CSV_FILE, "r") as f:
+            await f.readline()
+    except FileNotFoundError:
+        async with aiofiles.open(CSV_FILE, "w") as f:
+            await f.write("timestamp,symbol,side,avg_price,filled_qty,usd_value\n")
 
-# ---- Telegram ----
+async def append_to_csv(liq):
+    async with aiofiles.open(CSV_FILE, "a") as f:
+        ts = datetime.utcfromtimestamp(liq["trade_time"]/1000.0).isoformat()
+        row = f'{ts},{liq["symbol"]},{liq["side"]},{liq["avg_price"]},{liq["filled_qty"]},{liq["usd_value"]}\n'
+        await f.write(row)
+
+
+# ---- Telegram Sender ----
 async def send_telegram_message(text):
-    """Send message to Telegram channel."""
+    """Send text message to Telegram channel."""
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     payload = {"chat_id": TELEGRAM_CHAT_ID, "text": text, "parse_mode": "HTML"}
 
@@ -37,11 +50,12 @@ async def send_telegram_message(text):
         async with session.post(url, json=payload) as resp:
             if resp.status != 200:
                 print(f"Telegram error: {resp.status}")
+            else:
+                pass  # optional: print("Message sent to Telegram")
 
 
-# ---- Parser ----
+# ---- Core Parser ----
 def parse_force_order(msg_text):
-    """Extract liquidation data from Binance forceOrder events."""
     try:
         data = json.loads(msg_text)
         payload = data.get("data", {})
@@ -57,33 +71,16 @@ def parse_force_order(msg_text):
             "avg_price": avg_price,
             "filled_qty": filled_qty,
             "usd_value": usd_value,
-            "trade_time": int(o.get("T", payload.get("E", 0))),
+            "trade_time": int(o.get("T", payload.get("E", 0)))
         }
     except Exception:
         return None
 
 
-# ---- WebSocket Handler ----
+# ---- WebSocket Handling ----
 async def handle_ws_stream(symbols):
     stream_names = [f"{sym.lower()}@forceOrder" for sym in symbols]
     url = WS_URL + "/".join(stream_names)
-    pending_msgs = defaultdict(list)
-
-    async def flush_messages():
-        """Periodically send grouped liquidation messages."""
-        while True:
-            await asyncio.sleep(BATCH_INTERVAL)
-            if not pending_msgs:
-                continue
-
-            for key, msgs in list(pending_msgs.items()):
-                text = "\n\n".join(msgs[:20])  # limit size
-                del pending_msgs[key]
-                header = f"🔥 <b>Liquidations ({key} UTC)</b> 🔥\n\n"
-                await send_telegram_message(header + text)
-                await asyncio.sleep(1)  # small gap to stay below rate limit
-
-    asyncio.create_task(flush_messages())
 
     while True:
         try:
@@ -94,15 +91,17 @@ async def handle_ws_stream(symbols):
                     if not liq:
                         continue
 
-                    ts = datetime.utcfromtimestamp(liq["trade_time"] / 1000.0)
-                    minute_key = ts.strftime("%H:%M")
+                    ts = datetime.utcfromtimestamp(liq["trade_time"]/1000.0).strftime("%H:%M:%S")
                     text = (
                         f"💥 <b>{liq['symbol']}</b> | {liq['side']}\n"
                         f"Qty: <b>{liq['filled_qty']:.3f}</b>\n"
-                        f"Price: <b>{liq['avg_price']:.4f}</b>\n"
-                        f"Value: <b>${liq['usd_value']:.0f}</b>"
+                        f"Price: <b>{liq['avg_price']:.3f}</b>\n"
+                        f"Value: <b>${liq['usd_value']:.0f}</b>\n"
+                        f"Time: {ts} UTC"
                     )
-                    pending_msgs[minute_key].append(text)
+
+                    await send_telegram_message(text)
+                    await append_to_csv(liq)
 
         except Exception as e:
             print(f"[{datetime.utcnow().isoformat()}] Reconnecting due to: {e}")
@@ -112,13 +111,13 @@ async def handle_ws_stream(symbols):
 # ---- Main Entrypoint ----
 async def main():
     symbols = await fetch_symbols()
-    groups = [symbols[i:i + MAX_STREAMS_PER_CONN] for i in range(0, len(symbols), MAX_STREAMS_PER_CONN)]
+    await write_csv_header()
 
+    groups = [symbols[i:i+MAX_STREAMS_PER_CONN] for i in range(0, len(symbols), MAX_STREAMS_PER_CONN)]
     print(f"Tracking {len(symbols)} symbols across {len(groups)} websocket connections...")
 
     tasks = [handle_ws_stream(g) for g in groups]
     await asyncio.gather(*tasks)
-
 
 if __name__ == "__main__":
     try:
