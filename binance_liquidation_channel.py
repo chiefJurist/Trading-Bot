@@ -111,7 +111,7 @@ async def handle_ws_stream(symbols):
                     continue
 
                 local_time = datetime.strptime(minute_key, "%H:%M").strftime("%I:%M %p")
-                header = f"🔥 <b>Binance Liquidations</b> 🔥\n\n🕒 {local_time} <b>Local Time</b>\n\n\n"
+                header = f"🔥 <b>Binance Liquidations</b> 🔥\n\n🕒 <b>{local_time} Local Time</b>\n\n\n"
                 text = header + "\n\n".join(msgs)
                 del pending_msgs[minute_key]
 
