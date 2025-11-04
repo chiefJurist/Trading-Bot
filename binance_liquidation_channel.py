@@ -11,12 +11,13 @@ WS_URL = "wss://fstream.binance.com/stream?streams="
 
 # Telegram Config
 TELEGRAM_BOT_TOKEN = "8567226515:AAGq-HYbDTk-oKZAzy6mRmAdvPDKWM1OWNY"
-TELEGRAM_CHAT_ID = "@binance_liqs"  # or numeric ID like -100xxxxxxxxxx
+TELEGRAM_CHAT_ID = "@binance_liqs"
 
 # Config
 MAX_STREAMS_PER_CONN = 100
-FLUSH_INTERVAL = 60  # seconds (1 minute)
-LOCAL_TZ = timezone(timedelta(hours=1))  # adjust offset if needed (e.g., +1 for Nigeria)
+FLUSH_INTERVAL = 60  # seconds
+LOCAL_TZ = timezone(timedelta(hours=1))  # adjust offset if needed
+MAX_TELEGRAM_LENGTH = 3900  # keep safe margin from 4096 char limit
 
 
 # ---- Utility ----
@@ -38,6 +39,33 @@ async def send_telegram_message(text: str):
         async with session.post(url, json=payload) as resp:
             if resp.status != 200:
                 print(f"Telegram error: {resp.status}")
+
+
+async def send_long_message(full_text: str):
+    """Automatically split long text into multiple Telegram messages."""
+    if len(full_text) <= MAX_TELEGRAM_LENGTH:
+        await send_telegram_message(full_text)
+        return
+
+    # Split intelligently by paragraph
+    chunks = []
+    current_chunk = ""
+
+    for line in full_text.split("\n\n"):
+        if len(current_chunk) + len(line) + 2 > MAX_TELEGRAM_LENGTH:
+            chunks.append(current_chunk.strip())
+            current_chunk = line + "\n\n"
+        else:
+            current_chunk += line + "\n\n"
+
+    if current_chunk.strip():
+        chunks.append(current_chunk.strip())
+
+    # Send each chunk sequentially
+    for i, chunk in enumerate(chunks, 1):
+        suffix = f"\n\n📄 Part {i}/{len(chunks)}"
+        await send_telegram_message(chunk + suffix)
+        await asyncio.sleep(1)
 
 
 # ---- Parser ----
@@ -83,12 +111,12 @@ async def handle_ws_stream(symbols):
                     continue
 
                 local_time = datetime.strptime(minute_key, "%H:%M").strftime("%I:%M %p")
-                header = f"🔥 <b>Binance Liquidations</b> 🔥\n🕒 {local_time} Local Time\n\n"
+                header = f"🔥 <b>Binance Liquidations</b> 🔥\n\n🕒 {local_time} <b>Local Time</b>\n\n\n"
                 text = header + "\n\n".join(msgs)
                 del pending_msgs[minute_key]
 
-                await send_telegram_message(text)
-                await asyncio.sleep(2)  # avoid Telegram rate limits
+                await send_long_message(text)
+                await asyncio.sleep(2)
 
     asyncio.create_task(flush_messages())
 
