@@ -2,7 +2,7 @@ import asyncio
 import json
 import aiohttp
 import websockets
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from collections import defaultdict
 
 # Binance Futures endpoints
@@ -15,7 +15,8 @@ TELEGRAM_CHAT_ID = "@binance_liqs"  # or numeric ID like -100xxxxxxxxxx
 
 # Config
 MAX_STREAMS_PER_CONN = 100
-BATCH_INTERVAL = 30  # seconds between grouped Telegram sends
+FLUSH_INTERVAL = 60  # seconds (1 minute)
+LOCAL_TZ = timezone(timedelta(hours=1))  # adjust offset if needed (e.g., +1 for Nigeria)
 
 
 # ---- Utility ----
@@ -28,7 +29,7 @@ async def fetch_symbols():
 
 
 # ---- Telegram ----
-async def send_telegram_message(text):
+async def send_telegram_message(text: str):
     """Send message to Telegram channel."""
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     payload = {"chat_id": TELEGRAM_CHAT_ID, "text": text, "parse_mode": "HTML"}
@@ -40,7 +41,7 @@ async def send_telegram_message(text):
 
 
 # ---- Parser ----
-def parse_force_order(msg_text):
+def parse_force_order(msg_text: str):
     """Extract liquidation data from Binance forceOrder events."""
     try:
         data = json.loads(msg_text)
@@ -70,50 +71,60 @@ async def handle_ws_stream(symbols):
     pending_msgs = defaultdict(list)
 
     async def flush_messages():
-        """Periodically send grouped liquidation messages."""
+        """Send all collected liquidations once per minute."""
         while True:
-            await asyncio.sleep(BATCH_INTERVAL)
+            await asyncio.sleep(FLUSH_INTERVAL)
             if not pending_msgs:
                 continue
 
-            for key, msgs in list(pending_msgs.items()):
-                text = "\n\n".join(msgs[:20])  # limit size
-                del pending_msgs[key]
-                header = f"🔥 <b>Liquidations ({key} UTC)</b> 🔥\n\n"
-                await send_telegram_message(header + text)
-                await asyncio.sleep(1)  # small gap to stay below rate limit
+            # Process and clear pending messages
+            for minute_key, msgs in list(pending_msgs.items()):
+                if not msgs:
+                    continue
+
+                local_time = datetime.strptime(minute_key, "%H:%M").strftime("%I:%M %p")
+                header = f"🔥 <b>Binance Liquidations</b> 🔥\n🕒 {local_time} Local Time\n\n"
+                text = header + "\n\n".join(msgs)
+                del pending_msgs[minute_key]
+
+                await send_telegram_message(text)
+                await asyncio.sleep(2)  # avoid Telegram rate limits
 
     asyncio.create_task(flush_messages())
 
     while True:
         try:
-            async with websockets.connect(url, ping_interval=60, ping_timeout=10) as ws:
-                print(f"[{datetime.utcnow().isoformat()}] Connected to {len(symbols)} symbols.")
+            async with websockets.connect(url, ping_interval=20, ping_timeout=10) as ws:
+                print(f"[{datetime.now().isoformat()}] Connected to {len(symbols)} symbols.")
                 async for msg in ws:
                     liq = parse_force_order(msg)
                     if not liq:
                         continue
 
-                    ts = datetime.utcfromtimestamp(liq["trade_time"] / 1000.0)
+                    # Convert to local time and group by minute
+                    ts = datetime.fromtimestamp(liq["trade_time"] / 1000.0, tz=LOCAL_TZ)
                     minute_key = ts.strftime("%H:%M")
+
+                    # Message format
                     if liq['side'] == 'SELL':
                         text = (
-                            f"💥🔴 <b>{liq['symbol']}</b> | {liq['side']}\n"
+                            f"💥🔴 <b>{liq['symbol']}</b> | SELL\n"
                             f"Qty: <b>{liq['filled_qty']:.3f}</b>\n"
                             f"Price: <b>{liq['avg_price']:.4f}</b>\n"
                             f"Value: <b>${liq['usd_value']:.0f}</b>"
                         )
                     else:
                         text = (
-                            f"💥🟢 <b>{liq['symbol']}</b> | {liq['side']}\n"
+                            f"💥🟢 <b>{liq['symbol']}</b> | BUY\n"
                             f"Qty: <b>{liq['filled_qty']:.3f}</b>\n"
                             f"Price: <b>{liq['avg_price']:.4f}</b>\n"
                             f"Value: <b>${liq['usd_value']:.0f}</b>"
                         )
+
                     pending_msgs[minute_key].append(text)
 
         except Exception as e:
-            print(f"[{datetime.utcnow().isoformat()}] Reconnecting due to: {e}")
+            print(f"[{datetime.now().isoformat()}] Reconnecting due to: {e}")
             await asyncio.sleep(3)
 
 
