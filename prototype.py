@@ -19,8 +19,8 @@ MAX_WAIT_CANDLES = 12
 MIN_LIQS_FOR_SIGNAL = 7
 YOUR_TIMEZONE_OFFSET = timedelta(hours=1)  # You use UTC+1
 
-API_KEY = 'YOUR_BINANCE_FUTURES_KEY'
-API_SECRET = 'YOUR_BINANCE_FUTURES_SECRET'
+API_KEY = 'cTTxVL1Cka27JhHPL80arFFL1lPN6dhZWZwpQJ5rw7Uyl32hRiLtcqbNVxFS4u2O'
+API_SECRET = 'WPwxBqYa37AXKOMxwWmFeJJ7KvlmHpuD0dUIjd2d9YoW53L1yRGwJEcZhtaJpBeF'
 POSITION_FILE = 'current_position.json'
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s | %(message)s')
