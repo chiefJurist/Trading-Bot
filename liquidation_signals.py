@@ -1,106 +1,68 @@
-# live_signal_generator.py
 import csv
-import os
-import time
 from datetime import datetime, timedelta
 from collections import defaultdict
 
+# File paths
 SOURCE_FILE = "binance_liquidations.csv"
 SIGNALS_FILE = "signals.csv"
-CHECK_EVERY_SECONDS = 15
 
-# Timezone: your local time = UTC+1
+# Timezone offset (UTC+1)
 TZ_OFFSET = timedelta(hours=1)
 
-# Track last processed file size and current minute state
-last_size = 0
-current_minute_data = defaultdict(lambda: {"BUY": 0, "SELL": 0})
-current_minute = None
+def analyze_liquidations():
+    grouped = defaultdict(lambda: {"BUY": 0, "SELL": 0})
 
-def get_file_size():
-    return os.path.getsize(SOURCE_FILE) if os.path.exists(SOURCE_FILE) else 0
-
-def append_signal(date_str, time_str, symbol, side, count):
-    with open(SIGNALS_FILE, "a", newline="") as f:
-        writer = csv.writer(f)
-        # Write header only if file is empty
-        if os.path.getsize(SIGNALS_FILE) == 0:
-            writer.writerow(["date", "time", "pair", "side", "occurrences"])
-        writer.writerow([date_str, time_str, symbol, side, count])
-    print(f"NEW SIGNAL → {date_str} {time_str} | {symbol} | {side} | {count} liquidations")
-
-def process_new_lines():
-    global last_size, current_minute, current_minute_data
-
-    current_size = get_file_size()
-    if current_size == last_size:
-        return  # No new data
-
+    # ---- Read the liquidation CSV ----
     with open(SOURCE_FILE, "r") as f:
-        f.seek(last_size)  # Jump to where we left off
         reader = csv.DictReader(f)
-        new_rows = list(reader)
+        for row in reader:
+            try:
+                # Parse UTC timestamp and convert to UTC+1
+                dt_utc = datetime.fromisoformat(row["timestamp"])
+                dt_local = dt_utc + TZ_OFFSET
 
-    if not new_rows:
-        last_size = current_size
-        return
+                # Round to the nearest minute (zero out seconds & microseconds)
+                minute = dt_local.replace(second=0, microsecond=0)
 
-    for row in new_rows:
-        try:
-            dt_utc = datetime.fromisoformat(row["timestamp"].replace("Z", "+00:00"))
-            dt_local = dt_utc + TZ_OFFSET
-            minute = dt_local.replace(second=0, microsecond=0)
+                key = (minute, row["symbol"])
+                side = row["side"].upper().strip()
+                grouped[key][side] += 1
+            except Exception as e:
+                print("Skipping row due to error:", e)
 
-            symbol = row["symbol"]
-            side = row["side"].upper().strip()
+    # ---- Analyze and extract strong signals ----
+    results = []
+    for (minute, symbol), counts in grouped.items():
+        buy_count = counts["BUY"]
+        sell_count = counts["SELL"]
 
-            # If minute changed → check previous minute for signal
-            if current_minute and minute != current_minute:
-                check_and_emit_signal(current_minute)
+        # Check BUY signals
+        if buy_count >= 7 and sell_count == 0:
+            results.append({
+                "date": minute.strftime("%Y-%m-%d"),
+                "time": minute.strftime("%H:%M"),
+                "pair": symbol,
+                "side": "BUY",
+                "occurrences": buy_count
+            })
 
-            # Update current minute
-            current_minute = minute
-            current_minute_data[(minute, symbol)][side] += 1
+        # Check SELL signals
+        elif sell_count >= 7 and buy_count == 0:
+            results.append({
+                "date": minute.strftime("%Y-%m-%d"),
+                "time": minute.strftime("%H:%M"),
+                "pair": symbol,
+                "side": "SELL",
+                "occurrences": sell_count
+            })
 
-        except Exception as e:
-            print("Bad row:", e)
-
-    last_size = current_size
-
-def check_and_emit_signal(minute):
-    global current_minute_data
-    for (min_time, symbol), counts in current_minute_data.items():
-        if min_time != minute:
-            continue
-        buy = counts["BUY"]
-        sell = counts["SELL"]
-        if buy >= 7 and sell == 0:
-            append_signal(minute.strftime("%Y-%m-%d"), minute.strftime("%H:%M"), symbol, "BUY", buy)
-        elif sell >= 7 and buy == 0:
-            append_signal(minute.strftime("%Y-%m-%d"), minute.strftime("%H:%M"), symbol, "SELL", sell)
-    # Clear data for this minute
-    current_minute_data.clear()
-
-print("LIVE SIGNAL GENERATOR STARTED – Watching binance_liquidations.csv → signals.csv")
-print("Press Ctrl+C to stop")
-
-# Create signals.csv with header if doesn't exist
-if not os.path.exists(SIGNALS_FILE):
+    # ---- Write signals.csv ----
     with open(SIGNALS_FILE, "w", newline="") as f:
-        csv.writer(f).writerow(["date", "time", "pair", "side", "occurrences"])
+        writer = csv.DictWriter(f, fieldnames=["date", "time", "pair", "side", "occurrences"])
+        writer.writeheader()
+        writer.writerows(results)
 
-last_size = get_file_size()
+    print(f"✅ Analysis complete. {len(results)} signals saved to {SIGNALS_FILE}")
 
-try:
-    while True:
-        process_new_lines()
-        # Also check every 60 seconds in case the minute rolled over with no new lines
-        now_local = datetime.now() + TZ_OFFSET
-        now_minute = now_local.replace(second=0, microsecond=0)
-        if current_minute and now_minute > current_minute:
-            check_and_emit_signal(current_minute)
-            current_minute = now_minute
-
-        time.sleep(CHECK_EVERY_SECONDS)
-except KeyboardInterrupt:
-    print("\nLive signal generator stopped.")
+if __name__ == "__main__":
+    analyze_liquidations()
