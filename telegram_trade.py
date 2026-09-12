@@ -21,6 +21,8 @@ import websockets                 # For live Binance WebSocket streams
 from datetime import datetime, timedelta
 import numpy as np                 # For numeric arrays (required by TA-Lib)
 import talib                      # Technical indicators library
+import os 
+from dotenv import load_dotenv
 import ccxt                       # For unified crypto exchange API
 
 # --------------------------- CONFIGURATION ---------------------------

@@ -1,3 +1,5 @@
+import os 
+from dotenv import load_dotenv
 import ccxt
 import pandas as pd
 import talib as ta

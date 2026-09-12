@@ -1,3 +1,5 @@
+import os 
+from dotenv import load_dotenv
 import ccxt
 import pandas as pd
 import talib as ta
@@ -6,12 +8,14 @@ import math
 import time
 import datetime
 
+load_dotenv()
+
 # The User's API keys and addresses
-SPOT_API_KEY = 'lwObDP3Fcjia0OxQfombVxtG032NZWuFE4ctgKZPxBJYzblviFUd3ONUFAuOwcJq'
-SPOT_SECRET_KEY = 'PIx7RsETsxoqkJUaltX5pssmHnCMSXqUmb0lJv5OHR4RxS9kOtN2UCeYAtqFFAVm'
-FUTURES_API_KEY = 'FGqsynCXzPJoBJvcLG28EkQg2HvWlE4ANzt9Q3IIVH1iCqvuZ3jQh4Ipw2SzcpYn'
-FUTURES_SECRET_KEY = 'Tg0IcgRO3Xh7PhxfSUs6MfheM46uWa7BIydrLy2Q3ker2VWIQlMvHBmiq566EVEz'
-ADDRESS_ONE = '0x9D95d4751fCc02157d55527Ca4D50588bCC80590'
+SPOT_API_KEY = os.getenv('SPOT_API_KEY')
+SPOT_SECRET_KEY = os.getenv('SPOT_SECRET_KEY')
+FUTURES_API_KEY = os.getenv('FUTURES_API_KEY')
+FUTURES_SECRET_KEY = os.getenv('FUTURES_SECRET_KEY')
+ADDRESS_ONE = os.getenv('ADDRESS_ONE')
 
 # Initialize the Binance Spot exchange
 binance_spot = ccxt.binance({

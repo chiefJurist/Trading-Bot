@@ -3,6 +3,8 @@ import asyncio
 import json
 import os
 from datetime import datetime, timezone, timedelta
+import os 
+from dotenv import load_dotenv
 import ccxt.async_support as ccxt
 import talib
 import logging
