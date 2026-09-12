@@ -36,7 +36,7 @@ def fetch_OHLCV(symbol, timeframe, limit=500):
     return df
 
 
-# Function to calculate Chaikin A/D Line
+# Function to calculate Chaikin Accumulation/Distribution Line
 def calculate_chaikin_ad(df):
     # Ensure high, low, close, and volume columns are present
     if not all(col in df.columns for col in ['high', 'low', 'close', 'volume']):
