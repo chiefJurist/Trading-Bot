@@ -223,6 +223,12 @@ Every push and pull request to `main` runs the test suite automatically via GitH
 
 ---
 
+## Roadmap
+
+- [ ] Multi-exchange support for the liquidation tracker (currently Binance Futures only)
+- [ ] Additional indicator coverage
+
+
 ## License
 
 MIT — see `LICENSE`.
