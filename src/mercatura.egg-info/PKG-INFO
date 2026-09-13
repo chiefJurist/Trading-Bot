@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: mercatura
-Version: 0.1.0
+Version: 0.1.1
 Summary: Open-source Python trading toolkit: TA-Lib/pandas indicators, CCXT strategy runner, Binance liquidation cascade signals. More exchanges & AI coming.
 License: MIT License
         
