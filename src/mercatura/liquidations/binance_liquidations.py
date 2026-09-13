@@ -10,19 +10,16 @@ REST_URL = "https://fapi.binance.com/fapi/v1/exchangeInfo"
 WS_URL = "wss://fstream.binance.com/stream?streams="
 
 # Config
-MAX_STREAMS_PER_CONN = 100  # Binance limits 200 per connection; keep lower for stability
+MAX_STREAMS_PER_CONN = 100
 CSV_FILE = "binance_liquidations.csv"
 
-# ---- Utility Functions ----
 async def fetch_symbols():
-    """Fetch all USDⓈ-M futures trading pairs."""
     async with aiohttp.ClientSession() as session:
         async with session.get(REST_URL) as resp:
             data = await resp.json()
             return [s["symbol"] for s in data["symbols"] if s["contractType"] == "PERPETUAL"]
 
 async def write_csv_header():
-    """Ensure CSV file has header."""
     try:
         async with aiofiles.open(CSV_FILE, "r") as f:
             await f.readline()
@@ -36,9 +33,7 @@ async def append_to_csv(liq):
         row = f'{ts},{liq["symbol"]},{liq["side"]},{liq["avg_price"]},{liq["filled_qty"]},{liq["usd_value"]}\n'
         await f.write(row)
 
-# ---- Core Parser ----
 def parse_force_order(msg_text):
-    """Extract liquidation data from forceOrder event."""
     try:
         data = json.loads(msg_text)
         payload = data.get("data", {})
@@ -59,9 +54,7 @@ def parse_force_order(msg_text):
     except Exception:
         return None
 
-# ---- WebSocket Handling ----
 async def handle_ws_stream(symbols):
-    """Handle one websocket connection for a batch of symbols."""
     stream_names = [f"{sym.lower()}@forceOrder" for sym in symbols]
     url = WS_URL + "/".join(stream_names)
 
@@ -83,12 +76,10 @@ async def handle_ws_stream(symbols):
             print(f"[{datetime.utcnow().isoformat()}] Reconnecting due to: {e}")
             await asyncio.sleep(3)
 
-# ---- Main Entrypoint ----
 async def main():
     symbols = await fetch_symbols()
     await write_csv_header()
 
-    # Divide symbols into groups for multiple connections
     groups = [symbols[i:i+MAX_STREAMS_PER_CONN] for i in range(0, len(symbols), MAX_STREAMS_PER_CONN)]
 
     print(f"Tracking {len(symbols)} symbols across {len(groups)} websocket connections...")
@@ -96,8 +87,14 @@ async def main():
     tasks = [handle_ws_stream(g) for g in groups]
     await asyncio.gather(*tasks)
 
-if __name__ == "__main__":
+
+def run():
+    """Sync entrypoint for the console script — wraps the async main()."""
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
         print("Exited cleanly.")
+
+
+if __name__ == "__main__":
+    run()

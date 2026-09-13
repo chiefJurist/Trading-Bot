@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mercatura"
+version = "0.1.1"
+description = "Open-source Python trading toolkit: TA-Lib/pandas indicators, CCXT strategy runner, Binance liquidation cascade signals. More exchanges & AI coming."
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">=3.10"
+dependencies = [
+    "ccxt>=4.0.0",
+    "pandas>=2.0.0",
+    "numpy>=1.24.0",
+    "TA-Lib>=0.4.28",
+    "python-dotenv>=1.0.0",
+    "aiohttp>=3.9.0",
+    "aiofiles>=23.0.0",
+    "websockets>=12.0",
+]
+
+[project.scripts]
+mercatura-liquidations = "mercatura.liquidations.binance_liquidations:run"
+mercatura-signals = "mercatura.liquidations.liquidation_signals:main"
+mercatura-pattern = "mercatura.pattern:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

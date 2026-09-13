@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from liquidation_signals import detect_signals
+from mercatura.liquidations.liquidation_signals import detect_signals
 
 OFFSET = timedelta(hours=1)
 
