@@ -1,5 +1,5 @@
 import json
-from binance_liquidations import parse_force_order
+from mercatura.liquidations.binance_liquidations import parse_force_order
 
 
 def test_parse_force_order_valid_message():
