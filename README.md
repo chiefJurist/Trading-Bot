@@ -1,14 +1,16 @@
+```markdown
 # MERCATURA
 
-This repository is an open-source Python trading toolkit and reference implementation for building algorithmic trading systems. It contains implementations and examples of TA-Lib technical indicators, pandas-based technical analysis, NumPy calculations, CCXT exchange functions, their corresponding outputs and reusable strategy boilerplate.
+An open-source Python trading toolkit and reference implementation for building algorithmic trading systems. It includes TA-Lib technical indicators, pandas-based technical analysis, NumPy calculations, CCXT exchange integration, a live Binance Futures liquidation tracker with signal detection, and reusable strategy boilerplate you can trade with directly.
 
-The goal is to provide a practical collection of trading-related building blocks that can be explored, tested, modified and used as a foundation for developing custom trading strategies and automated trading systems.
+The goal is to provide a practical collection of trading-related building blocks that can be explored, tested, modified, and used as a foundation for developing custom trading strategies and automated trading systems.
 
 ## Features
 
-- **Indicators** (`indicators/`) — standalone TA-Lib/pandas/NumPy indicator scripts (ADX, ADXR, MA, etc.) that fetch OHLCV data via CCXT and print computed values per candle.
-- **Liquidation tracking** (`liquidations/`) — a live Binance Futures liquidation feed collector plus two downstream signal-detection scripts.
-- **Strategy runner** (`pattern.py`) — a boilerplate entrypoint where you pick indicators, combine them however you like, and place/close real orders via CCXT.
+- **Indicators** (`indicators/`) — standalone TA-Lib/pandas/NumPy indicator scripts (ADX, MA, Bollinger Bands, etc.) that fetch OHLCV data via CCXT and expose a `calculate_*()` function for reuse.
+- **Liquidation tracking** (`liquidations/`) — a live Binance Futures liquidation feed collector plus a signal-detection script for spotting one-sided liquidation cascades.
+- **Strategy runner** (`pattern.py`) — a working example strategy where you pick indicators, combine them however you like, and place/close real orders via CCXT.
+- **Tests** (`tests/`) — pytest coverage for the pure logic (liquidation parsing and signal detection), runnable without a live exchange connection.
 
 ---
 
@@ -17,7 +19,7 @@ The goal is to provide a practical collection of trading-related building blocks
 ### Prerequisites
 
 - Python 3.10+
-- TA-Lib C library installed on your system (the Python wrapper `TA-Lib` requires the compiled C library first):
+- The TA-Lib C library installed on your system (the Python wrapper requires the compiled C library first):
   - **macOS:** `brew install ta-lib`
   - **Ubuntu/Debian:** `sudo apt-get install libta-lib0-dev` (or build from source if unavailable)
   - **Windows:** install a prebuilt TA-Lib wheel matching your Python version
@@ -34,7 +36,7 @@ python3 -m venv venv
 source venv/bin/activate      # Windows: venv\Scripts\activate
 
 # 3. Install dependencies
-pip install ccxt pandas numpy TA-Lib python-dotenv aiohttp aiofiles websockets
+pip install -r requirements.txt
 
 # 4. Configure your credentials
 cp .env.example .env
@@ -43,6 +45,7 @@ cp .env.example .env
 
 Your `.env` should contain:
 
+```
 SPOT_API_KEY=your_spot_api_key
 SPOT_SECRET_KEY=your_spot_secret_key
 
@@ -50,7 +53,7 @@ FUTURES_API_KEY=your_futures_api_key
 FUTURES_SECRET_KEY=your_futures_secret_key
 
 ADDRESS_ONE=your_address
-
+```
 
 `.env` is already git-ignored — never commit real keys.
 
@@ -63,20 +66,21 @@ python indicators/adx.py
 # Run the liquidation collector (streams live, writes to CSV)
 python liquidations/binance_liquidations.py
 
-# Run signal analysis after you have some liquidation data logged
-python liquidations/binance_liquidation_signals.py
-python liquidations/binance_liquidation_signals_long.py
+# Run signal detection after you have some liquidation data logged
+python liquidations/liquidation_signals.py --window 1
+python liquidations/liquidation_signals.py --window 2
 
 # Run your strategy
 python pattern.py
 ```
 
-### Customizing timeframe and parameters
+### Running tests
 
-- `TIMEFRAME` accepts any CCXT-supported string: `'1m'`, `'5m'`, `'15m'`, `'1h'`, `'4h'`, `'1d'`, etc. Change it at the top of `pattern.py` to trade on a different candle interval.
-- Each indicator function may use different parameter names (e.g. `adx.py`/`ma.py` use `period=`, while `bollinger_bands.py` uses `timeperiod=`, `nbdevup=`, `nbdevdn=`) — always check the indicator file's own function signature before wiring it into `check_signal()`.
-- `POSITION_SIZE`, `TP_PCT`, `SL_PCT`, and `POLL_SECONDS` are all safe to tune directly at the top of the file without touching the trading logic itself.
+```bash
+pytest tests/
+```
 
+This currently covers `parse_force_order()` (liquidation parsing) and `detect_signals()` (signal detection logic) — both pure functions that don't require a live exchange connection.
 
 ---
 
@@ -107,9 +111,7 @@ python liquidations/binance_liquidations.py
 Detach without killing it: `Ctrl+A`, then `D`.
 Reattach later: `screen -r liquidations`.
 
-This session keeps `binance_liquidations.py` streaming Binance Futures forceOrder liquidation events 24/7 and appending them to `binance_liquidations.csv`.
-
-You can run the two signal scripts (`binance_liquidation_signals.py` / `_long.py`) periodically against that CSV — either manually inside the same screen, in a second short-lived screen, or via a cron job, since they're one-shot batch scripts rather than long-running processes.
+This session keeps the collector streaming Binance Futures forceOrder liquidation events 24/7 and appending them to `binance_liquidations.csv`. Run `liquidation_signals.py` periodically against that CSV — manually inside the same screen, in a second short-lived screen, or via a cron job, since it's a one-shot batch script rather than a long-running process.
 
 ### Screen 2 — Trading (pattern.py)
 
@@ -127,132 +129,42 @@ This session runs your live strategy — whichever indicators and order logic yo
 ### Useful screen commands
 
 ```bash
-screen -ls          # list all running sessions
-screen -r <name>    # reattach to a session
-screen -X -S <name> quit   # kill a session
+screen -ls                    # list all running sessions
+screen -r <name>               # reattach to a session
+screen -X -S <name> quit       # kill a session
 ```
 
 ---
 
 ## 3. The Trading Aspect — `pattern.py`
 
-`pattern.py` is intentionally empty boilerplate. It's the file you edit to:
+`pattern.py` is a working example strategy you edit and build on. It:
 
-1. Pick any indicator(s) from `indicators/` by name.
-2. Combine their outputs however you want (e.g. only enter when ADX confirms trend strength AND your MA crossover fires).
-3. Set your own timeframe(s) and indicator parameters.
-4. Use CCXT to open a market order, then attach a take-profit and stop-loss, and later close the position.
+1. Picks any indicator(s) from `indicators/` by name via `load_indicator()`.
+2. Combines their outputs however you want inside `check_signal()`.
+3. Uses your own timeframe(s) and indicator parameters.
+4. Opens a market order via CCXT with an attached take-profit and stop-loss, and closes/flips positions as signals change.
 
-Example to drop into `pattern.py` and edit from there:
+The included example combines three indicators:
+- **ADX** — confirms the trend is strong enough to trade (filters out choppy conditions)
+- **Fast/slow MA crossover** — picks direction (long or short)
+- **Bollinger Bands** — confirms price hasn't already run past the opposite band before entering
 
-```python
-import os
-import importlib
-import time
-from dotenv import load_dotenv
-import ccxt
-import pandas as pd
+### Customizing timeframe and parameters
 
-load_dotenv()
+- `TIMEFRAME` accepts any CCXT-supported string: `'1m'`, `'5m'`, `'15m'`, `'1h'`, `'4h'`, `'1d'`, etc.
+- Each indicator function may use different parameter names (e.g. `adx.py`/`ma.py` use `period=`, while `bollinger_bands.py` uses `timeperiod=`, `nbdevup=`, `nbdevdn=`) — always check the indicator file's own function signature before wiring it into `check_signal()`.
+- `POSITION_SIZE`, `TP_PCT`, `SL_PCT`, `POLL_SECONDS`, `ADX_THRESHOLD`, `FAST_MA_PERIOD`, `SLOW_MA_PERIOD`, `BB_PERIOD`, and `BB_DEV` are all safe to tune directly at the top of the file without touching the trading logic itself.
 
-FUTURES_API_KEY = os.getenv('FUTURES_API_KEY')
-FUTURES_SECRET_KEY = os.getenv('FUTURES_SECRET_KEY')
-
-binance_futures = ccxt.binanceusdm({
-    'apiKey': FUTURES_API_KEY,
-    'secret': FUTURES_SECRET_KEY,
-})
-
-SYMBOL = 'ETH/USDT'
-TIMEFRAME = '5m'
-POSITION_SIZE = 0.011   # contracts
-TP_PCT = 0.015          # 1.5% take profit
-SL_PCT = 0.005          # 0.5% stop loss
-
-
-def fetch_ohlcv(symbol, timeframe, limit=1500):
-    bars = binance_futures.fetch_ohlcv(symbol, timeframe, limit=limit)
-    df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
-    df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
-    return df
-
-
-def load_indicator(name):
-    """Dynamically import any script from indicators/ by filename (no .py)."""
-    return importlib.import_module(f"indicators.{name}")
-
-
-def check_signal(df):
-    # Load whichever indicators you want and combine them freely.
-    adx_mod = load_indicator("adx")
-    adxr_mod = load_indicator("adxr")
-
-    adx_values = adx_mod.calculate_adx(df)
-    adxr_values = adxr_mod.calculate_adxr(df)
-
-    latest_adx = adx_values[-1][2]['adx']
-    latest_adxr = adxr_values[-1][2]['adxr']
-
-    # Example combined rule — edit this however you like
-    if latest_adx > 25 and latest_adxr > 20:
-        return "long"
-    return None
-
-
-def open_long(symbol, amount):
-    order = binance_futures.create_order(
-        symbol=symbol, type='market', side='buy', amount=amount,
-        params={'positionSide': 'LONG'}
-    )
-    entry_price = order['average']
-
-    tp_price = round(entry_price * (1 + TP_PCT), 2)
-    sl_price = round(entry_price * (1 - SL_PCT), 2)
-
-    binance_futures.create_order(
-        symbol=symbol, type='limit', side='sell', amount=amount, price=tp_price,
-        params={'positionSide': 'LONG', 'reduceOnly': True}
-    )
-    binance_futures.create_order(
-        symbol=symbol, type='STOP_MARKET', side='sell', amount=amount,
-        params={'positionSide': 'LONG', 'reduceOnly': True, 'stopPrice': sl_price}
-    )
-    return order
-
-
-def close_position(symbol, amount, side='LONG'):
-    close_side = 'sell' if side == 'LONG' else 'buy'
-    return binance_futures.create_order(
-        symbol=symbol, type='market', side=close_side, amount=amount,
-        params={'positionSide': side, 'reduceOnly': True}
-    )
-
-
-def main():
-    while True:
-        df = fetch_ohlcv(SYMBOL, TIMEFRAME)
-        signal = check_signal(df)
-
-        if signal == "long":
-            open_long(SYMBOL, POSITION_SIZE)
-            print(f"Opened LONG on {SYMBOL}")
-
-        time.sleep(60)
-
-
-if __name__ == "__main__":
-    main()
-```
-
-Swap `load_indicator("adx")` / `load_indicator("adxr")` for any file in `indicators/` by name — the loader works with any of them since they all expose a `calculate_*` function taking a DataFrame. Stack as many as you want inside `check_signal()`.
+See `example_orders.md` for what the raw CCXT order objects (`open_position`/`close_position`) actually look like under the hood.
 
 ---
 
 ## 4. The Liquidations Aspect
 
-The `liquidations/` folder tracks forced liquidations across every USDⓈ-M perpetual on Binance Futures in real time and turns the raw feed into actionable signals.
+The `liquidations/` folder tracks forced liquidations across every USDⓈ-M perpetual on Binance Futures in real time, logs every single one, and turns that raw feed into actionable signals — with both the fetching and the signal criteria fully under your control.
 
-### `binance_liquidations.py` — the collector
+### `binance_liquidations.py` — fetch and log every liquidation
 
 - Fetches every active USDⓈ-M perpetual symbol from Binance.
 - Opens multiple WebSocket connections (batched under Binance's per-connection stream limit) subscribed to each symbol's `forceOrder` stream.
@@ -261,26 +173,62 @@ The `liquidations/` folder tracks forced liquidations across every USDⓈ-M perp
 
 This gives you a continuously growing, timestamped ledger of every liquidation happening across the entire futures market — something no single exchange UI exposes in bulk.
 
-### `binance_liquidation_signals.py` — strict per-minute signal
+### `liquidation_signals.py` — turn the raw log into signals
 
-- Groups liquidations into 1-minute buckets per symbol.
-- Fires a signal only when **7 or more liquidations on one side occur within the same single minute with zero liquidations on the opposite side**.
-- Writes qualifying signals to `signals.csv`.
+A single script, two modes, controlled by `--window`:
 
-**Why this matters:** a cluster of same-side liquidations with no counter-liquidations usually means forced closes are cascading in one direction (e.g. a wave of longs getting stopped out), which often marks a short-term local extreme or exhaustion point — useful as a contrarian/reversal signal.
+- `--window 1` (default) — strict per-minute signal: fires when 7+ same-side liquidations occur within a single minute with zero opposite-side liquidations in that minute. Tight timing, but can miss cascades that straddle a minute boundary.
+- `--window 2` — rolling two-minute signal: same rule, but grouped over the current minute plus the one before it. Catches cascades split across a minute boundary (e.g. 4 liquidations at 12:00:50 and 4 more at 12:01:05) that the 1-minute mode would miss, at the cost of slightly looser timing.
 
-### `binance_liquidation_signals_long.py` — rolling 2-minute signal
+```bash
+python liquidations/liquidation_signals.py --window 1   # → signals.csv
+python liquidations/liquidation_signals.py --window 2   # → signals_combined.csv
+python liquidations/liquidation_signals.py --window 2 --output my_signals.csv   # custom filename
+```
 
-- Same logic, but combines each minute with the minute before it into a rolling 2-minute window before counting.
-- Catches cascades that straddle a minute boundary (e.g. 4 liquidations at 12:00:50 and 4 more at 12:01:05) that the strict per-minute version above would miss entirely, since neither minute alone hits the threshold of 7.
-- Writes results to `signals_combined.csv`.
+**Why this matters:** a cluster of same-side liquidations with no counter-liquidations usually means forced closes are cascading in one direction (e.g. a wave of longs getting stopped out), which often marks a short-term local extreme or exhaustion point — useful as a contrarian/reversal signal. Running both windows together gives you high-confidence, tightly-timed signals (`--window 1`) alongside more complete coverage of cascades that straddle a minute mark (`--window 2`).
 
-**Advantage of running both:** the strict version gives you high-confidence, tightly-timed signals; the rolling version catches the same underlying event even when it straddles a minute mark, giving you more complete coverage of genuine liquidation cascades at the cost of slightly looser timing.
+### Editing to your own taste
 
-Run these two scripts against `binance_liquidations.csv` at whatever cadence you like (cron, manual, or looped inside the same VPS screen) to keep `signals.csv` and `signals_combined.csv` up to date.
+Nothing here is fixed — the constants at the top of `liquidation_signals.py` are meant to be tuned:
+
+- `THRESHOLD` — minimum same-side liquidations required to qualify as a signal (default: 7). Lower it for more sensitivity, raise it to filter for only the largest cascades.
+- `TIME_OFFSET` — timezone offset applied to output timestamps (default: UTC+1). Change to match your own timezone.
+- `--window` — 1 or 2 minutes, as above.
+
+Run either mode (or both) periodically against `binance_liquidations.csv` — cron, a loop in the same VPS screen session, or manually — to keep signal files up to date as new liquidations stream in.
 
 ---
+
+## 5. Development
+
+### Requirements
+
+Install everything the toolkit needs (including TA-Lib's Python bindings — make sure the C library prerequisite above is installed first):
+
+```bash
+pip install -r requirements.txt
+```
+
+### Tests
+
+```bash
+pytest tests/
+```
+
+Current coverage: `parse_force_order()` (liquidation event parsing) and `detect_signals()` (signal detection logic) — both pure functions, tested without any live exchange connection. Coverage for `pattern.py`'s `check_signal()` and the indicator files is planned but not yet added.
+
+### CI
+
+Every push and pull request to `main` runs the test suite automatically via GitHub Actions (`.github/workflows/tests.yml`).
+
+---
+
+## License
+
+MIT — see `LICENSE`.
 
 ## Disclaimer
 
 This project is for educational and development purposes. The included strategies, indicators, and signal logic do not constitute financial advice or guarantee profitable trading. Use at your own risk.
+```
