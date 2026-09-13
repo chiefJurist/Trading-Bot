@@ -1,4 +1,3 @@
-```markdown
 # MERCATURA
 
 An open-source Python trading toolkit and reference implementation for building algorithmic trading systems. It includes TA-Lib technical indicators, pandas-based technical analysis, NumPy calculations, CCXT exchange integration, a live Binance Futures liquidation tracker with signal detection, and reusable strategy boilerplate you can trade with directly.
@@ -231,4 +230,3 @@ MIT — see `LICENSE`.
 ## Disclaimer
 
 This project is for educational and development purposes. The included strategies, indicators, and signal logic do not constitute financial advice or guarantee profitable trading. Use at your own risk.
-```
