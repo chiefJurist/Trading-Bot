@@ -229,6 +229,9 @@ Every push and pull request to `main` runs the test suite automatically via GitH
 - [ ] Additional indicator coverage
 
 
+---
+
+
 ## License
 
 MIT — see `LICENSE`.
