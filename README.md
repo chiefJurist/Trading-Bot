@@ -1,21 +1,43 @@
 # MERCATURA
 
-An open-source Python trading toolkit and reference implementation for building algorithmic trading systems. It includes TA-Lib technical indicators, pandas-based technical analysis, NumPy calculations, CCXT exchange integration, a live Binance Futures liquidation tracker with signal detection, and reusable strategy boilerplate you can trade with directly.
+Open-source Python trading toolkit: TA-Lib/pandas indicators, CCXT strategy runner, Binance liquidation cascade signals. More exchanges & AI coming.
 
-The goal is to provide a practical collection of trading-related building blocks that can be explored, tested, modified, and used as a foundation for developing custom trading strategies and automated trading systems.
+`mercatura` is installable directly from PyPI and ships three console commands (`mercatura-liquidations`, `mercatura-signals`, `mercatura-pattern`) alongside the full source for anyone who wants to clone, read, and modify it directly.
 
 ## Features
 
-- **Indicators** (`indicators/`) — standalone TA-Lib/pandas/NumPy indicator scripts (ADX, MA, Bollinger Bands, etc.) that fetch OHLCV data via CCXT and expose a `calculate_*()` function for reuse.
-- **Liquidation tracking** (`liquidations/`) — a live Binance Futures liquidation feed collector plus a signal-detection script for spotting one-sided liquidation cascades.
-- **Strategy runner** (`pattern.py`) — a working example strategy where you pick indicators, combine them however you like, and place/close real orders via CCXT.
+- **Indicators** (`mercatura/indicators/`) — TA-Lib/pandas/NumPy indicator scripts (ADX, MA, Bollinger Bands, and the full TA-Lib set) that fetch OHLCV data via CCXT and expose a `calculate_*()` function for reuse.
+- **Liquidation tracking** (`mercatura/liquidations/`) — a live Binance Futures liquidation feed collector plus a signal-detection script for spotting one-sided liquidation cascades.
+- **Strategy runner** (`mercatura/pattern.py`) — a working example strategy where you pick indicators, combine them however you like, and place/close real orders via CCXT.
 - **Tests** (`tests/`) — pytest coverage for the pure logic (liquidation parsing and signal detection), runnable without a live exchange connection.
 
 ---
 
-## 1. Local Setup (Laptop / Dev Machine)
+## 1. Install
 
-### Prerequisites
+### Option A — pip install (recommended for using the toolkit)
+
+```bash
+pip install mercatura
+```
+
+This installs the package and three console commands, available from any directory:
+
+```bash
+mercatura-liquidations
+mercatura-signals --window 1
+mercatura-pattern
+```
+
+To get the latest published version later:
+
+```bash
+pip install --upgrade mercatura
+```
+
+### Option B — clone the repo (recommended for contributing or modifying the source)
+
+#### Prerequisites
 
 - Python 3.10+
 - The TA-Lib C library installed on your system (the Python wrapper requires the compiled C library first):
@@ -23,7 +45,7 @@ The goal is to provide a practical collection of trading-related building blocks
   - **Ubuntu/Debian:** `sudo apt-get install libta-lib0-dev` (or build from source if unavailable)
   - **Windows:** install a prebuilt TA-Lib wheel matching your Python version
 
-### Steps
+#### Steps
 
 ```bash
 # 1. Clone the repo
@@ -34,15 +56,13 @@ cd mercatura
 python3 -m venv venv
 source venv/bin/activate      # Windows: venv\Scripts\activate
 
-# 3. Install dependencies
-pip install -r requirements.txt
-
-# 4. Configure your credentials
-cp .env.example .env
-# then edit .env and fill in your real API keys/addresses
+# 3. Install in editable mode (so code changes take effect immediately)
+pip install -e .
 ```
 
-Your `.env` should contain:
+### Credentials (required either way)
+
+Whichever install method you use, the tools look for a `.env` file in your current working directory when you run them:
 
 ```
 SPOT_API_KEY=your_spot_api_key
@@ -54,28 +74,29 @@ FUTURES_SECRET_KEY=your_futures_secret_key
 ADDRESS_ONE=your_address
 ```
 
-`.env` is already git-ignored — never commit real keys.
+If you cloned the repo, copy the template: `cp .env.example .env`, then fill in real values. `.env` is already git-ignored — never commit real keys.
 
-### Running things locally
+### Running things
 
 ```bash
-# Run a single indicator script (prints computed values to console)
-python indicators/adx.py
+# Console commands (after pip install mercatura, or pip install -e .)
+mercatura-liquidations              # streams live, writes to binance_liquidations.csv
+mercatura-signals --window 1        # → signals.csv
+mercatura-signals --window 2        # → signals_combined.csv
+mercatura-pattern                   # runs the example strategy
 
-# Run the liquidation collector (streams live, writes to CSV)
-python liquidations/binance_liquidations.py
-
-# Run signal detection after you have some liquidation data logged
-python liquidations/liquidation_signals.py --window 1
-python liquidations/liquidation_signals.py --window 2
-
-# Run your strategy
-python pattern.py
+# Equivalent, if running from a cloned repo without installing
+python -m mercatura.liquidations.binance_liquidations
+python -m mercatura.liquidations.liquidation_signals --window 1
+python -m mercatura.pattern
 ```
 
-### Running tests
+Outputs (`binance_liquidations.csv`, `signals.csv`, etc.) are written to whichever directory you run the command from — `cd` into a working folder with your `.env` before running.
+
+### Running tests (requires a cloned repo)
 
 ```bash
+pip install pytest
 pytest tests/
 ```
 
@@ -85,7 +106,7 @@ This currently covers `parse_force_order()` (liquidation parsing) and `detect_si
 
 ## 2. VPS Deployment (with `screen`)
 
-Running these scripts continuously (liquidation streaming, live trading) requires a persistent session that survives SSH disconnects. `screen` is the simplest way to do that.
+Running these commands continuously (liquidation streaming, live trading) requires a persistent session that survives SSH disconnects. `screen` is the simplest way to do that.
 
 ### Install screen
 
@@ -94,31 +115,33 @@ sudo apt-get update
 sudo apt-get install screen
 ```
 
-### Set up the repo on the VPS
+### Set up on the VPS
 
-Follow the same steps as the local setup above (clone, venv, install deps, configure `.env`) directly on the VPS.
+```bash
+pip install mercatura
+mkdir mercatura-run && cd mercatura-run
+# create your .env here (see Credentials above)
+```
 
 ### Screen 1 — Liquidations collector
 
 ```bash
 screen -S liquidations
-cd mercatura
-source venv/bin/activate
-python liquidations/binance_liquidations.py
+cd mercatura-run
+mercatura-liquidations
 ```
 
 Detach without killing it: `Ctrl+A`, then `D`.
 Reattach later: `screen -r liquidations`.
 
-This session keeps the collector streaming Binance Futures forceOrder liquidation events 24/7 and appending them to `binance_liquidations.csv`. Run `liquidation_signals.py` periodically against that CSV — manually inside the same screen, in a second short-lived screen, or via a cron job, since it's a one-shot batch script rather than a long-running process.
+This session keeps the collector streaming Binance Futures forceOrder liquidation events 24/7 and appending them to `binance_liquidations.csv`. Run `mercatura-signals` periodically against that CSV — manually inside the same screen, in a second short-lived screen, or via a cron job, since it's a one-shot batch command rather than a long-running process.
 
-### Screen 2 — Trading (pattern.py)
+### Screen 2 — Trading (pattern)
 
 ```bash
 screen -S trading
-cd mercatura
-source venv/bin/activate
-python pattern.py
+cd mercatura-run
+mercatura-pattern
 ```
 
 Detach: `Ctrl+A`, then `D`. Reattach: `screen -r trading`.
@@ -137,9 +160,9 @@ screen -X -S <name> quit       # kill a session
 
 ## 3. The Trading Aspect — `pattern.py`
 
-`pattern.py` is a working example strategy you edit and build on. It:
+`pattern.py` (installed as `mercatura.pattern`, run via `mercatura-pattern`) is a working example strategy you edit and build on. It:
 
-1. Picks any indicator(s) from `indicators/` by name via `load_indicator()`.
+1. Picks any indicator(s) from `mercatura.indicators` by name via `load_indicator()`.
 2. Combines their outputs however you want inside `check_signal()`.
 3. Uses your own timeframe(s) and indicator parameters.
 4. Opens a market order via CCXT with an attached take-profit and stop-loss, and closes/flips positions as signals change.
@@ -148,6 +171,8 @@ The included example combines three indicators:
 - **ADX** — confirms the trend is strong enough to trade (filters out choppy conditions)
 - **Fast/slow MA crossover** — picks direction (long or short)
 - **Bollinger Bands** — confirms price hasn't already run past the opposite band before entering
+
+If you installed via pip, edit your own copy of `pattern.py` and either run it directly (`python your_pattern.py`) or clone the repo to modify the installed source.
 
 ### Customizing timeframe and parameters
 
@@ -161,9 +186,9 @@ See `example_orders.md` for what the raw CCXT order objects (`open_position`/`cl
 
 ## 4. The Liquidations Aspect
 
-The `liquidations/` folder tracks forced liquidations across every USDⓈ-M perpetual on Binance Futures in real time, logs every single one, and turns that raw feed into actionable signals — with both the fetching and the signal criteria fully under your control.
+`mercatura.liquidations` tracks forced liquidations across every USDⓈ-M perpetual on Binance Futures in real time, logs every single one, and turns that raw feed into actionable signals — with both the fetching and the signal criteria fully under your control.
 
-### `binance_liquidations.py` — fetch and log every liquidation
+### `mercatura-liquidations` — fetch and log every liquidation
 
 - Fetches every active USDⓈ-M perpetual symbol from Binance.
 - Opens multiple WebSocket connections (batched under Binance's per-connection stream limit) subscribed to each symbol's `forceOrder` stream.
@@ -172,17 +197,17 @@ The `liquidations/` folder tracks forced liquidations across every USDⓈ-M perp
 
 This gives you a continuously growing, timestamped ledger of every liquidation happening across the entire futures market — something no single exchange UI exposes in bulk.
 
-### `liquidation_signals.py` — turn the raw log into signals
+### `mercatura-signals` — turn the raw log into signals
 
-A single script, two modes, controlled by `--window`:
+A single command, two modes, controlled by `--window`:
 
 - `--window 1` (default) — strict per-minute signal: fires when 7+ same-side liquidations occur within a single minute with zero opposite-side liquidations in that minute. Tight timing, but can miss cascades that straddle a minute boundary.
 - `--window 2` — rolling two-minute signal: same rule, but grouped over the current minute plus the one before it. Catches cascades split across a minute boundary (e.g. 4 liquidations at 12:00:50 and 4 more at 12:01:05) that the 1-minute mode would miss, at the cost of slightly looser timing.
 
 ```bash
-python liquidations/liquidation_signals.py --window 1   # → signals.csv
-python liquidations/liquidation_signals.py --window 2   # → signals_combined.csv
-python liquidations/liquidation_signals.py --window 2 --output my_signals.csv   # custom filename
+mercatura-signals --window 1                        # → signals.csv
+mercatura-signals --window 2                        # → signals_combined.csv
+mercatura-signals --window 2 --output my_signals.csv # custom filename
 ```
 
 **Why this matters:** a cluster of same-side liquidations with no counter-liquidations usually means forced closes are cascading in one direction (e.g. a wave of longs getting stopped out), which often marks a short-term local extreme or exhaustion point — useful as a contrarian/reversal signal. Running both windows together gives you high-confidence, tightly-timed signals (`--window 1`) alongside more complete coverage of cascades that straddle a minute mark (`--window 2`).
@@ -195,18 +220,19 @@ Nothing here is fixed — the constants at the top of `liquidation_signals.py` a
 - `TIME_OFFSET` — timezone offset applied to output timestamps (default: UTC+1). Change to match your own timezone.
 - `--window` — 1 or 2 minutes, as above.
 
+If you installed via pip and want to change these constants, clone the repo and run from source instead (`pip install -e .`) — the pip-installed package uses the defaults as published.
+
 Run either mode (or both) periodically against `binance_liquidations.csv` — cron, a loop in the same VPS screen session, or manually — to keep signal files up to date as new liquidations stream in.
 
 ---
 
 ## 5. Development
 
-### Requirements
-
-Install everything the toolkit needs (including TA-Lib's Python bindings — make sure the C library prerequisite above is installed first):
+### Requirements (for cloned-repo development)
 
 ```bash
-pip install -r requirements.txt
+pip install -e .
+pip install pytest
 ```
 
 ### Tests
@@ -221,16 +247,23 @@ Current coverage: `parse_force_order()` (liquidation event parsing) and `detect_
 
 Every push and pull request to `main` runs the test suite automatically via GitHub Actions (`.github/workflows/tests.yml`).
 
+### Publishing (maintainers)
+
+```bash
+# bump version in pyproject.toml first
+python -m build
+twine upload dist/*
+```
+
 ---
 
 ## Roadmap
 
 - [ ] Multi-exchange support for the liquidation tracker (currently Binance Futures only)
+- [ ] AI/ML components (e.g. learned liquidation cascade detection, model-based strategy signals)
 - [ ] Additional indicator coverage
 
-
 ---
-
 
 ## License
 
