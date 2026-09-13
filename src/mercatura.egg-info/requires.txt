@@ -1,8 +1,0 @@
-ccxt>=4.0.0
-pandas>=2.0.0
-numpy>=1.24.0
-TA-Lib>=0.4.28
-python-dotenv>=1.0.0
-aiohttp>=3.9.0
-aiofiles>=23.0.0
-websockets>=12.0

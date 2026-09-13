@@ -1,4 +1,0 @@
-[console_scripts]
-mercatura-liquidations = mercatura.liquidations.binance_liquidations:run
-mercatura-pattern = mercatura.pattern:main
-mercatura-signals = mercatura.liquidations.liquidation_signals:main
