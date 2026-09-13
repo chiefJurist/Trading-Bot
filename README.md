@@ -261,6 +261,7 @@ twine upload dist/*
 
 ## Roadmap
 
+- [ ] CLI Template files so users can easily edit indicators after installing without depending on the toolkit
 - [ ] Multi-exchange support for the liquidation tracker (currently Binance Futures only)
 - [ ] AI/ML components (e.g. learned liquidation cascade detection, model-based strategy signals)
 - [ ] Additional indicator coverage
