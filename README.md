@@ -35,6 +35,8 @@ To get the latest published version later:
 pip install --upgrade mercatura
 ```
 
+Use this option if you simply want to use Mercatura as an installed package.
+
 ### Option B — clone the repo (recommended for contributing or modifying the source)
 
 #### Prerequisites
