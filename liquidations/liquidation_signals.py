@@ -5,22 +5,20 @@ from collections import defaultdict, Counter
 import aiofiles
 
 INPUT_FILE = "binance_liquidations.csv"
-TIME_OFFSET = timedelta(hours=1)  # UTC+1 — adjust to your local timezone
-THRESHOLD = 7                     # minimum same-side liquidations to qualify as a signal
+TIME_OFFSET = timedelta(hours=1)
+THRESHOLD = 7
 
 
 def parse_timestamp(ts):
-    """Convert timestamp string to minute-based datetime (drops seconds/microseconds)."""
     dt = datetime.fromisoformat(ts)
     return dt.replace(second=0, microsecond=0)
 
 
 async def load_liquidations():
-    """Read the raw liquidation CSV into {minute: [ {symbol, side}, ... ]}."""
     minutes = defaultdict(list)
 
     async with aiofiles.open(INPUT_FILE, "r") as f:
-        await f.readline()  # skip header
+        await f.readline()
         async for line in f:
             parts = line.strip().split(",")
             if len(parts) < 6:
@@ -32,46 +30,49 @@ async def load_liquidations():
     return minutes
 
 
-async def analyze_liquidations(window_minutes, output_file):
-    """
-    Group liquidations into rolling windows of `window_minutes` and flag
-    any (symbol, side) combination that hits THRESHOLD occurrences with
-    zero opposite-side activity in the same window.
-
-    window_minutes=1 -> strict single-minute signal (tight timing, may miss
-                         cascades that straddle a minute boundary)
-    window_minutes=2 -> rolling two-minute signal (catches cascades that
-                         straddle a minute boundary, at the cost of looser timing)
-    """
-    minutes = await load_liquidations()
+def detect_signals(minutes, window_minutes, threshold, time_offset):
+    """Pure function: {minute: [{symbol, side}, ...]} -> list of signal dicts. No I/O."""
     sorted_minutes = sorted(minutes.keys())
+    signals = []
+
+    for i in range(window_minutes - 1, len(sorted_minutes)):
+        window_keys = sorted_minutes[i - (window_minutes - 1): i + 1]
+        combined = [row for key in window_keys for row in minutes[key]]
+
+        counts = Counter((row["symbol"], row["side"]) for row in combined)
+
+        for (symbol, side), count in counts.items():
+            if count < threshold:
+                continue
+
+            opposite_side = "BUY" if side == "SELL" else "SELL"
+            has_opposite = any(
+                r["symbol"] == symbol and r["side"] == opposite_side
+                for r in combined
+            )
+            if has_opposite:
+                continue
+
+            local_time = sorted_minutes[i] + time_offset
+            signals.append({
+                "date": str(local_time.date()),
+                "time": local_time.time().strftime('%H:%M'),
+                "pair": symbol,
+                "side": side,
+                "occurrences": count
+            })
+
+    return signals
+
+
+async def analyze_liquidations(window_minutes, output_file):
+    minutes = await load_liquidations()
+    signals = detect_signals(minutes, window_minutes, THRESHOLD, TIME_OFFSET)
 
     async with aiofiles.open(output_file, "w") as out:
         await out.write("date,time,pair,side,occurrences\n")
-
-        for i in range(window_minutes - 1, len(sorted_minutes)):
-            window_keys = sorted_minutes[i - (window_minutes - 1): i + 1]
-            combined = [row for key in window_keys for row in minutes[key]]
-
-            counts = Counter((row["symbol"], row["side"]) for row in combined)
-
-            for (symbol, side), count in counts.items():
-                if count < THRESHOLD:
-                    continue
-
-                opposite_side = "BUY" if side == "SELL" else "SELL"
-                has_opposite = any(
-                    r["symbol"] == symbol and r["side"] == opposite_side
-                    for r in combined
-                )
-                if has_opposite:
-                    continue
-
-                local_time = sorted_minutes[i] + TIME_OFFSET
-                await out.write(
-                    f"{local_time.date()},{local_time.time().strftime('%H:%M')},"
-                    f"{symbol},{side},{count}\n"
-                )
+        for s in signals:
+            await out.write(f"{s['date']},{s['time']},{s['pair']},{s['side']},{s['occurrences']}\n")
 
     print(f"Analysis complete ({window_minutes}-minute window). Results saved in {output_file}")
 
