@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mercatura"
-version = "0.1.0"
+version = "0.1.1"
 description = "Open-source Python trading toolkit: TA-Lib/pandas indicators, CCXT strategy runner, Binance liquidation cascade signals. More exchanges & AI coming."
 readme = "README.md"
 license = {file = "LICENSE"}
