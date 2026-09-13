@@ -71,6 +71,13 @@ python liquidations/binance_liquidation_signals_long.py
 python pattern.py
 ```
 
+### Customizing timeframe and parameters
+
+- `TIMEFRAME` accepts any CCXT-supported string: `'1m'`, `'5m'`, `'15m'`, `'1h'`, `'4h'`, `'1d'`, etc. Change it at the top of `pattern.py` to trade on a different candle interval.
+- Each indicator function may use different parameter names (e.g. `adx.py`/`ma.py` use `period=`, while `bollinger_bands.py` uses `timeperiod=`, `nbdevup=`, `nbdevdn=`) — always check the indicator file's own function signature before wiring it into `check_signal()`.
+- `POSITION_SIZE`, `TP_PCT`, `SL_PCT`, and `POLL_SECONDS` are all safe to tune directly at the top of the file without touching the trading logic itself.
+
+
 ---
 
 ## 2. VPS Deployment (with `screen`)
